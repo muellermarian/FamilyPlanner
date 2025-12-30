@@ -8,8 +8,9 @@ export default function App() {
   const [profileId, setProfileId] = useState<string | null>(null);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [users, setUsers] = useState<{ id: string; name: string }[]>([]);
 
-  // Session prüfen und Family-ID laden
+  // Session check and user/profile load
   useEffect(() => {
     const init = async () => {
       const {
@@ -18,19 +19,20 @@ export default function App() {
       setUser(currentUser);
 
       if (currentUser) {
-        // console.log('profile query id:', currentUser.id, 'typeof:', typeof currentUser.id);
-        const { data, error } = await supabase
+        const { data } = await supabase
           .from('profiles')
           .select('id, family_id')
           .eq('user_id', currentUser.id)
           .maybeSingle();
 
-        // console.log('profile data', data);
-
         if (data) {
           setFamilyId(data.family_id);
           setProfileId(data.id);
         }
+
+        // Alle Benutzer laden für Assigned-To Dropdown
+        const { data: usersData } = await supabase.from('profiles').select('id, name');
+        setUsers(usersData ?? []);
       }
     };
     init();
@@ -41,20 +43,27 @@ export default function App() {
       email,
       password,
     });
+
     if (error) {
       alert(error.message);
     } else {
       setUser(data.user);
+
       // Family-ID nach Login laden
-      const { data: profile, error: profileError } = await supabase
+      const { data: profile } = await supabase
         .from('profiles')
         .select('id, family_id')
         .eq('user_id', data.user.id)
         .maybeSingle();
+
       if (profile) {
         setFamilyId(profile.family_id);
         setProfileId(profile.id);
       }
+
+      // Alle Benutzer laden
+      const { data: usersData } = await supabase.from('profiles').select('id, name');
+      setUsers(usersData ?? []);
     }
   };
 
@@ -85,8 +94,13 @@ export default function App() {
 
       {user && !familyId && <p>Loading family data...</p>}
 
-      {user && familyId && profileId && (
-        <TodoList familyId={familyId} currentUserId={user.id} currentProfileId={profileId} />
+      {user && familyId && profileId && users.length > 0 && (
+        <TodoList
+          familyId={familyId}
+          currentUserId={user.id}
+          currentProfileId={profileId}
+          users={users}
+        />
       )}
     </div>
   );

@@ -1,27 +1,25 @@
 import { useEffect, useState } from 'react';
-import { getTodosForFamily, addTodo, toggleTodo } from '../lib/todos';
-
-interface Todo {
-  id: string;
-  task: string;
-  isDone: boolean;
-  comment: string;
-  assigned_to_id: string;
-  created_by_id: string;
-}
+import { getTodosForFamily, addTodo, toggleTodo, deleteTodo } from '../lib/todos';
+import type { Todo } from '../lib/types';
 
 interface TodoListProps {
   familyId: string;
   currentUserId: string;
   currentProfileId: string;
+  users: { id: string; name: string }[]; // für Assigned To Dropdown
 }
 
-export default function TodoList({ familyId, currentUserId, currentProfileId }: TodoListProps) {
+export default function TodoList({
+  familyId,
+  currentUserId,
+  currentProfileId,
+  users,
+}: TodoListProps) {
   const [todos, setTodos] = useState<Todo[]>([]);
   const [newTask, setNewTask] = useState('');
   const [assignedTo, setAssignedTo] = useState(currentProfileId || currentUserId);
+  const [newComment, setNewComment] = useState('');
 
-  // keep assignedTo in sync if profileId becomes available after mount
   useEffect(() => {
     setAssignedTo(currentProfileId || currentUserId);
   }, [currentProfileId, currentUserId]);
@@ -37,11 +35,14 @@ export default function TodoList({ familyId, currentUserId, currentProfileId }: 
 
   const handleAdd = async () => {
     if (!newTask) return;
-    // Use profile id for created_by_id when available
     const createdById = currentProfileId || currentUserId;
+    const assigned = assignedTo || null; // null, wenn leer
+
     try {
-      await addTodo(familyId, newTask, assignedTo, createdById);
+      await addTodo(familyId, newTask, assigned, createdById, newComment);
       setNewTask('');
+      setNewComment('');
+      setAssignedTo(currentProfileId || currentUserId);
       await fetchTodos();
     } catch (err: any) {
       console.error('addTodo failed', err);
@@ -59,39 +60,86 @@ export default function TodoList({ familyId, currentUserId, currentProfileId }: 
     }
   };
 
+  const handleDelete = async (id: string) => {
+    try {
+      await deleteTodo(id);
+      await fetchTodos();
+    } catch (err: any) {
+      alert(err.message);
+    }
+  };
+
   return (
-    <div className="max-w-md mx-auto mt-10 p-4 border rounded">
+    <div className="max-w-md mx-auto mt-10 p-4 border rounded shadow-md">
       <h2 className="text-2xl font-bold mb-4">Family Todo</h2>
 
-      <div className="flex mb-4">
+      {/* Neue Aufgabe */}
+      <div className="flex flex-col gap-2 mb-6">
         <input
           type="text"
           value={newTask}
           onChange={(e) => setNewTask(e.target.value)}
           placeholder="Neue Aufgabe"
-          className="border p-2 flex-1 rounded mr-2"
+          className="border p-2 rounded"
         />
-        <button onClick={handleAdd} className="bg-blue-600 text-white px-4 py-2 rounded">
-          Add
+        <textarea
+          value={newComment}
+          onChange={(e) => setNewComment(e.target.value)}
+          placeholder="Kommentar"
+          className="border p-2 rounded"
+        />
+        <select
+          value={assignedTo}
+          onChange={(e) => setAssignedTo(e.target.value)}
+          className="border p-2 rounded"
+        >
+          <option value="">Ohne Zuweisung</option>
+          {users.map((u) => (
+            <option key={u.id} value={u.id}>
+              {u.name}
+            </option>
+          ))}
+        </select>
+        <button
+          onClick={handleAdd}
+          className="bg-blue-600 text-white p-2 rounded hover:bg-blue-700"
+        >
+          Hinzufügen
         </button>
       </div>
 
-      <ul>
+      {/* Todo-Liste */}
+      <ul className="flex flex-col gap-3">
         {todos.map((todo) => (
-          <li key={todo.id} className="flex flex-col mb-3 p-2 border rounded">
-            <div className="flex items-center">
-              <input
-                type="checkbox"
-                checked={todo.isDone}
-                onChange={() => handleToggle(todo.id, todo.isDone)}
-                className="mr-2"
-              />
-              <span className={todo.isDone ? 'line-through' : ''}>{todo.task}</span>
+          <li key={todo.id} className="border rounded p-3 flex justify-between items-start">
+            <div className="flex flex-col flex-1 gap-1">
+              {/* Assigned To*/}
+              <div className="font-bold text-lg">{todo.assigned?.name || ''}</div>
+
+              {/* Task & Checkbox */}
+              <div className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  checked={todo.isDone}
+                  onChange={() => handleToggle(todo.id, todo.isDone)}
+                />
+                <span className={todo.isDone ? 'line-through' : ''}>{todo.task}</span>
+              </div>
+
+              {/* Comment */}
+              {todo.comment && <p className="text-gray-500 text-sm">{todo.comment}</p>}
+
+              {/* Creator Info */}
+              <div className="text-xs text-gray-400 mt-1">
+                Erstellt von: {todo.creator?.name || todo.created_by_id}, am{' '}
+                {new Date().toLocaleDateString()}
+              </div>
             </div>
-            {todo.comment && <p className="text-gray-500 text-sm">{todo.comment}</p>}
-            <div className="text-xs text-gray-400">
-              assigned_to: {todo.assigned_to_id} | created_by: {todo.created_by_id}
-            </div>
+
+            {/* Delete Button */}
+            <button onClick={() => handleDelete(todo.id)} className="text-red-500 font-bold ml-3">
+              X
+            </button>
           </li>
         ))}
       </ul>
