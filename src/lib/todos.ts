@@ -22,6 +22,7 @@ export const getTodosForFamily = async (familyId: string): Promise<Todo[]> => {
     `
     )
     .eq('family_id', familyId)
+    .order('due_at', { ascending: true, nullsFirst: false })
     .order('created_at', { ascending: true });
 
   if (error) throw error;

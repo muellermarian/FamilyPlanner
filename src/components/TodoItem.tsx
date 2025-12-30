@@ -38,8 +38,12 @@ export default function TodoItem({ todo, onToggle, onDelete }: TodoItemProps) {
         <div className="flex flex-col flex-1 gap-1">
           <div className="font-bold text-lg">{todo.assigned?.name || ''}</div>
           {todo.due_at && (
-            <p className="text-gray-500 text-sm">
-              Fällig am: {new Date(todo.due_at).toLocaleDateString()}
+            <p
+              className={`text-sm font-semibold mt-1 ${
+                new Date(todo.due_at) < new Date() ? 'text-red-600' : 'text-blue-600'
+              }`}
+            >
+              📅 Fällig am: {new Date(todo.due_at).toLocaleDateString()}
             </p>
           )}
           <div className="flex items-center gap-2">
