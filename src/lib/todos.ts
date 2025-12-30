@@ -12,8 +12,13 @@ export const getTodosForFamily = async (familyId: string): Promise<Todo[]> => {
       comment,
       assigned_to_id,
       created_by_id,
+      done_by_id,
+      done_at,
+      due_at,
+      created_at,
       assigned:profiles!todos_assigned_to_id_fkey(user_id, name),
-      creator:profiles!todos_created_by_id_fkey(user_id, name)
+      creator:profiles!todos_created_by_id_fkey(user_id, name),
+      done_by:profiles!todos_done_by_id_fkey(name)
     `
     )
     .eq('family_id', familyId)
@@ -25,6 +30,7 @@ export const getTodosForFamily = async (familyId: string): Promise<Todo[]> => {
     ...t,
     assigned: Array.isArray(t.assigned) ? t.assigned[0] ?? null : t.assigned ?? null,
     creator: Array.isArray(t.creator) ? t.creator[0] ?? null : t.creator ?? null,
+    done_by: Array.isArray(t.done_by) ? t.done_by[0] ?? null : t.done_by ?? null,
   }));
 
   return normalized as Todo[];
@@ -36,7 +42,8 @@ export const addTodo = async (
   task: string,
   assignedToId: string | null,
   createdById: string,
-  comment?: string
+  comment?: string,
+  dueAt?: string | null
 ) => {
   const insertData: any = {
     family_id: familyId,
@@ -44,33 +51,36 @@ export const addTodo = async (
     created_by_id: createdById,
   };
 
-  if (assignedToId) {
-    insertData.assigned_to_id = assignedToId;
-  }
+  if (assignedToId) insertData.assigned_to_id = assignedToId;
+  if (comment) insertData.comment = comment;
+  if (dueAt) insertData.due_at = dueAt;
 
-  if (comment) {
-    insertData.comment = comment;
-  }
+  const { data, error } = await supabase.from('todos').insert(insertData).select('*');
 
-  const { data, error } = await supabase.from('todos').insert(insertData);
   if (error) throw error;
+
   return data;
 };
 
 // Toggle todo completion status
-export const toggleTodo = async (id: string, isDone: boolean) => {
-  const { data, error } = await supabase
-    .from('todos')
-    .update({ isDone: isDone })
-    .eq('id', id)
-    .select();
+export const toggleTodo = async (id: string, isDone: boolean, doneById?: string | null) => {
+  const updateData: any = { isDone };
+  if (isDone) {
+    updateData.done_by_id = doneById;
+    updateData.done_at = new Date().toISOString();
+  } else {
+    updateData.done_by_id = null;
+    updateData.done_at = null;
+  }
+
+  const { error } = await supabase.from('todos').update(updateData).eq('id', id);
   if (error) throw error;
-  return data;
 };
 
-// Delete a todo by ID
 export async function deleteTodo(id: string) {
-  const { error } = await supabase.from('todos').delete().eq('id', id);
+  const confirmed = window.confirm('Todo wirklich löschen?');
+  if (!confirmed) return;
 
+  const { error } = await supabase.from('todos').delete().eq('id', id);
   if (error) throw error;
 }
