@@ -21,8 +21,8 @@ export default function TodoList({
   const [showAddForm, setShowAddForm] = useState(false);
 
   const fetchTodos = async () => {
-    const data = await getTodosForFamily(familyId);
-    setTodos(data || []);
+    const data = await getTodosForFamily(familyId, filter);
+    setTodos(data ?? []);
   };
 
   useEffect(() => {

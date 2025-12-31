@@ -1,8 +1,11 @@
 import { supabase } from './supabaseClient';
 import type { Todo } from './types';
 
-export const getTodosForFamily = async (familyId: string): Promise<Todo[]> => {
-  const { data, error } = await supabase
+export const getTodosForFamily = async (
+  familyId: string,
+  filter: 'open' | 'all' | 'done' = 'open'
+): Promise<Todo[]> => {
+  let query = supabase
     .from('todos')
     .select(
       `
@@ -21,9 +24,18 @@ export const getTodosForFamily = async (familyId: string): Promise<Todo[]> => {
       done_by:profiles!todos_done_by_id_fkey(name)
     `
     )
-    .eq('family_id', familyId)
-    .order('due_at', { ascending: true, nullsFirst: false })
-    .order('created_at', { ascending: true });
+    .eq('family_id', familyId);
+
+  // Filter direkt in Supabase
+  if (filter === 'open') query = query.eq('isDone', false);
+  if (filter === 'done') query = query.eq('isDone', true);
+
+  // Sortierung abhängig vom Filter
+  if (filter === 'all') query = query.order('created_at', { ascending: false });
+  if (filter === 'done') query = query.order('done_at', { ascending: false });
+  if (filter === 'open') query = query.order('due_at', { ascending: true });
+
+  const { data, error } = await query;
 
   if (error) throw error;
 
