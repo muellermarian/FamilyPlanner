@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useSwipeable } from 'react-swipeable';
-import type { Todo } from '../lib/types';
+import type { Todo } from '../../lib/types';
 
 interface TodoItemProps {
   todo: Todo;
@@ -26,13 +26,11 @@ export default function TodoItem({ todo, onToggle, onDelete }: TodoItemProps) {
     <div {...handlers} className="relative overflow-hidden rounded">
       {/* Roter Hintergrund */}
       <div
-        className={`absolute inset-0 bg-red-500 flex justify-end items-center p-3 transition-all duration-200 ${
-          isSwiping ? 'opacity-100 translate-x-0' : 'opacity-0'
+        className={`absolute inset-0 bg-red-500 flex justify-end items-center p-3 transition-opacity duration-200 ${
+          isSwiping ? 'opacity-100' : 'opacity-0'
         }`}
       >
-        <span className="text-white font-bold transform transition-transform duration-200 scale-100">
-          Löschen
-        </span>
+        <span className="text-white font-bold">Löschen</span>
       </div>
 
       {/* Todo-Inhalt */}
@@ -42,7 +40,7 @@ export default function TodoItem({ todo, onToggle, onDelete }: TodoItemProps) {
         }`}
       >
         <div className="flex flex-col flex-1 gap-1">
-          <div className="font-bold text-lg">{todo.assigned?.name || ''}</div>
+          {todo.assigned && <div className="font-bold text-lg">{todo.assigned.name}</div>}
           {todo.due_at && (
             <p
               className={`text-sm font-semibold mt-1 ${

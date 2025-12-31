@@ -1,5 +1,5 @@
-import TodoList from './components/TodoList';
-import Login from './components/Login';
+import TodoList from './components/todos/TodoList';
+import Login from './components/auth/Login';
 import { useAuth } from './hooks/useAuth';
 
 export default function App() {
