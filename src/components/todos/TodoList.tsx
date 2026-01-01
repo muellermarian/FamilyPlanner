@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
 import type { Todo, TodoFilterType } from '../../lib/types';
 import { getTodosForFamily, addTodo, toggleTodo, deleteTodo } from '../../lib/todos';
-import { TodoItem, TodoAddForm, TodoFilter } from './index';
+import { TodoItem, TodoAddForm, TodoFilter, TodoEditForm } from './index';
+import { supabase } from '../../lib/supabaseClient';
 
 // Props for the TodoList component:
 // - familyId: id of the family to load todos for
@@ -26,20 +27,60 @@ export default function TodoList({
   const [showAddForm, setShowAddForm] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [editTodo, setEditTodo] = useState<Todo | null>(null);
+  const [commentMeta, setCommentMeta] = useState<
+    Record<
+      string,
+      { count: number; last?: { text: string; user_id?: string; created_at?: string } }
+    >
+  >({});
 
   // Fetch todos for the given family and filter; sets an empty array if no data returned.
   const fetchTodos = async () => {
     setLoading(true);
     setError(null);
     try {
-      console.log('Fetching todos', { familyId, filter });
       const data = await getTodosForFamily(familyId, filter);
-      console.log('Fetched todos', { count: data?.length ?? 0 });
-      setTodos(data ?? []);
+      const todosLoaded = data ?? [];
+      setTodos(todosLoaded);
+
+      // Fetch comment counts and latest comment for the loaded todos
+      if (todosLoaded.length > 0) {
+        const todoIds = todosLoaded.map((t) => t.id);
+        const { data: commentsData, error: commentsError } = await supabase
+          .from('todo_comments')
+          .select('todo_id, text, user_id, created_at')
+          .in('todo_id', todoIds)
+          .order('created_at', { ascending: false });
+
+        if (commentsError) {
+          console.warn('Failed to load comments meta', commentsError);
+          setCommentMeta({});
+        } else if (commentsData) {
+          const map: Record<
+            string,
+            { count: number; last?: { text: string; user_id?: string; created_at?: string } }
+          > = {};
+          for (const c of commentsData as any[]) {
+            const id = c.todo_id as string;
+            if (!map[id]) {
+              map[id] = {
+                count: 1,
+                last: { text: c.text, user_id: c.user_id, created_at: c.created_at },
+              };
+            } else {
+              map[id].count += 1;
+            }
+          }
+          setCommentMeta(map);
+        }
+      } else {
+        setCommentMeta({});
+      }
     } catch (err: any) {
-      console.error('Error fetching todos', err);
       setError(err?.message || String(err));
       setTodos([]);
+      setCommentMeta({});
     } finally {
       setLoading(false);
     }
@@ -135,14 +176,36 @@ export default function TodoList({
 
       {/* List of todos matching the selected filter */}
       <div className="mb-2 text-sm text-gray-600">
-        {loading ? '🔄 Lade Todos…' : `${todos.length} Todos geladen — Filter: ${filter}`}
+        {loading ? '🔄 Lade Todos…' : `${todos.length} Todos geladen`}
       </div>
       {error && <div className="mb-2 text-red-600">Fehler: {error}</div>}
       <ul className="flex flex-col gap-3">
         {filteredTodos.map((todo) => (
-          <TodoItem key={todo.id} todo={todo} onToggle={handleToggle} onDelete={handleDelete} />
+          <TodoItem
+            key={todo.id}
+            todo={todo}
+            onToggle={handleToggle}
+            onDelete={handleDelete}
+            users={users}
+            onEdit={() => setEditTodo(todo)}
+            currentUserId={currentUserId}
+            currentProfileId={currentProfileId}
+            onRefresh={fetchTodos}
+            commentCount={commentMeta[todo.id]?.count ?? 0}
+            lastComment={commentMeta[todo.id]?.last}
+          />
         ))}
       </ul>
+      {editTodo && (
+        <TodoEditForm
+          todo={editTodo}
+          users={users}
+          onClose={() => setEditTodo(null)}
+          onUpdate={fetchTodos}
+          currentUserId={currentUserId}
+          currentProfileId={currentProfileId}
+        />
+      )}
     </div>
   );
 }

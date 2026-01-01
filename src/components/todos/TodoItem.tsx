@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useSwipeable } from 'react-swipeable';
 import type { Todo } from '../../lib/types';
+import TodoEditForm from './TodoEditForm';
 
 // Props for the TodoItem component:
 // - todo: the todo item to render
@@ -10,6 +11,17 @@ interface TodoItemProps {
   todo: Todo;
   onToggle: (todo: Todo) => void;
   onDelete: (id: string) => void;
+  users: { id: string; name: string }[];
+  onEdit: () => void;
+  // Optional: current user id (passed to edit form for comments)
+  currentUserId?: string;
+  // Optional: current profile id (preferred for FK relations)
+  currentProfileId?: string;
+  // Optional callback to refresh todos when edit form updates
+  onRefresh?: () => void;
+  // Comment meta
+  commentCount?: number;
+  lastComment?: { text?: string; user_id?: string; created_at?: string } | null;
 }
 
 // Renders a single todo entry with swipe-to-delete and inline controls.
@@ -17,11 +29,24 @@ interface TodoItemProps {
 // - horizontal swipe to reveal a red delete background and trigger delete on full swipe left
 // - checkbox to toggle completion
 // - shows assignee, due date (colored when overdue), description, creator and done metadata
-export default function TodoItem({ todo, onToggle, onDelete }: TodoItemProps) {
+export default function TodoItem({
+  todo,
+  onToggle,
+  onDelete,
+  users,
+  onEdit,
+  currentUserId,
+  currentProfileId,
+  onRefresh,
+  commentCount,
+  lastComment,
+}: TodoItemProps) {
   // Horizontal translation applied while swiping (in pixels)
   const [swipeOffset, setSwipeOffset] = useState(0);
   // Whether a swipe is currently in progress (used to show/hide the delete background)
   const [isSwiping, setIsSwiping] = useState(false);
+  // State to control the edit modal
+  const [open, setOpen] = useState(false);
 
   // Handlers provided by react-swipeable to manage swipe interactions.
   const handlers = useSwipeable({
@@ -96,6 +121,21 @@ export default function TodoItem({ todo, onToggle, onDelete }: TodoItemProps) {
           {/* Optional description */}
           {todo.description && <p className="text-gray-500 text-sm">{todo.description}</p>}
 
+          {/* Comments summary: count and latest comment */}
+          <div className="text-sm text-gray-500 mt-1">
+            {typeof commentCount === 'number' && <span className="mr-3">💬 {commentCount}</span>}
+            {lastComment && (
+              <span>
+                <strong>
+                  {users.find((u) => u.id === lastComment.user_id)?.name || lastComment.user_id}:
+                </strong>{' '}
+                {lastComment.text && lastComment.text.length > 200
+                  ? `${lastComment.text.slice(0, 200)}…`
+                  : lastComment.text}
+              </span>
+            )}
+          </div>
+
           {/* Creator and creation timestamp */}
           {todo.created_at && (
             <div className="text-xs text-gray-400 mt-1">
@@ -116,6 +156,20 @@ export default function TodoItem({ todo, onToggle, onDelete }: TodoItemProps) {
         <button onClick={() => onDelete(todo.id)} className="text-red-500 font-bold ml-3">
           X
         </button>
+        <button onClick={onEdit} className="text-blue-500 font-bold ml-3">
+          📝
+        </button>
+
+        {open && (
+          <TodoEditForm
+            todo={todo}
+            users={users}
+            onClose={() => setOpen(false)}
+            onUpdate={onRefresh}
+            currentUserId={currentUserId}
+            currentProfileId={currentProfileId}
+          />
+        )}
       </div>
     </div>
   );
