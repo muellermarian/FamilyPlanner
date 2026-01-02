@@ -11,13 +11,22 @@ interface Ingredient {
 
 interface RecipeEditFormProps {
   recipe: Recipe;
-  onUpdate: (name: string, imageUrl: string | null, ingredients: Ingredient[]) => Promise<void>;
+  onUpdate: (
+    name: string,
+    imageUrl: string | null,
+    imageFile: File | null,
+    instructions: string,
+    ingredients: Ingredient[]
+  ) => Promise<void>;
   onCancel: () => void;
 }
 
 export default function RecipeEditForm({ recipe, onUpdate, onCancel }: RecipeEditFormProps) {
   const [name, setName] = useState(recipe.name);
   const [imageUrl, setImageUrl] = useState(recipe.image_url || '');
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [instructions, setInstructions] = useState(recipe.instructions || '');
   const [ingredients, setIngredients] = useState<Ingredient[]>([]);
   const [submitting, setSubmitting] = useState(false);
 
@@ -54,6 +63,27 @@ export default function RecipeEditForm({ recipe, onUpdate, onCancel }: RecipeEdi
     setIngredients(updated);
   };
 
+  const handleImageFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setImageFile(file);
+      setImageUrl(''); // Clear URL if file is selected
+
+      // Create preview
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const clearImage = () => {
+    setImageFile(null);
+    setImageUrl('');
+    setImagePreview(null);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim()) return;
@@ -66,7 +96,13 @@ export default function RecipeEditForm({ recipe, onUpdate, onCancel }: RecipeEdi
 
     setSubmitting(true);
     try {
-      await onUpdate(name.trim(), imageUrl.trim() || null, validIngredients);
+      await onUpdate(
+        name.trim(),
+        imageUrl.trim() || null,
+        imageFile,
+        instructions.trim(),
+        validIngredients
+      );
     } catch (err) {
       console.error(err);
     } finally {
@@ -104,13 +140,66 @@ export default function RecipeEditForm({ recipe, onUpdate, onCancel }: RecipeEdi
             </div>
 
             <div className="mb-4">
-              <label className="block text-sm font-medium mb-1">Bild-URL (optional)</label>
-              <input
-                type="url"
-                value={imageUrl}
-                onChange={(e) => setImageUrl(e.target.value)}
+              <label className="block text-sm font-medium mb-1">Rezeptbild</label>
+
+              {(imagePreview || recipe.image_url) && (
+                <div className="mb-3 relative">
+                  <img
+                    src={imagePreview || recipe.image_url || ''}
+                    alt="Vorschau"
+                    className="w-full h-48 object-cover rounded"
+                  />
+                  <button
+                    type="button"
+                    onClick={clearImage}
+                    className="absolute top-2 right-2 bg-red-600 text-white px-2 py-1 rounded text-sm"
+                  >
+                    Entfernen
+                  </button>
+                </div>
+              )}
+
+              <div className="space-y-2">
+                <div>
+                  <label className="block text-xs text-gray-600 mb-1">
+                    Neues Foto aufnehmen oder auswählen
+                  </label>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageFileChange}
+                    className="w-full border rounded px-3 py-2 text-sm"
+                  />
+                </div>
+
+                <div className="text-center text-xs text-gray-500">oder</div>
+
+                <div>
+                  <label className="block text-xs text-gray-600 mb-1">Bild-URL eingeben</label>
+                  <input
+                    type="url"
+                    value={imageUrl}
+                    onChange={(e) => {
+                      setImageUrl(e.target.value);
+                      setImageFile(null);
+                      setImagePreview(null);
+                    }}
+                    className="w-full border rounded px-3 py-2 text-sm"
+                    placeholder="https://..."
+                    disabled={!!imageFile}
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div className="mb-4">
+              <label className="block text-sm font-medium mb-1">Anleitung</label>
+              <textarea
+                value={instructions}
+                onChange={(e) => setInstructions(e.target.value)}
                 className="w-full border rounded px-3 py-2"
-                placeholder="https://..."
+                placeholder="Beschreibe die Zubereitungsschritte..."
+                rows={6}
               />
             </div>
 

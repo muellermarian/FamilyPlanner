@@ -229,6 +229,15 @@ export default function RecipeDetail({
                 </ul>
               )}
             </div>
+
+            {recipe.instructions && (
+              <div className="mb-4">
+                <h4 className="font-semibold mb-2">Anleitung</h4>
+                <div className="text-gray-700 whitespace-pre-wrap bg-gray-50 p-3 rounded border">
+                  {recipe.instructions}
+                </div>
+              </div>
+            )}
           </div>
 
           {!isMarkedForCooking && (

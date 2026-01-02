@@ -6,6 +6,7 @@ import {
   deleteRecipe,
   getActiveCookings,
   updateRecipe,
+  uploadRecipeImage,
 } from '../../lib/recipes';
 import RecipeItem from './RecipeItem';
 import RecipeAddForm from './RecipeAddForm';
@@ -54,6 +55,8 @@ export default function RecipeList({ familyId, currentUserId, currentProfileId }
   const handleAdd = async (
     name: string,
     imageUrl: string | null,
+    imageFile: File | null,
+    instructions: string,
     ingredients: Array<{
       name: string;
       quantity: string;
@@ -62,7 +65,21 @@ export default function RecipeList({ familyId, currentUserId, currentProfileId }
     }>
   ) => {
     try {
-      await addRecipe(familyId, name, imageUrl, currentProfileId || currentUserId, ingredients);
+      let finalImageUrl = imageUrl;
+
+      // Upload image file if provided
+      if (imageFile) {
+        finalImageUrl = await uploadRecipeImage(imageFile, familyId);
+      }
+
+      await addRecipe(
+        familyId,
+        name,
+        finalImageUrl,
+        instructions,
+        currentProfileId || currentUserId,
+        ingredients
+      );
       await fetchRecipes();
       setShowAddForm(false);
     } catch (err: any) {
@@ -86,6 +103,8 @@ export default function RecipeList({ familyId, currentUserId, currentProfileId }
   const handleUpdateRecipe = async (
     name: string,
     imageUrl: string | null,
+    imageFile: File | null,
+    instructions: string,
     ingredients: Array<{
       name: string;
       quantity: string;
@@ -96,7 +115,14 @@ export default function RecipeList({ familyId, currentUserId, currentProfileId }
     if (!editRecipe) return;
 
     try {
-      await updateRecipe(editRecipe.id, name, imageUrl, ingredients);
+      let finalImageUrl = imageUrl;
+
+      // Upload image file if provided
+      if (imageFile) {
+        finalImageUrl = await uploadRecipeImage(imageFile, familyId);
+      }
+
+      await updateRecipe(editRecipe.id, name, finalImageUrl, instructions, ingredients);
       await fetchRecipes();
       setEditRecipe(null);
       setSelectedRecipe(null);

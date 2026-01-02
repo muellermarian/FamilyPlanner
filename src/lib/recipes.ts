@@ -2,6 +2,26 @@ import { supabase } from './supabaseClient';
 import type { Recipe, RecipeIngredient, RecipeCooking } from './types';
 
 /**
+ * Upload a recipe image to Supabase Storage
+ */
+export async function uploadRecipeImage(file: File, familyId: string): Promise<string> {
+  const fileExt = file.name.split('.').pop();
+  const fileName = `${familyId}/${Date.now()}.${fileExt}`;
+
+  const { data, error } = await supabase.storage.from('recipe-images').upload(fileName, file, {
+    cacheControl: '3600',
+    upsert: false,
+  });
+
+  if (error) throw error;
+
+  // Get public URL
+  const { data: urlData } = supabase.storage.from('recipe-images').getPublicUrl(data.path);
+
+  return urlData.publicUrl;
+}
+
+/**
  * Get all recipes for a family with their ingredients
  */
 export async function getRecipes(familyId: string): Promise<Recipe[]> {
@@ -67,6 +87,7 @@ export async function addRecipe(
   familyId: string,
   name: string,
   imageUrl: string | null,
+  instructions: string | null,
   createdById: string,
   ingredients: Array<{
     name: string;
@@ -82,6 +103,7 @@ export async function addRecipe(
       family_id: familyId,
       name,
       image_url: imageUrl,
+      instructions: instructions,
       created_by_id: createdById,
     })
     .select()
@@ -123,6 +145,7 @@ export async function updateRecipe(
   recipeId: string,
   name: string,
   imageUrl: string | null,
+  instructions: string | null,
   ingredients: Array<{
     name: string;
     quantity: string;
@@ -136,6 +159,7 @@ export async function updateRecipe(
     .update({
       name,
       image_url: imageUrl,
+      instructions: instructions,
     })
     .eq('id', recipeId);
 
