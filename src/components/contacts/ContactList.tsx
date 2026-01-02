@@ -74,12 +74,20 @@ export default function ContactList({ familyId }: ContactListProps) {
   const handleAddPerson = async (
     firstName: string,
     lastName: string,
-    birthdate: string,
+    birthdate: string | null,
     phone: string,
     email: string
   ) => {
     try {
-      await addContact(familyId, firstName, lastName, selectedFamilyId, birthdate, phone, email);
+      await addContact(
+        familyId,
+        firstName,
+        lastName,
+        selectedFamilyId,
+        birthdate || undefined,
+        phone,
+        email
+      );
       await fetchData();
       setShowPersonForm(false);
       setSelectedFamilyId(null);
@@ -93,7 +101,7 @@ export default function ContactList({ familyId }: ContactListProps) {
     firstName: string,
     lastName: string,
     contactFamilyId: string | null,
-    birthdate: string,
+    birthdate: string | null,
     phone: string,
     email: string
   ) => {
@@ -105,7 +113,7 @@ export default function ContactList({ familyId }: ContactListProps) {
         firstName,
         lastName,
         contactFamilyId,
-        birthdate,
+        birthdate || undefined,
         phone,
         email
       );

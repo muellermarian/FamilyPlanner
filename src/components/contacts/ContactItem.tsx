@@ -17,11 +17,25 @@ export default function ContactItem({
     ? contactFamilies.find((f) => f.id === contact.contact_family_id)?.family_name
     : null;
 
+  const calculateAge = (birthdate: string): number => {
+    const today = new Date();
+    const birthDate = new Date(birthdate);
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const monthDiff = today.getMonth() - birthDate.getMonth();
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+      age--;
+    }
+    return age;
+  };
+
+  const age = contact.birthdate ? calculateAge(contact.birthdate) : null;
+
   return (
     <div className="flex justify-between items-start p-4 border rounded hover:bg-gray-50">
       <div>
         <div className="font-medium text-lg">
           {contact.last_name}, {contact.first_name}
+          {age !== null && <span className="text-gray-500 font-normal"> ({age})</span>}
         </div>
         {familyName && <div className="text-sm text-gray-500 italic">Familie: {familyName}</div>}
         {contact.birthdate && (
