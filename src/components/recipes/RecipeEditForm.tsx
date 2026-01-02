@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { QUANTITY_UNITS } from '../../lib/constants';
+import { deleteRecipe } from '../../lib/recipes';
 import type { Recipe } from '../../lib/types';
 
 interface Ingredient {
@@ -19,9 +20,15 @@ interface RecipeEditFormProps {
     ingredients: Ingredient[]
   ) => Promise<void>;
   onCancel: () => void;
+  onDelete: () => void;
 }
 
-export default function RecipeEditForm({ recipe, onUpdate, onCancel }: RecipeEditFormProps) {
+export default function RecipeEditForm({
+  recipe,
+  onUpdate,
+  onCancel,
+  onDelete,
+}: RecipeEditFormProps) {
   const [name, setName] = useState(recipe.name);
   const [imageUrl, setImageUrl] = useState(recipe.image_url || '');
   const [imageFile, setImageFile] = useState<File | null>(null);
@@ -29,6 +36,7 @@ export default function RecipeEditForm({ recipe, onUpdate, onCancel }: RecipeEdi
   const [instructions, setInstructions] = useState(recipe.instructions || '');
   const [ingredients, setIngredients] = useState<Ingredient[]>([]);
   const [submitting, setSubmitting] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
   useEffect(() => {
     // Initialize ingredients from recipe
@@ -116,6 +124,20 @@ export default function RecipeEditForm({ recipe, onUpdate, onCancel }: RecipeEdi
       console.error(err);
     } finally {
       setSubmitting(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    setSubmitting(true);
+    try {
+      await deleteRecipe(recipe.id);
+      onDelete();
+    } catch (err: any) {
+      console.error(err);
+      alert(err.message || JSON.stringify(err));
+    } finally {
+      setSubmitting(false);
+      setShowDeleteDialog(false);
     }
   };
 
@@ -307,6 +329,13 @@ export default function RecipeEditForm({ recipe, onUpdate, onCancel }: RecipeEdi
           <div className="p-4 border-t flex gap-3">
             <button
               type="button"
+              onClick={() => setShowDeleteDialog(true)}
+              className="px-4 py-2 border border-red-600 text-red-600 rounded hover:bg-red-50"
+            >
+              Löschen
+            </button>
+            <button
+              type="button"
               onClick={onCancel}
               className="flex-1 px-4 py-2 border rounded hover:bg-gray-100"
             >
@@ -322,6 +351,34 @@ export default function RecipeEditForm({ recipe, onUpdate, onCancel }: RecipeEdi
           </div>
         </form>
       </div>
+
+      {showDeleteDialog && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-lg shadow-lg max-w-md w-full p-6">
+            <h3 className="text-lg font-bold mb-4">Rezept löschen?</h3>
+            <p className="text-gray-700 mb-6">
+              Möchtest du das Rezept "{recipe.name}" wirklich löschen? Diese Aktion kann nicht
+              rückgängig gemacht werden.
+            </p>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setShowDeleteDialog(false)}
+                className="flex-1 px-4 py-2 border rounded hover:bg-gray-100"
+                disabled={submitting}
+              >
+                Abbrechen
+              </button>
+              <button
+                onClick={handleDelete}
+                className="flex-1 bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700 disabled:opacity-50"
+                disabled={submitting}
+              >
+                {submitting ? 'Löschen...' : 'Löschen'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

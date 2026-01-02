@@ -244,6 +244,11 @@ export default function RecipeList({ familyId, currentUserId, currentProfileId }
           recipe={editRecipe}
           onUpdate={handleUpdateRecipe}
           onCancel={() => setEditRecipe(null)}
+          onDelete={async () => {
+            await handleDelete(editRecipe.id);
+            setEditRecipe(null);
+            setSelectedRecipe(null);
+          }}
         />
       )}
     </div>
