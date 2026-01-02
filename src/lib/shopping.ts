@@ -39,10 +39,7 @@ export async function addShoppingItem(
 /**
  * Update quantity of an existing shopping item
  */
-export async function updateShoppingItemQuantity(
-  id: string,
-  newQuantity: string
-): Promise<void> {
+export async function updateShoppingItemQuantity(id: string, newQuantity: string): Promise<void> {
   const { error } = await supabase
     .from('shopping_items')
     .update({ quantity: newQuantity })
