@@ -21,7 +21,7 @@ interface TodoItemProps {
   onRefresh?: () => void;
   // Comment meta
   commentCount?: number;
-  lastComment?: { text?: string; user_id?: string; created_at?: string } | null;
+  comments?: { text?: string; user_id?: string; created_at?: string }[] | null;
 }
 
 // Renders a single todo entry with swipe-to-delete and inline controls.
@@ -39,7 +39,7 @@ export default function TodoItem({
   currentProfileId,
   onRefresh,
   commentCount,
-  lastComment,
+  comments,
 }: TodoItemProps) {
   // Horizontal translation applied while swiping (in pixels)
   const [swipeOffset, setSwipeOffset] = useState(0);
@@ -89,90 +89,150 @@ export default function TodoItem({
 
       {/* Main todo card: slides left/right based on swipeOffset */}
       <div
-        className="relative border rounded p-3 flex justify-between items-start bg-white transition-transform duration-200 ease-out"
+        className="relative border rounded p-3 flex flex-col bg-white transition-transform duration-200 ease-out gap-2"
         style={{ transform: `translateX(${swipeOffset}px)` }}
       >
-        <div className="flex flex-col flex-1 gap-1">
-          {/* Assignee name (if any) */}
-          <div className="font-bold text-lg">{todo.assigned?.name || ''}</div>
-
-          {/* Due date: colored red when past, blue otherwise */}
-          {todo.due_at && (
+        {/* Top row: Checkbox and task title */}
+        <div className="flex items-start gap-2">
+          <input
+            type="checkbox"
+            checked={todo.isDone}
+            onChange={() => onToggle(todo)}
+            className="w-5 h-5 accent-blue-600 mt-0.5 flex-shrink-0"
+          />
+          <div className="flex-1">
             <p
-              className={`text-sm font-semibold mt-1 ${
-                new Date(todo.due_at) < new Date() ? 'text-red-600' : 'text-blue-600'
+              className={`text-sm font-medium ${
+                todo.isDone ? 'line-through text-gray-400' : 'text-gray-700'
               }`}
             >
-              📅 Fällig am: {new Date(todo.due_at).toLocaleDateString()}
+              {todo.task || 'Keine Aufgabe'}
             </p>
-          )}
-
-          {/* Checkbox toggles completion; task title is struck through when done */}
-          <label className="flex items-center gap-2 cursor-pointer">
-            <input
-              type="checkbox"
-              checked={todo.isDone}
-              onChange={() => onToggle(todo)}
-              className="w-5 h-5 accent-blue-600"
-            />
-            <span className={todo.isDone ? 'line-through' : ''}>{todo.task}</span>
-          </label>
-
-          {/* Optional description */}
-          {todo.description && <p className="text-gray-500 text-sm">{todo.description}</p>}
-
-          {/* Comments summary: count and latest comment */}
-          <div className="text-sm text-gray-500 mt-1">
-            {typeof commentCount === 'number' && commentCount > 0 && (
-              <span className="mr-3">💬 {commentCount}</span>
-            )}
-            {lastComment && (
-              <span>
-                <strong>
-                  {users.find((u) => u.id === lastComment.user_id)?.name || lastComment.user_id}:
-                </strong>{' '}
-                {lastComment.text && lastComment.text.length > 200
-                  ? `${lastComment.text.slice(0, 200)}…`
-                  : lastComment.text}
-              </span>
-            )}
           </div>
+          <div className="flex gap-4 flex-shrink-0">
+            <button
+              onClick={onEdit}
+              className="text-blue-500 hover:text-blue-700 font-bold text-sm"
+            >
+              📝
+            </button>
+            <button
+              onClick={() => onDelete(todo.id)}
+              className="text-red-500 hover:text-red-700 font-bold text-sm"
+            >
+              ✕
+            </button>
+          </div>
+        </div>
 
-          {/* Creator and creation timestamp */}
-          {todo.created_at && (
-            <div className="text-xs text-gray-400 mt-1">
-              * {todo.creator?.name || todo.created_by_id},{' '}
-              {new Date(todo.created_at).toLocaleString()}
-            </div>
-          )}
-
-          {/* If completed, show who marked it done and when */}
-          {todo.isDone && todo.done_by && todo.done_at && (
-            <div className="text-xs text-green-600 mt-1">
-              ✓ {todo.done_by.name}, {new Date(todo.done_at).toLocaleString()}
-            </div>
+        {/* Person and description */}
+        <div className="flex items-center gap-2 px-5 text-xs">
+          <span>👤</span>
+          <span className={todo.isDone ? 'line-through text-gray-400' : 'text-gray-600'}>
+            {todo.assigned?.name || 'Nicht zugewiesen'}
+          </span>
+          {todo.description && (
+            <>
+              <span className="text-gray-400"></span>
+              <span className={todo.isDone ? 'line-through text-gray-400' : 'text-gray-600'}>
+                {todo.description}
+              </span>
+            </>
           )}
         </div>
 
-        {/* Explicit delete button: alternative to swipe-to-delete */}
-        <button onClick={() => onDelete(todo.id)} className="text-red-500 font-bold ml-3">
-          X
-        </button>
-        <button onClick={onEdit} className="text-blue-500 font-bold ml-3">
-          📝
-        </button>
-
-        {open && (
-          <TodoEditForm
-            todo={todo}
-            users={users}
-            onClose={() => setOpen(false)}
-            onUpdate={onRefresh}
-            currentUserId={currentUserId}
-            currentProfileId={currentProfileId}
-          />
+        {/* Due date */}
+        {todo.due_at && (
+          <div className="px-5 flex items-center gap-2 text-xs">
+            <span
+              className={`font-medium ${
+                new Date(todo.due_at) < new Date() && !todo.isDone
+                  ? 'text-red-600'
+                  : 'text-blue-600'
+              }`}
+            >
+              📅 {new Date(todo.due_at).toLocaleDateString('de-DE')}
+            </span>
+          </div>
         )}
+
+        {/* Comments section */}
+        {typeof commentCount === 'number' &&
+          commentCount > 0 &&
+          comments &&
+          comments.length > 0 && (
+            <div className="px-5 space-y-2">
+              <div className="text-xs font-medium text-gray-500">
+                💬 {commentCount} Kommentar(e)
+              </div>
+              {comments.map((comment, idx) => (
+                <div
+                  key={idx}
+                  className="text-xs bg-gray-50 p-2 rounded border-l-2 border-gray-300"
+                >
+                  <div className="flex items-center gap-2 font-medium text-gray-700">
+                    <span>👤</span>
+                    <span>
+                      {users.find((u) => u.id === comment.user_id)?.name || comment.user_id}
+                    </span>
+                    {comment.created_at && (
+                      <span className="text-gray-500 font-normal">
+                        {new Date(comment.created_at).toLocaleDateString('de-DE')}{' '}
+                        {new Date(comment.created_at).toLocaleTimeString('de-DE', {
+                          hour: '2-digit',
+                          minute: '2-digit',
+                        })}
+                      </span>
+                    )}
+                  </div>
+                  <div className="text-gray-600 mt-1">
+                    {comment.text && comment.text.length > 200
+                      ? `${comment.text.slice(0, 200)}…`
+                      : comment.text}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+        {/* Separator line */}
+        <div className="border-t border-gray-200"></div>
+
+        {/* Creator info */}
+        <div className="px-5 text-xs text-gray-400 flex items-center gap-2">
+          <span>👤</span>
+          <span>
+            {todo.creator?.name || todo.created_by_id}
+            {todo.created_at && (
+              <>
+                {' '}
+                {new Date(todo.created_at).toLocaleDateString('de-DE')}{' '}
+                {new Date(todo.created_at).toLocaleTimeString('de-DE', {
+                  hour: '2-digit',
+                  minute: '2-digit',
+                })}
+              </>
+            )}
+          </span>
+          {todo.isDone && todo.done_by && (
+            <>
+              <span></span>
+              <span className="text-green-600">✓ {todo.done_by.name}</span>
+            </>
+          )}
+        </div>
       </div>
+
+      {open && (
+        <TodoEditForm
+          todo={todo}
+          users={users}
+          onClose={() => setOpen(false)}
+          onUpdate={onRefresh}
+          currentUserId={currentUserId}
+          currentProfileId={currentProfileId}
+        />
+      )}
     </div>
   );
 }

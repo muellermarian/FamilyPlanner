@@ -31,7 +31,7 @@ export default function TodoList({
   const [commentMeta, setCommentMeta] = useState<
     Record<
       string,
-      { count: number; last?: { text: string; user_id?: string; created_at?: string } }
+      { count: number; comments?: { text: string; user_id?: string; created_at?: string }[] }
     >
   >({});
 
@@ -58,18 +58,15 @@ export default function TodoList({
         } else if (commentsData) {
           const map: Record<
             string,
-            { count: number; last?: { text: string; user_id?: string; created_at?: string } }
+            { count: number; comments?: { text: string; user_id?: string; created_at?: string }[] }
           > = {};
           for (const c of commentsData as any[]) {
             const id = c.todo_id as string;
             if (!map[id]) {
-              map[id] = {
-                count: 1,
-                last: { text: c.text, user_id: c.user_id, created_at: c.created_at },
-              };
-            } else {
-              map[id].count += 1;
+              map[id] = { count: 0, comments: [] };
             }
+            map[id].count += 1;
+            map[id].comments?.push({ text: c.text, user_id: c.user_id, created_at: c.created_at });
           }
           setCommentMeta(map);
         }
@@ -191,7 +188,7 @@ export default function TodoList({
             currentProfileId={currentProfileId}
             onRefresh={fetchTodos}
             commentCount={commentMeta[todo.id]?.count ?? 0}
-            lastComment={commentMeta[todo.id]?.last}
+            comments={commentMeta[todo.id]?.comments ?? []}
           />
         ))}
       </ul>

@@ -75,7 +75,9 @@ export function createCalendarDays(
   const month = currentMonth.getMonth();
   const firstDay = new Date(year, month, 1);
   const startDate = new Date(firstDay);
-  startDate.setDate(startDate.getDate() - firstDay.getDay());
+  // Adjust for German calendar (Monday = 0, Sunday = 6)
+  const dayOffset = firstDay.getDay() === 0 ? 6 : firstDay.getDay() - 1;
+  startDate.setDate(startDate.getDate() - dayOffset);
 
   const days: CalendarDay[] = [];
   const currentDay = new Date(startDate);

@@ -40,7 +40,7 @@ export default function CalendarGrid({
       </div>
 
       <div className="grid grid-cols-7 gap-1 mb-1">
-        {['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'].map((day) => (
+        {['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'].map((day) => (
           <div key={day} className="text-center font-semibold text-xs p-1 bg-gray-100 rounded">
             {day}
           </div>
