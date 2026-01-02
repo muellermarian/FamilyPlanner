@@ -96,3 +96,33 @@ export interface RecipeCooking {
   cooked_at?: string | null;
   cooked_by_id?: string | null;
 }
+
+export interface ContactFamily {
+  id: string;
+  family_id: string;
+  family_name: string;
+  street?: string;
+  house_number?: string;
+  zip?: string;
+  city?: string;
+  country?: string;
+  created_at?: string;
+  contacts?: Contact[];
+}
+
+export interface Contact {
+  id: string;
+  family_id: string;
+  contact_family_id?: string | null;
+  first_name: string;
+  last_name: string;
+  birthdate?: string;
+  phone?: string;
+  email?: string;
+  street?: string;
+  house_number?: string;
+  zip?: string;
+  city?: string;
+  country?: string;
+  created_at?: string;
+}
