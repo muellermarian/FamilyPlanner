@@ -55,7 +55,10 @@ export default function AgendaView({ items, onEditEvent, onSelectItem }: AgendaV
 
             <div className="space-y-2">
               {dayItems.map((item) => {
-                const icon = item.type === 'event' ? '📅' : item.type === 'todo' ? '✅' : '🎂';
+                const isTodo = item.type === 'todo';
+                const isTodoDone = isTodo && (item.data as Todo)?.isDone;
+                const icon =
+                  item.type === 'event' ? '📅' : isTodo ? (isTodoDone ? '✅' : '⬜') : '🎂';
                 const bgColor =
                   item.type === 'event'
                     ? 'bg-blue-50 border-blue-200'

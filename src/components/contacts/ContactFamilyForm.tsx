@@ -1,7 +1,18 @@
 import { useState } from 'react';
+import type { ContactFamily } from '../../lib/types';
 
 interface ContactFamilyFormProps {
-  onAdd: (
+  family?: ContactFamily | null;
+  onAdd?: (
+    familyName: string,
+    street: string,
+    houseNumber: string,
+    zip: string,
+    city: string,
+    country: string
+  ) => Promise<void>;
+  onUpdate?: (
+    contactFamilyId: string,
     familyName: string,
     street: string,
     houseNumber: string,
@@ -12,13 +23,18 @@ interface ContactFamilyFormProps {
   onCancel: () => void;
 }
 
-export default function ContactFamilyForm({ onAdd, onCancel }: ContactFamilyFormProps) {
-  const [familyName, setFamilyName] = useState('');
-  const [street, setStreet] = useState('');
-  const [houseNumber, setHouseNumber] = useState('');
-  const [zip, setZip] = useState('');
-  const [city, setCity] = useState('');
-  const [country, setCountry] = useState('Deutschland');
+export default function ContactFamilyForm({
+  family,
+  onAdd,
+  onUpdate,
+  onCancel,
+}: ContactFamilyFormProps) {
+  const [familyName, setFamilyName] = useState(family?.family_name || '');
+  const [street, setStreet] = useState(family?.street || '');
+  const [houseNumber, setHouseNumber] = useState(family?.house_number || '');
+  const [zip, setZip] = useState(family?.zip || '');
+  const [city, setCity] = useState(family?.city || '');
+  const [country, setCountry] = useState(family?.country || 'Deutschland');
   const [submitting, setSubmitting] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -27,20 +43,32 @@ export default function ContactFamilyForm({ onAdd, onCancel }: ContactFamilyForm
 
     setSubmitting(true);
     try {
-      await onAdd(
-        familyName.trim(),
-        street.trim(),
-        houseNumber.trim(),
-        zip.trim(),
-        city.trim(),
-        country.trim()
-      );
-      setFamilyName('');
-      setStreet('');
-      setHouseNumber('');
-      setZip('');
-      setCity('');
-      setCountry('');
+      if (family && onUpdate) {
+        await onUpdate(
+          family.id,
+          familyName.trim(),
+          street.trim(),
+          houseNumber.trim(),
+          zip.trim(),
+          city.trim(),
+          country.trim()
+        );
+      } else if (onAdd) {
+        await onAdd(
+          familyName.trim(),
+          street.trim(),
+          houseNumber.trim(),
+          zip.trim(),
+          city.trim(),
+          country.trim()
+        );
+        setFamilyName('');
+        setStreet('');
+        setHouseNumber('');
+        setZip('');
+        setCity('');
+        setCountry('');
+      }
     } catch (err) {
       // Silent fail on family form submit
     } finally {
@@ -53,7 +81,9 @@ export default function ContactFamilyForm({ onAdd, onCancel }: ContactFamilyForm
       <div className="bg-white rounded-lg shadow-lg max-w-md w-full max-h-[90vh] overflow-hidden flex flex-col">
         <form onSubmit={handleSubmit} className="flex flex-col h-full">
           <div className="p-4 border-b">
-            <h3 className="text-lg font-bold">Neue Familie hinzufügen</h3>
+            <h3 className="text-lg font-bold">
+              {family ? 'Familie bearbeiten' : 'Neue Familie hinzufügen'}
+            </h3>
           </div>
 
           <div className="overflow-y-auto flex-1 p-4 space-y-4">
@@ -144,7 +174,7 @@ export default function ContactFamilyForm({ onAdd, onCancel }: ContactFamilyForm
               disabled={submitting || !familyName.trim()}
               className="flex-1 bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 disabled:opacity-50"
             >
-              {submitting ? 'Speichern...' : 'Familie hinzufügen'}
+              {submitting ? 'Speichern...' : family ? 'Speichern' : 'Familie hinzufügen'}
             </button>
           </div>
         </form>

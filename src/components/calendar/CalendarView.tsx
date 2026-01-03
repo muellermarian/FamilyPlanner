@@ -11,7 +11,6 @@ import CalendarGrid from './CalendarGrid';
 import AgendaView from './AgendaView';
 import EventDetailModal from './EventDetailModal';
 import { createAgendaItems, createCalendarDays } from './calendarUtils';
-
 export default function CalendarView() {
   const { familyId: userFamilyId } = useAuth();
   const familyId = userFamilyId || '';
@@ -172,6 +171,8 @@ export default function CalendarView() {
     );
   };
 
+  const todayStr = new Date().toDateString();
+
   return (
     <div className="p-4 max-w-2xl mx-auto">
       <div className="flex items-center justify-between mb-4">
@@ -300,53 +301,71 @@ export default function CalendarView() {
             </button>
           </div>
 
-          {getCurrentWeek().map(({ date, items }) => (
-            <button
-              key={date.toISOString()}
-              onClick={() => {
-                setSelectedDay(date);
-                setSelectedDayAgenda(items);
-              }}
-              className="w-full text-left p-3 rounded border hover:border-blue-400 hover:bg-blue-50 transition"
-            >
-              <div className="flex justify-between items-center mb-2">
-                <div>
-                  <div className="text-sm font-semibold">
-                    {date.toLocaleDateString('de-DE', {
-                      weekday: 'long',
-                      day: '2-digit',
-                      month: '2-digit',
-                    })}
+          {getCurrentWeek().map(({ date, items }) => {
+            const isToday = date.toDateString() === todayStr;
+            return (
+              <button
+                key={date.toISOString()}
+                onClick={() => {
+                  setSelectedDay(date);
+                  setSelectedDayAgenda(items);
+                }}
+                className={`w-full text-left p-3 rounded border hover:border-blue-400 hover:bg-blue-50 transition ${
+                  isToday ? 'ring-2 ring-blue-500 bg-blue-50/80' : ''
+                }`}
+              >
+                <div className="flex justify-between items-center mb-2">
+                  <div>
+                    <div className="text-sm font-semibold">
+                      {date.toLocaleDateString('de-DE', {
+                        weekday: 'long',
+                        day: '2-digit',
+                        month: '2-digit',
+                      })}
+                    </div>
+                    <div className="text-xs text-gray-500">
+                      {items.length === 0
+                        ? 'Keine Einträge'
+                        : `${items.length} Termin(e)/Aufgabe(n)`}
+                    </div>
                   </div>
-                  <div className="text-xs text-gray-500">
-                    {items.length === 0 ? 'Keine Einträge' : `${items.length} Termin(e)/Aufgabe(n)`}
-                  </div>
+                  {isToday && (
+                    <span className="text-[11px] px-2 py-1 rounded-full bg-blue-100 text-blue-800 font-semibold">
+                      Heute
+                    </span>
+                  )}
                 </div>
-              </div>
 
-              <div className="flex flex-wrap gap-2">
-                {items.slice(0, 4).map((item) => (
-                  <span
-                    key={`${item.type}-${item.id}`}
-                    className={`text-[11px] px-2 py-1 rounded-full border ${
-                      {
-                        event: 'bg-blue-100 border-blue-300 text-blue-900',
-                        todo: 'bg-green-100 border-green-300 text-green-900',
-                        birthday: 'bg-pink-100 border-pink-300 text-pink-900',
-                      }[item.type]
-                    }`}
-                  >
-                    {item.type === 'birthday' ? '🎂' : item.type === 'todo' ? '✅' : '📅'}{' '}
-                    {item.title}
-                    {item.time ? ` · ${item.time}` : ''}
-                  </span>
-                ))}
-                {items.length > 4 && (
-                  <span className="text-[11px] text-gray-600">+{items.length - 4} mehr</span>
-                )}
-              </div>
-            </button>
-          ))}
+                <div className="flex flex-wrap gap-2">
+                  {items.slice(0, 4).map((item) => (
+                    <span
+                      key={`${item.type}-${item.id}`}
+                      className={`text-[11px] px-2 py-1 rounded-full border ${
+                        {
+                          event: 'bg-blue-100 border-blue-300 text-blue-900',
+                          todo: 'bg-green-100 border-green-300 text-green-900',
+                          birthday: 'bg-pink-100 border-pink-300 text-pink-900',
+                        }[item.type]
+                      }`}
+                    >
+                      {item.type === 'birthday'
+                        ? '🎂'
+                        : item.type === 'todo'
+                        ? (item.data as any)?.isDone
+                          ? '✅'
+                          : '⬜'
+                        : '📅'}{' '}
+                      {item.title}
+                      {item.time ? ` · ${item.time}` : ''}
+                    </span>
+                  ))}
+                  {items.length > 4 && (
+                    <span className="text-[11px] text-gray-600">+{items.length - 4} mehr</span>
+                  )}
+                </div>
+              </button>
+            );
+          })}
         </div>
       ) : (
         <AgendaView
@@ -393,7 +412,13 @@ export default function CalendarView() {
                   }`}
                 >
                   <div className="font-medium text-sm">
-                    {item.type === 'birthday' ? '🎂' : item.type === 'todo' ? '✅' : '📅'}{' '}
+                    {item.type === 'birthday'
+                      ? '🎂'
+                      : item.type === 'todo'
+                      ? (item.data as any)?.isDone
+                        ? '✅'
+                        : '⬜'
+                      : '📅'}{' '}
                     {item.title}
                   </div>
                   {item.description && (

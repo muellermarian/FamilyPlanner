@@ -99,7 +99,13 @@ export default function CalendarGrid({
                     }`}
                   >
                     <div className="truncate">
-                      {event.type === 'birthday' ? '🎂' : event.type === 'todo' ? '✅' : '📅'}{' '}
+                      {event.type === 'birthday'
+                        ? '🎂'
+                        : event.type === 'todo'
+                        ? (event.data as any)?.isDone
+                          ? '✅'
+                          : '⬜'
+                        : '📅'}{' '}
                       {event.title}
                     </div>
                     {event.description && (

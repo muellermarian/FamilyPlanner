@@ -4,6 +4,7 @@ import {
   getContactFamilies,
   getAllContacts,
   addContactFamily,
+  updateContactFamily,
   addContact,
   updateContact,
   deleteContactFamily,
@@ -26,6 +27,7 @@ export default function ContactList({ familyId }: ContactListProps) {
   const [error, setError] = useState<string | null>(null);
   const [showFamilyForm, setShowFamilyForm] = useState(false);
   const [showPersonForm, setShowPersonForm] = useState(false);
+  const [editFamily, setEditFamily] = useState<ContactFamily | null>(null);
   const [editContact, setEditContact] = useState<Contact | null>(null);
   const [selectedFamilyId, setSelectedFamilyId] = useState<string | null>(null);
   const [familySearchQuery, setFamilySearchQuery] = useState('');
@@ -64,6 +66,32 @@ export default function ContactList({ familyId }: ContactListProps) {
       await addContactFamily(familyId, familyName, street, houseNumber, zip, city, country);
       await fetchData();
       setShowFamilyForm(false);
+    } catch (err: any) {
+      alert(err.message || JSON.stringify(err));
+    }
+  };
+
+  const handleUpdateFamily = async (
+    contactFamilyId: string,
+    familyName: string,
+    street: string,
+    houseNumber: string,
+    zip: string,
+    city: string,
+    country: string
+  ) => {
+    try {
+      await updateContactFamily(
+        contactFamilyId,
+        familyName,
+        street,
+        houseNumber,
+        zip,
+        city,
+        country
+      );
+      await fetchData();
+      setEditFamily(null);
     } catch (err: any) {
       alert(err.message || JSON.stringify(err));
     }
@@ -269,7 +297,7 @@ export default function ContactList({ familyId }: ContactListProps) {
                     onClick={() => toggleFamily(family.id)}
                   >
                     <div className="flex items-center gap-3">
-                      <span className="text-2xl">{isExpanded ? '👨‍👩‍👧‍👦' : '👨‍👩‍👧'}</span>
+                      <span className="text-2xl">👨‍👩‍👧</span>
                       <div>
                         <div className="font-semibold text-lg">{family.family_name}</div>
                         {hasAddress && (
@@ -288,6 +316,13 @@ export default function ContactList({ familyId }: ContactListProps) {
                         title="Person hinzufügen"
                       >
                         +Person
+                      </button>
+                      <button
+                        onClick={() => setEditFamily(family)}
+                        className="text-gray-700 hover:text-gray-900 px-3 py-1 text-sm font-medium"
+                        title="Familie bearbeiten"
+                      >
+                        ✏️
                       </button>
                       <button
                         onClick={() => handleDeleteFamily(family.id, family.family_name)}
@@ -386,6 +421,14 @@ export default function ContactList({ familyId }: ContactListProps) {
 
       {showFamilyForm && (
         <ContactFamilyForm onAdd={handleAddFamily} onCancel={() => setShowFamilyForm(false)} />
+      )}
+
+      {editFamily && (
+        <ContactFamilyForm
+          family={editFamily}
+          onUpdate={handleUpdateFamily}
+          onCancel={() => setEditFamily(null)}
+        />
       )}
 
       {showPersonForm && (

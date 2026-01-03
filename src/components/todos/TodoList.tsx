@@ -151,7 +151,7 @@ export default function TodoList({
             }`}
             title={minimalMode ? 'Detailansicht' : 'Minimalansicht'}
           >
-            {minimalMode ? '☑' : '📋'}
+            {minimalMode ? '👁️' : '👁️'}
           </button>
           {!showAddForm && (
             <button

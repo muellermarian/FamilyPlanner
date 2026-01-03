@@ -12,7 +12,9 @@ export default function EventDetailModal({ item, onClose }: EventDetailModalProp
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
       <div className="bg-white rounded-lg shadow-xl p-6 w-full max-w-md">
         <div className="flex items-start gap-3 mb-4">
-          <span className="text-3xl">{item.type === 'todo' ? '✅' : '🎂'}</span>
+          <span className="text-3xl">
+            {item.type === 'todo' ? ((item.data as any)?.isDone ? '✅' : '⬜') : '🎂'}
+          </span>
           <div className="flex-1">
             <h2 className="text-xl font-bold mb-1">{item.title}</h2>
             <div className="text-sm text-gray-500">
