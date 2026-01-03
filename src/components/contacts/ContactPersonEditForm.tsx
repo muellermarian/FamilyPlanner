@@ -10,6 +10,7 @@ interface ContactPersonEditFormProps {
     contactFamilyId: string | null,
     birthdate: string | null,
     phone: string,
+    phoneLandline: string,
     email: string,
     street: string,
     houseNumber: string,
@@ -31,6 +32,7 @@ export default function ContactPersonEditForm({
   const [contactFamilyId, setContactFamilyId] = useState(contact.contact_family_id || '');
   const [birthdate, setBirthdate] = useState(contact.birthdate || '');
   const [phone, setPhone] = useState(contact.phone || '');
+  const [phoneLandline, setPhoneLandline] = useState(contact.phone_landline || '');
   const [email, setEmail] = useState(contact.email || '');
   const [street, setStreet] = useState(contact.street || '');
   const [houseNumber, setHouseNumber] = useState(contact.house_number || '');
@@ -51,6 +53,7 @@ export default function ContactPersonEditForm({
         contactFamilyId || null,
         birthdate.trim() || null,
         phone.trim(),
+        phoneLandline.trim(),
         email.trim(),
         street.trim(),
         houseNumber.trim(),
@@ -131,6 +134,17 @@ export default function ContactPersonEditForm({
                 type="tel"
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
+                className="w-full border rounded px-3 py-2 text-base"
+                placeholder="+49 123 456789"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium mb-1">Festnetz (optional)</label>
+              <input
+                type="tel"
+                value={phoneLandline}
+                onChange={(e) => setPhoneLandline(e.target.value)}
                 className="w-full border rounded px-3 py-2 text-base"
                 placeholder="+49 123 456789"
               />

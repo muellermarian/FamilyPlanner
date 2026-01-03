@@ -9,7 +9,7 @@ interface ShoppingAddFormProps {
 export default function ShoppingAddForm({ onAdd, onCancel }: ShoppingAddFormProps) {
   const [name, setName] = useState('');
   const [quantity, setQuantity] = useState('');
-  const [unit, setUnit] = useState('Stk');
+  const [unit, setUnit] = useState('Packung');
   const [submitting, setSubmitting] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -21,7 +21,7 @@ export default function ShoppingAddForm({ onAdd, onCancel }: ShoppingAddFormProp
       await onAdd(name.trim(), quantity.trim() || '1', unit);
       setName('');
       setQuantity('');
-      setUnit('Stk');
+      setUnit('Packung');
     } catch (err) {
       console.error(err);
     } finally {

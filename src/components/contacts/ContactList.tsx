@@ -76,7 +76,13 @@ export default function ContactList({ familyId }: ContactListProps) {
     lastName: string,
     birthdate: string | null,
     phone: string,
-    email: string
+    phoneLandline: string,
+    email: string,
+    street: string,
+    houseNumber: string,
+    zip: string,
+    city: string,
+    country: string
   ) => {
     try {
       await addContact(
@@ -86,7 +92,13 @@ export default function ContactList({ familyId }: ContactListProps) {
         selectedFamilyId,
         birthdate || undefined,
         phone,
-        email
+        phoneLandline,
+        email,
+        street,
+        houseNumber,
+        zip,
+        city,
+        country
       );
       await fetchData();
       setShowPersonForm(false);
@@ -103,7 +115,13 @@ export default function ContactList({ familyId }: ContactListProps) {
     contactFamilyId: string | null,
     birthdate: string | null,
     phone: string,
-    email: string
+    phoneLandline: string,
+    email: string,
+    street: string,
+    houseNumber: string,
+    zip: string,
+    city: string,
+    country: string
   ) => {
     if (!editContact) return;
 
@@ -115,7 +133,13 @@ export default function ContactList({ familyId }: ContactListProps) {
         contactFamilyId,
         birthdate || undefined,
         phone,
-        email
+        phoneLandline,
+        email,
+        street,
+        houseNumber,
+        zip,
+        city,
+        country
       );
       await fetchData();
       setEditContact(null);

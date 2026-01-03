@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import type { Recipe, RecipeIngredient } from '../../lib/types';
 import { addShoppingItem, getShoppingItems, updateShoppingItemQuantity } from '../../lib/shopping';
 import { markRecipeForCooking, markRecipeAsCooked } from '../../lib/recipes';
-import ServingScaleModal from './ServingScaleModal';
 
 interface RecipeDetailProps {
   recipe: Recipe;
@@ -28,7 +27,7 @@ export default function RecipeDetail({
   const [selectedIngredients, setSelectedIngredients] = useState<Set<string>>(new Set());
   const [adding, setAdding] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
-  const [showServingModal, setShowServingModal] = useState(false);
+  const [desiredServings, setDesiredServings] = useState<number>(recipe.servings || 1);
 
   // Initialize selected ingredients based on add_to_shopping flag
   useEffect(() => {
@@ -68,20 +67,24 @@ export default function RecipeDetail({
       return;
     }
 
-    // Show serving scale modal if recipe has servings info
-    if (recipe.servings) {
-      setShowServingModal(true);
-      return;
-    }
-
-    // Otherwise proceed with original ingredients
     const ingredientsToAdd =
       recipe.ingredients?.filter((ing) => selectedIngredients.has(ing.id)) || [];
-    await addIngredientsToShopping(ingredientsToAdd);
+
+    // Scale ingredients if recipe has servings info
+    let scaledIngredients = ingredientsToAdd;
+    if (recipe.servings) {
+      const baseServings = recipe.servings || 1;
+      const scaleFactor = desiredServings / baseServings;
+      scaledIngredients = ingredientsToAdd.map((ing) => ({
+        ...ing,
+        quantity: (parseFloat(ing.quantity) * scaleFactor).toString(),
+      }));
+    }
+
+    await addIngredientsToShopping(scaledIngredients);
   };
 
   const handleServingConfirm = async (scaledIngredients: RecipeIngredient[]) => {
-    setShowServingModal(false);
     await addIngredientsToShopping(scaledIngredients);
   };
 
@@ -255,6 +258,46 @@ export default function RecipeDetail({
                 </div>
               </div>
             )}
+
+            {recipe.servings && !isMarkedForCooking && (
+              <div className="mb-4 p-4 bg-blue-50 border border-blue-200 rounded">
+                <label className="block text-sm font-medium text-blue-900 mb-3">
+                  Für wie viele Personen möchtest du kochen?
+                </label>
+                <div className="flex gap-3 items-center">
+                  <input
+                    type="number"
+                    min="0.5"
+                    step="0.5"
+                    value={desiredServings}
+                    onChange={(e) => setDesiredServings(parseFloat(e.target.value) || 1)}
+                    className="flex-1 border border-blue-300 rounded px-3 py-2"
+                  />
+                  <div className="text-sm text-blue-700 font-medium whitespace-nowrap">
+                    Multiplikator: {((desiredServings || 1) / (recipe.servings || 1)).toFixed(2)}x
+                  </div>
+                </div>
+                {desiredServings !== recipe.servings && (
+                  <div className="mt-3 p-2 bg-white rounded border border-blue-100">
+                    <h5 className="font-medium text-sm text-blue-900 mb-2">Angepasste Mengen:</h5>
+                    <div className="space-y-1 max-h-40 overflow-y-auto">
+                      {recipe.ingredients?.map((ing) => {
+                        const scaleFactor = (desiredServings || 1) / (recipe.servings || 1);
+                        const scaledQty = (parseFloat(ing.quantity) * scaleFactor).toFixed(2);
+                        return (
+                          <div key={ing.id} className="text-xs text-blue-700 flex justify-between">
+                            <span>{ing.name}</span>
+                            <span className="font-medium">
+                              {scaledQty} {ing.unit}
+                            </span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
 
           {!isMarkedForCooking && (
@@ -264,9 +307,7 @@ export default function RecipeDetail({
                 disabled={adding || selectedIngredients.size === 0}
                 className="w-full bg-green-600 text-white px-4 py-3 rounded hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed font-medium"
               >
-                {adding
-                  ? 'Wird hinzugefügt...'
-                  : `Kochen - Portionen werden im nächsten Schritt ausgewählt.`}
+                {adding ? 'Wird hinzugefügt...' : 'Kochen - Zutaten zur Einkaufsliste'}
               </button>
             </div>
           )}
@@ -277,15 +318,6 @@ export default function RecipeDetail({
         <div className="fixed bottom-4 left-1/2 transform -translate-x-1/2 bg-green-600 text-white px-6 py-3 rounded-lg shadow-lg z-[60] max-w-md text-center">
           {toast}
         </div>
-      )}
-
-      {showServingModal && recipe.ingredients && (
-        <ServingScaleModal
-          recipeServings={recipe.servings}
-          ingredients={recipe.ingredients.filter((ing) => selectedIngredients.has(ing.id))}
-          onConfirm={handleServingConfirm}
-          onCancel={() => setShowServingModal(false)}
-        />
       )}
     </>
   );

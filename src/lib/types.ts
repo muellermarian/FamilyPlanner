@@ -119,6 +119,7 @@ export interface Contact {
   last_name: string;
   birthdate?: string;
   phone?: string;
+  phone_landline?: string;
   email?: string;
   street?: string;
   house_number?: string;
