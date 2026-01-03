@@ -62,7 +62,7 @@ export default function ContactPersonEditForm({
         country.trim()
       );
     } catch (err) {
-      console.error(err);
+      // Silent fail
     } finally {
       setSubmitting(false);
     }

@@ -63,7 +63,7 @@ export default function ContactPersonForm({ onAdd, onCancel }: ContactPersonForm
       setCity('');
       setCountry('Deutschland');
     } catch (err) {
-      console.error(err);
+      // Silent fail
     } finally {
       setSubmitting(false);
     }

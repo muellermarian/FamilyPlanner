@@ -23,7 +23,7 @@ export default function ShoppingAddForm({ onAdd, onCancel }: ShoppingAddFormProp
       setQuantity('');
       setUnit('Packung');
     } catch (err) {
-      console.error(err);
+      // Silent fail
     } finally {
       setSubmitting(false);
     }

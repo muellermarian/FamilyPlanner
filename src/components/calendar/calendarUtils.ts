@@ -4,15 +4,21 @@ export function createAgendaItems(
   calendarEvents: CalendarEvent[],
   todos: Todo[],
   birthdays: Contact[],
-  viewMode: 'upcoming' | 'all' | 'calendar'
+  viewMode: 'upcoming' | 'all' | 'calendar' | 'week'
 ): AgendaItem[] {
   const items: AgendaItem[] = [];
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
+  // Helper to parse ISO date string to local date
+  const parseDate = (dateStr: string) => {
+    const [year, month, day] = dateStr.split('-').map(Number);
+    return new Date(year, month - 1, day);
+  };
+
   // Add calendar events
   calendarEvents.forEach((event) => {
-    const eventDate = new Date(event.event_date);
+    const eventDate = parseDate(event.event_date);
     if (viewMode === 'calendar' || viewMode === 'all' || eventDate >= today) {
       items.push({
         type: 'event',
@@ -29,7 +35,7 @@ export function createAgendaItems(
   // Add todos with due dates
   todos.forEach((todo) => {
     if (todo.due_at) {
-      const dueDate = new Date(todo.due_at);
+      const dueDate = parseDate(todo.due_at.split('T')[0]);
       if (viewMode === 'calendar' || viewMode === 'all' || dueDate >= today) {
         items.push({
           type: 'todo',
@@ -79,11 +85,22 @@ export function createCalendarDays(
   const dayOffset = firstDay.getDay() === 0 ? 6 : firstDay.getDay() - 1;
   startDate.setDate(startDate.getDate() - dayOffset);
 
+  // Helper to parse ISO date string to local date
+  const parseDate = (dateStr: string) => {
+    const [year, month, day] = dateStr.split('-').map(Number);
+    return new Date(year, month - 1, day);
+  };
+
   const days: CalendarDay[] = [];
   const currentDay = new Date(startDate);
 
   for (let i = 0; i < 42; i++) {
-    const dateStr = currentDay.toISOString().split('T')[0];
+    // Create date string from local date, not UTC!
+    const year = currentDay.getFullYear();
+    const monthNum = currentDay.getMonth() + 1;
+    const monthStr = String(monthNum).padStart(2, '0');
+    const day = String(currentDay.getDate()).padStart(2, '0');
+    const dateStr = `${year}-${monthStr}-${day}`;
     const isCurrentMonth = currentDay.getMonth() === month;
     const dayEvents: AgendaItem[] = [];
 
@@ -94,7 +111,7 @@ export function createCalendarDays(
           type: 'event',
           title: event.title,
           id: event.id,
-          date: new Date(event.event_date),
+          date: parseDate(event.event_date),
           time: event.event_time,
           data: event,
         });
@@ -108,7 +125,7 @@ export function createCalendarDays(
           type: 'todo',
           title: todo.task,
           id: todo.id,
-          date: new Date(todo.due_at),
+          date: parseDate(todo.due_at.split('T')[0]),
           data: todo,
         });
       }
@@ -117,7 +134,11 @@ export function createCalendarDays(
     // Add birthdays
     birthdays.forEach((contact) => {
       if (contact.birthdate) {
-        const bdayDate = new Date(contact.birthdate);
+        const bdayDateStr =
+          typeof contact.birthdate === 'string'
+            ? contact.birthdate.split('T')[0]
+            : contact.birthdate;
+        const bdayDate = parseDate(bdayDateStr);
         if (
           bdayDate.getMonth() === currentDay.getMonth() &&
           bdayDate.getDate() === currentDay.getDate()

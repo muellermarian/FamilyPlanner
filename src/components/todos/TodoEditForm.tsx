@@ -53,7 +53,6 @@ export default function TodoEditForm({
         .order('created_at', { ascending: false });
 
       if (error) {
-        console.error('Error loading comments', error);
         return;
       }
 
@@ -93,8 +92,6 @@ export default function TodoEditForm({
     if (!error) {
       onUpdate?.();
       onClose();
-    } else {
-      console.error('save todo error', error);
     }
   };
 
@@ -121,7 +118,6 @@ export default function TodoEditForm({
       .single();
 
     if (error) {
-      console.error('Error inserting comment', error);
       return;
     }
 

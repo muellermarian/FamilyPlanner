@@ -107,7 +107,7 @@ export default function RecipeAddForm({ onAdd, onCancel }: RecipeAddFormProps) {
       setServings(null);
       setIngredients([{ name: '', quantity: '1', unit: 'Stk', add_to_shopping: true }]);
     } catch (err) {
-      console.error(err);
+      // Silent fail on recipe add
     } finally {
       setSubmitting(false);
     }

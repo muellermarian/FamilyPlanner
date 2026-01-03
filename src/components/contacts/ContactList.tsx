@@ -42,7 +42,6 @@ export default function ContactList({ familyId }: ContactListProps) {
       setContactFamilies(families);
       setAllContacts(contacts);
     } catch (err: any) {
-      console.error(err);
       setError(err.message || 'Fehler beim Laden');
     } finally {
       setLoading(false);
@@ -66,7 +65,6 @@ export default function ContactList({ familyId }: ContactListProps) {
       await fetchData();
       setShowFamilyForm(false);
     } catch (err: any) {
-      console.error(err);
       alert(err.message || JSON.stringify(err));
     }
   };
@@ -104,7 +102,6 @@ export default function ContactList({ familyId }: ContactListProps) {
       setShowPersonForm(false);
       setSelectedFamilyId(null);
     } catch (err: any) {
-      console.error(err);
       alert(err.message || JSON.stringify(err));
     }
   };
@@ -144,7 +141,6 @@ export default function ContactList({ familyId }: ContactListProps) {
       await fetchData();
       setEditContact(null);
     } catch (err: any) {
-      console.error(err);
       alert(err.message || JSON.stringify(err));
     }
   };
@@ -161,7 +157,6 @@ export default function ContactList({ familyId }: ContactListProps) {
       await deleteContactFamily(contactFamilyId);
       await fetchData();
     } catch (err: any) {
-      console.error(err);
       alert(err.message);
     }
   };
@@ -173,7 +168,6 @@ export default function ContactList({ familyId }: ContactListProps) {
       await deleteContact(contactId);
       await fetchData();
     } catch (err: any) {
-      console.error(err);
       alert(err.message);
     }
   };

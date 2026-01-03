@@ -53,7 +53,7 @@ export default function ShoppingList({
       const data = await getPurchaseHistory(familyId);
       setPurchases(data);
     } catch (err) {
-      console.error('Failed to load purchase history', err);
+      // Silent fail for purchase history
     }
   };
 
@@ -92,7 +92,6 @@ export default function ShoppingList({
         setShowAddForm(false);
       }
     } catch (err: any) {
-      console.error(err);
       alert(err.message || JSON.stringify(err));
     }
   };
@@ -107,7 +106,6 @@ export default function ShoppingList({
         return newSet;
       });
     } catch (err: any) {
-      console.error(err);
       alert(err.message);
     }
   };
@@ -146,7 +144,6 @@ export default function ShoppingList({
       await fetchItems();
       await fetchHistory();
     } catch (err: any) {
-      console.error(err);
       alert(err.message || JSON.stringify(err));
     }
   };

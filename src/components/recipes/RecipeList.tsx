@@ -85,7 +85,6 @@ export default function RecipeList({ familyId, currentUserId, currentProfileId }
       await fetchRecipes();
       setShowAddForm(false);
     } catch (err: any) {
-      console.error(err);
       alert(err.message || JSON.stringify(err));
     }
   };
@@ -97,7 +96,6 @@ export default function RecipeList({ familyId, currentUserId, currentProfileId }
       await deleteRecipe(id);
       await fetchRecipes();
     } catch (err: any) {
-      console.error(err);
       alert(err.message);
     }
   };
@@ -130,7 +128,6 @@ export default function RecipeList({ familyId, currentUserId, currentProfileId }
       setEditRecipe(null);
       setSelectedRecipe(null);
     } catch (err: any) {
-      console.error(err);
       alert(err.message || JSON.stringify(err));
     }
   };

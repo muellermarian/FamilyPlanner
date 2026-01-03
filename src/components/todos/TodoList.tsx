@@ -28,6 +28,7 @@ export default function TodoList({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [editTodo, setEditTodo] = useState<Todo | null>(null);
+  const [minimalMode, setMinimalMode] = useState(false);
   const [commentMeta, setCommentMeta] = useState<
     Record<
       string,
@@ -106,7 +107,6 @@ export default function TodoList({
       await fetchTodos();
       setShowAddForm(false);
     } catch (err: any) {
-      console.error(err);
       alert(err.message || JSON.stringify(err));
     }
   };
@@ -118,7 +118,6 @@ export default function TodoList({
       await toggleTodo(todo.id, !todo.isDone, doneById);
       await fetchTodos();
     } catch (err: any) {
-      console.error(err);
       alert(err.message || JSON.stringify(err));
     }
   };
@@ -129,7 +128,6 @@ export default function TodoList({
       await deleteTodo(id);
       await fetchTodos();
     } catch (err: any) {
-      console.error(err);
       alert(err.message);
     }
   };
@@ -145,15 +143,25 @@ export default function TodoList({
     <div className="max-w-md mx-auto mt-10 p-4 border rounded shadow-md">
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-2xl font-bold">Todo Liste</h2>
-        {/* Show a button to reveal the add form when it is hidden */}
-        {!showAddForm && (
+        <div className="flex gap-2">
           <button
-            onClick={() => setShowAddForm(true)}
-            className="bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700 text-lg font-bold"
+            onClick={() => setMinimalMode(!minimalMode)}
+            className={`px-3 py-1 rounded font-medium text-sm ${
+              minimalMode ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+            }`}
+            title={minimalMode ? 'Detailansicht' : 'Minimalansicht'}
           >
-            +
+            {minimalMode ? '☑' : '📋'}
           </button>
-        )}
+          {!showAddForm && (
+            <button
+              onClick={() => setShowAddForm(true)}
+              className="bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700 text-lg font-bold"
+            >
+              +
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Add form: shown when the user clicks + */}
@@ -167,31 +175,71 @@ export default function TodoList({
         />
       )}
 
-      {/* Filter control (open/all/done) */}
-      <TodoFilter filter={filter} setFilter={setFilter} />
+      {/* Minimal Mode */}
+      {minimalMode ? (
+        <>
+          <div className="mb-4 text-sm text-gray-600">
+            {loading ? '🔄 Lade Todos…' : `${filteredTodos.filter((t) => !t.isDone).length} offen`}
+          </div>
+          <div className="space-y-2">
+            {filteredTodos.map((todo) => (
+              <div
+                key={todo.id}
+                className="flex items-center gap-3 p-2 bg-gray-50 rounded hover:bg-gray-100"
+              >
+                <input
+                  type="checkbox"
+                  checked={todo.isDone}
+                  onChange={() => handleToggle(todo)}
+                  className="w-5 h-5 cursor-pointer"
+                />
+                <span
+                  className={`flex-1 text-sm ${
+                    todo.isDone ? 'text-gray-400 line-through' : 'text-gray-900'
+                  }`}
+                >
+                  {todo.task}
+                </span>
+                <button
+                  onClick={() => setEditTodo(todo)}
+                  className="text-blue-600 hover:text-blue-800 px-2 py-1 text-sm font-medium"
+                >
+                  ✏️
+                </button>
+              </div>
+            ))}
+          </div>
+        </>
+      ) : (
+        <>
+          {/* Filter control (open/all/done) */}
+          <TodoFilter filter={filter} setFilter={setFilter} />
 
-      {/* List of todos matching the selected filter */}
-      <div className="mb-2 text-sm text-gray-600">
-        {loading ? '🔄 Lade Todos…' : `${todos.length} Todos geladen`}
-      </div>
-      {error && <div className="mb-2 text-red-600">Fehler: {error}</div>}
-      <ul className="flex flex-col gap-3">
-        {filteredTodos.map((todo) => (
-          <TodoItem
-            key={todo.id}
-            todo={todo}
-            onToggle={handleToggle}
-            onDelete={handleDelete}
-            users={users}
-            onEdit={() => setEditTodo(todo)}
-            currentUserId={currentUserId}
-            currentProfileId={currentProfileId}
-            onRefresh={fetchTodos}
-            commentCount={commentMeta[todo.id]?.count ?? 0}
-            comments={commentMeta[todo.id]?.comments ?? []}
-          />
-        ))}
-      </ul>
+          {/* List of todos matching the selected filter */}
+          <div className="mb-2 text-sm text-gray-600">
+            {loading ? '🔄 Lade Todos…' : `${todos.length} Todos geladen`}
+          </div>
+          {error && <div className="mb-2 text-red-600">Fehler: {error}</div>}
+          <ul className="flex flex-col gap-3">
+            {filteredTodos.map((todo) => (
+              <TodoItem
+                key={todo.id}
+                todo={todo}
+                onToggle={handleToggle}
+                onDelete={handleDelete}
+                users={users}
+                onEdit={() => setEditTodo(todo)}
+                currentUserId={currentUserId}
+                currentProfileId={currentProfileId}
+                onRefresh={fetchTodos}
+                commentCount={commentMeta[todo.id]?.count ?? 0}
+                comments={commentMeta[todo.id]?.comments ?? []}
+              />
+            ))}
+          </ul>
+        </>
+      )}
+
       {editTodo && (
         <TodoEditForm
           todo={editTodo}

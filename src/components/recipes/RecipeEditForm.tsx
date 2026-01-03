@@ -124,7 +124,7 @@ export default function RecipeEditForm({
         validIngredients
       );
     } catch (err) {
-      console.error(err);
+      // Silent fail on recipe update
     } finally {
       setSubmitting(false);
     }
@@ -136,7 +136,6 @@ export default function RecipeEditForm({
       await deleteRecipe(recipe.id);
       onDelete();
     } catch (err: any) {
-      console.error(err);
       alert(err.message || JSON.stringify(err));
     } finally {
       setSubmitting(false);

@@ -81,13 +81,11 @@ export default function Dashboard({
         } catch (notesErr) {
           if (!mounted) return;
           setNoteCount(null);
-          console.error('Failed to load notes count', notesErr);
         }
       } catch (err) {
         if (!mounted) return;
         setOpenCount(null);
         setNoteCount(null);
-        console.error('Failed to load open todos', err);
       } finally {
         if (mounted) setLoading(false);
       }
@@ -105,7 +103,7 @@ export default function Dashboard({
           .maybeSingle();
         setFamilyName((data as any)?.name ?? null);
       } catch (err) {
-        console.warn('Failed to load family name', err);
+        // Silent fail on family name
       }
     })();
 

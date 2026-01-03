@@ -42,7 +42,7 @@ export default function ContactFamilyForm({ onAdd, onCancel }: ContactFamilyForm
       setCity('');
       setCountry('');
     } catch (err) {
-      console.error(err);
+      // Silent fail on family form submit
     } finally {
       setSubmitting(false);
     }

@@ -84,10 +84,6 @@ export default function RecipeDetail({
     await addIngredientsToShopping(scaledIngredients);
   };
 
-  const handleServingConfirm = async (scaledIngredients: RecipeIngredient[]) => {
-    await addIngredientsToShopping(scaledIngredients);
-  };
-
   const addIngredientsToShopping = async (ingredientsToAdd: RecipeIngredient[]) => {
     setAdding(true);
     try {
@@ -141,7 +137,6 @@ export default function RecipeDetail({
         onUpdate();
       }, 3000);
     } catch (err: any) {
-      console.error(err);
       alert(err.message || JSON.stringify(err));
     } finally {
       setAdding(false);
@@ -158,7 +153,6 @@ export default function RecipeDetail({
         onClose();
       }, 2000);
     } catch (err: any) {
-      console.error(err);
       alert(err.message || JSON.stringify(err));
     }
   };

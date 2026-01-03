@@ -1,4 +1,4 @@
-import type { CalendarEvent, CalendarDay } from '../../lib/types';
+import type { CalendarDay } from '../../lib/types';
 
 interface CalendarGridProps {
   days: CalendarDay[];
@@ -6,8 +6,7 @@ interface CalendarGridProps {
   onPreviousMonth: () => void;
   onNextMonth: () => void;
   onAddEvent: (date: Date) => void;
-  onEditEvent: (event: CalendarEvent) => void;
-  onSelectItem: (item: any) => void;
+  onSelectDay: (date: Date) => void;
 }
 
 export default function CalendarGrid({
@@ -16,8 +15,7 @@ export default function CalendarGrid({
   onPreviousMonth,
   onNextMonth,
   onAddEvent,
-  onEditEvent,
-  onSelectItem,
+  onSelectDay,
 }: CalendarGridProps) {
   return (
     <div>
@@ -53,7 +51,8 @@ export default function CalendarGrid({
           return (
             <div
               key={idx}
-              className={`min-h-[80px] border rounded p-1 ${
+              onClick={() => onSelectDay(day.date)}
+              className={`min-h-[80px] border rounded p-1 cursor-pointer hover:bg-blue-50 ${
                 day.isCurrentMonth ? 'bg-white' : 'bg-gray-50'
               } ${isToday ? 'ring-2 ring-blue-500' : ''}`}
             >
@@ -71,7 +70,15 @@ export default function CalendarGrid({
                 </span>
                 {day.isCurrentMonth && (
                   <button
-                    onClick={() => onAddEvent(day.date)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      const normalizedDate = new Date(
+                        day.date.getFullYear(),
+                        day.date.getMonth(),
+                        day.date.getDate()
+                      );
+                      onAddEvent(normalizedDate);
+                    }}
                     className="text-blue-600 hover:text-blue-800 text-xs font-bold"
                   >
                     +
@@ -80,23 +87,16 @@ export default function CalendarGrid({
               </div>
 
               <div className="space-y-0.5">
-                {day.events.map((event) => (
+                {day.events.slice(0, 2).map((event) => (
                   <div
                     key={`${event.type}-${event.id}`}
-                    className={`text-[10px] p-0.5 rounded cursor-pointer ${
+                    className={`text-[10px] p-0.5 rounded ${
                       event.type === 'event'
-                        ? 'bg-blue-100 hover:bg-blue-200 text-blue-900'
+                        ? 'bg-blue-100 text-blue-900'
                         : event.type === 'todo'
-                        ? 'bg-green-100 hover:bg-green-200 text-green-900'
-                        : 'bg-pink-100 hover:bg-pink-200 text-pink-900'
+                        ? 'bg-green-100 text-green-900'
+                        : 'bg-pink-100 text-pink-900'
                     }`}
-                    onClick={() => {
-                      if (event.type === 'event') {
-                        onEditEvent(event.data as CalendarEvent);
-                      } else {
-                        onSelectItem(event);
-                      }
-                    }}
                   >
                     <div className="truncate">
                       {event.type === 'birthday' ? '🎂' : event.type === 'todo' ? '✅' : '📅'}{' '}
@@ -107,6 +107,17 @@ export default function CalendarGrid({
                     )}
                   </div>
                 ))}
+                {day.events.length > 2 && (
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onSelectDay(day.date);
+                    }}
+                    className="w-full text-[10px] p-0.5 rounded bg-gray-300 text-gray-800 hover:bg-gray-400 font-semibold text-center"
+                  >
+                    +{day.events.length - 2} mehr
+                  </button>
+                )}
               </div>
             </div>
           );

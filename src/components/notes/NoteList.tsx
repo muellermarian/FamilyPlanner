@@ -31,7 +31,6 @@ export default function NoteList({ familyId, currentProfileId, users }: NoteList
       const data = await getNotesForFamily(familyId);
       setNotes(data ?? []);
     } catch (err: any) {
-      console.error(err);
       setError(err?.message || String(err));
       setNotes([]);
     } finally {
@@ -52,7 +51,6 @@ export default function NoteList({ familyId, currentProfileId, users }: NoteList
       setShowAdd(false);
       await fetchNotes();
     } catch (err: any) {
-      console.error(err);
       alert(err?.message || String(err));
     }
   };
@@ -63,7 +61,6 @@ export default function NoteList({ familyId, currentProfileId, users }: NoteList
       await deleteNote(id);
       await fetchNotes();
     } catch (err: any) {
-      console.error(err);
       alert(err?.message || String(err));
     }
   };
@@ -73,7 +70,6 @@ export default function NoteList({ familyId, currentProfileId, users }: NoteList
       await updateNote(note.id, note.title, note.content);
       await fetchNotes();
     } catch (err: any) {
-      console.error(err);
       alert(err?.message || String(err));
     }
   };

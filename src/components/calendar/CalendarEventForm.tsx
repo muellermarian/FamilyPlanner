@@ -32,9 +32,15 @@ export default function CalendarEventForm({
       setEventDate(event.event_date);
       setEventTime(event.event_time || '');
     } else if (initialDate) {
-      const year = initialDate.getFullYear();
-      const month = String(initialDate.getMonth() + 1).padStart(2, '0');
-      const day = String(initialDate.getDate()).padStart(2, '0');
+      // Normalize the date to local timezone (midnight)
+      const normalizedDate = new Date(
+        initialDate.getFullYear(),
+        initialDate.getMonth(),
+        initialDate.getDate()
+      );
+      const year = normalizedDate.getFullYear();
+      const month = String(normalizedDate.getMonth() + 1).padStart(2, '0');
+      const day = String(normalizedDate.getDate()).padStart(2, '0');
       setEventDate(`${year}-${month}-${day}`);
     }
   }, [event, initialDate]);
@@ -51,7 +57,6 @@ export default function CalendarEventForm({
       }
       onSubmit();
     } catch (err: any) {
-      console.error(err);
       alert(err.message || JSON.stringify(err));
     }
   };
@@ -64,7 +69,6 @@ export default function CalendarEventForm({
       await deleteCalendarEvent(event.id);
       onSubmit();
     } catch (err: any) {
-      console.error(err);
       alert(err.message || JSON.stringify(err));
     }
   };
