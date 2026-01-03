@@ -10,8 +10,8 @@ export default defineConfig({
     VitePWA({
       registerType: 'autoUpdate',
       manifest: {
-        name: 'Family Todo',
-        short_name: 'Todos',
+        name: 'Family App',
+        short_name: 'Family',
         start_url: '/',
         display: 'standalone',
         background_color: '#ffffff',
