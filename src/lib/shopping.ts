@@ -134,3 +134,60 @@ export async function getPurchaseHistory(familyId: string): Promise<ShoppingPurc
 
   return result;
 }
+
+/**
+ * Get all unique items ever purchased (for quick-add feature)
+ */
+export async function getUniquePurchasedItems(familyId: string): Promise<
+  Array<{
+    name: string;
+    quantity: string;
+    unit: string;
+  }>
+> {
+  // Get all purchases for the family
+  const { data: purchases, error: purchasesError } = await supabase
+    .from('shopping_purchases')
+    .select('id')
+    .eq('family_id', familyId);
+
+  if (purchasesError) throw purchasesError;
+  if (!purchases || purchases.length === 0) return [];
+
+  const purchaseIds = purchases.map((p: any) => p.id);
+
+  // Get all purchase items
+  const { data: items, error: itemsError } = await supabase
+    .from('shopping_purchase_items')
+    .select('name, quantity, unit')
+    .in('purchase_id', purchaseIds);
+
+  if (itemsError) throw itemsError;
+  if (!items) return [];
+
+  // Create unique combinations of name/quantity/unit
+  const uniqueMap = new Map<string, { name: string; quantity: string; unit: string }>();
+
+  for (const item of items) {
+    const key = `${item.name.toLowerCase()}|${item.quantity}|${item.unit}`;
+    if (!uniqueMap.has(key)) {
+      uniqueMap.set(key, {
+        name: item.name,
+        quantity: item.quantity,
+        unit: item.unit,
+      });
+    }
+  }
+
+  // Return sorted by name
+  return Array.from(uniqueMap.values()).sort((a, b) => a.name.localeCompare(b.name));
+}
+
+/**
+ * Delete multiple shopping items
+ */
+export async function deleteShoppingItems(ids: string[]): Promise<void> {
+  const { error } = await supabase.from('shopping_items').delete().in('id', ids);
+
+  if (error) throw error;
+}

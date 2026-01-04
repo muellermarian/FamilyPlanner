@@ -4,6 +4,7 @@ import {
   getShoppingItems,
   addShoppingItem,
   deleteShoppingItem,
+  deleteShoppingItems,
   createPurchase,
   getPurchaseHistory,
   updateShoppingItemQuantity,
@@ -11,6 +12,7 @@ import {
 import ShoppingItemComponent from './ShoppingItem';
 import ShoppingAddForm from './ShoppingAddForm';
 import ShoppingHistory from './ShoppingHistory';
+import ShoppingQuickAdd from './ShoppingQuickAdd';
 
 interface ShoppingListProps {
   familyId: string;
@@ -29,6 +31,7 @@ export default function ShoppingList({
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [showAddForm, setShowAddForm] = useState(false);
   const [showHistory, setShowHistory] = useState(false);
+  const [showQuickAdd, setShowQuickAdd] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [purchases, setPurchases] = useState<ShoppingPurchase[]>([]);
@@ -148,6 +151,29 @@ export default function ShoppingList({
     }
   };
 
+  const handleDeleteSelected = async () => {
+    if (selectedIds.size === 0) {
+      alert('Bitte wähle mindestens einen Artikel aus');
+      return;
+    }
+
+    const confirmed = confirm(
+      `Möchtest du wirklich ${selectedIds.size} markierte${
+        selectedIds.size === 1 ? 'n' : ''
+      } Artikel löschen?`
+    );
+
+    if (!confirmed) return;
+
+    try {
+      await deleteShoppingItems(Array.from(selectedIds));
+      setSelectedIds(new Set());
+      await fetchItems();
+    } catch (err: any) {
+      alert('Fehler beim Löschen: ' + (err.message || String(err)));
+    }
+  };
+
   const allSelected = items.length > 0 && selectedIds.size === items.length;
 
   return (
@@ -155,6 +181,13 @@ export default function ShoppingList({
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-2xl font-bold">Einkaufsliste</h2>
         <div className="flex gap-2">
+          <button
+            onClick={() => setShowQuickAdd(true)}
+            className="bg-purple-600 text-white px-3 py-1 rounded hover:bg-purple-700"
+            title="Schnellanlage"
+          >
+            ⚡
+          </button>
           <button
             onClick={() => setShowHistory(true)}
             className="bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700"
@@ -175,20 +208,30 @@ export default function ShoppingList({
 
       {showAddForm && <ShoppingAddForm onAdd={handleAdd} onCancel={() => setShowAddForm(false)} />}
 
-      <div className="mb-4 flex gap-2">
-        <button
-          onClick={handleToggleAll}
-          className="px-3 py-2 border rounded hover:bg-gray-100 text-sm"
-        >
-          {allSelected ? 'Alle abwählen' : 'Alle auswählen'}
-        </button>
-        <button
-          onClick={handlePurchase}
-          disabled={selectedIds.size === 0}
-          className="flex-1 bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          Markierte eingekauft ({selectedIds.size})
-        </button>
+      <div className="mb-4 flex flex-col gap-2">
+        <div className="flex gap-2">
+          <button
+            onClick={handleToggleAll}
+            className="px-3 py-2 border rounded hover:bg-gray-100 text-sm"
+          >
+            {allSelected ? 'Alle abwählen' : 'Alle auswählen'}
+          </button>
+          <button
+            onClick={handlePurchase}
+            disabled={selectedIds.size === 0}
+            className="flex-1 bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            Markierte eingekauft ({selectedIds.size})
+          </button>
+        </div>
+        {selectedIds.size > 0 && (
+          <button
+            onClick={handleDeleteSelected}
+            className="w-full bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700"
+          >
+            Markierte löschen ({selectedIds.size})
+          </button>
+        )}
       </div>
 
       <div className="mb-2 text-sm text-gray-600">
@@ -221,6 +264,16 @@ export default function ShoppingList({
           purchases={purchases}
           users={users}
           onClose={() => setShowHistory(false)}
+        />
+      )}
+
+      {showQuickAdd && (
+        <ShoppingQuickAdd
+          familyId={familyId}
+          currentProfileId={currentProfileId || currentUserId}
+          currentItems={items}
+          onClose={() => setShowQuickAdd(false)}
+          onItemsAdded={fetchItems}
         />
       )}
 
