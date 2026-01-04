@@ -101,6 +101,8 @@ export default function RecipeEditForm({
     setImageFile(null);
     setImageUrl('');
     setImagePreview(null);
+    // Force the image to be removed by setting a flag
+    // The recipe.image_url will be cleared in the condition below
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -175,17 +177,17 @@ export default function RecipeEditForm({
             <div className="mb-4">
               <label className="block text-sm font-medium mb-1">Rezeptbild</label>
 
-              {(imagePreview || recipe.image_url) && (
+              {(imagePreview || (imageUrl && recipe.image_url)) && (
                 <div className="mb-3 relative">
                   <img
-                    src={imagePreview || recipe.image_url || ''}
+                    src={imagePreview || imageUrl || recipe.image_url || ''}
                     alt="Vorschau"
                     className="w-full h-48 object-cover rounded"
                   />
                   <button
                     type="button"
                     onClick={clearImage}
-                    className="absolute top-2 right-2 bg-red-600 text-white px-2 py-1 rounded text-sm"
+                    className="absolute top-2 right-2 bg-red-600 text-white px-2 py-1 rounded text-sm hover:bg-red-700"
                   >
                     Entfernen
                   </button>

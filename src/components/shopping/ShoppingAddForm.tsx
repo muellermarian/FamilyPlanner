@@ -99,7 +99,7 @@ export default function ShoppingAddForm({ onAdd, onCancel }: ShoppingAddFormProp
         </div>
         <div>
           <label className="block text-sm font-medium mb-1">
-            Angebotsdatum <span className="text-gray-400">(optional)</span>
+            Datum <span className="text-gray-400">(optional)</span>
           </label>
           <input
             type="date"
