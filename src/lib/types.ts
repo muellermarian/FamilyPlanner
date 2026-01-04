@@ -48,6 +48,8 @@ export interface ShoppingItem {
   unit: string;
   created_by_id: string;
   created_at?: string;
+  store?: string | null;
+  deal_date?: string | null;
 }
 
 export interface ShoppingPurchase {
@@ -141,13 +143,13 @@ export interface CalendarEvent {
 }
 
 export interface AgendaItem {
-  type: 'event' | 'todo' | 'birthday';
+  type: 'event' | 'todo' | 'birthday' | 'shopping';
   title: string;
   id: string;
   date: Date;
   time?: string;
   description?: string;
-  data: CalendarEvent | Todo | Contact;
+  data: CalendarEvent | Todo | Contact | ShoppingItem;
 }
 
 export interface CalendarDay {

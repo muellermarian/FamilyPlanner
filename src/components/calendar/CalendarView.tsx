@@ -4,8 +4,9 @@ import {
   getCalendarEvents,
   getTodosForCalendar,
   getBirthdaysForCalendar,
+  getShoppingItemsForCalendar,
 } from '../../lib/calendar';
-import type { CalendarEvent, Todo, Contact, AgendaItem } from '../../lib/types';
+import type { CalendarEvent, Todo, Contact, ShoppingItem, AgendaItem } from '../../lib/types';
 import CalendarEventForm from './CalendarEventForm.js';
 import CalendarGrid from './CalendarGrid';
 import AgendaView from './AgendaView';
@@ -18,6 +19,7 @@ export default function CalendarView() {
   const [calendarEvents, setCalendarEvents] = useState<CalendarEvent[]>([]);
   const [todos, setTodos] = useState<Todo[]>([]);
   const [birthdays, setBirthdays] = useState<Contact[]>([]);
+  const [shoppingItems, setShoppingItems] = useState<ShoppingItem[]>([]);
   const [showEventForm, setShowEventForm] = useState(false);
   const [editEvent, setEditEvent] = useState<CalendarEvent | null>(null);
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
@@ -44,14 +46,16 @@ export default function CalendarView() {
 
   const fetchData = async () => {
     try {
-      const [events, todosData, birthdaysData] = await Promise.all([
+      const [events, todosData, birthdaysData, shoppingData] = await Promise.all([
         getCalendarEvents(familyId),
         getTodosForCalendar(familyId),
         getBirthdaysForCalendar(familyId),
+        getShoppingItemsForCalendar(familyId),
       ]);
       setCalendarEvents(events);
       setTodos(todosData);
       setBirthdays(birthdaysData);
+      setShoppingItems(shoppingData);
     } catch (err) {
       // Silent fail on calendar data fetch
     }
@@ -85,8 +89,14 @@ export default function CalendarView() {
     setSelectedDay(null);
   }, [viewMode]);
 
-  const agendaItems = createAgendaItems(calendarEvents, todos, birthdays, viewMode);
-  const calendarDays = createCalendarDays(currentMonth, calendarEvents, todos, birthdays);
+  const agendaItems = createAgendaItems(calendarEvents, todos, birthdays, shoppingItems, viewMode);
+  const calendarDays = createCalendarDays(
+    currentMonth,
+    calendarEvents,
+    todos,
+    birthdays,
+    shoppingItems
+  );
 
   // Build all agenda items for a specific day (events, todos, birthdays)
   const buildDayAgenda = (date: Date): AgendaItem[] => {
@@ -140,6 +150,20 @@ export default function CalendarView() {
             data: contact,
           });
         }
+      }
+    });
+
+    shoppingItems.forEach((item) => {
+      if (item.deal_date === dateStr) {
+        const title = item.store ? `🛒 ${item.name} (${item.store})` : `🛒 ${item.name}`;
+        dayItems.push({
+          type: 'shopping',
+          title,
+          id: item.id,
+          date: normalizedDate,
+          description: `${item.quantity} ${item.unit}`,
+          data: item,
+        });
       }
     });
 
@@ -345,11 +369,14 @@ export default function CalendarView() {
                           event: 'bg-blue-100 border-blue-300 text-blue-900',
                           todo: 'bg-green-100 border-green-300 text-green-900',
                           birthday: 'bg-pink-100 border-pink-300 text-pink-900',
+                          shopping: 'bg-orange-100 border-orange-300 text-orange-900',
                         }[item.type]
                       }`}
                     >
                       {item.type === 'birthday'
                         ? '🎂'
+                        : item.type === 'shopping'
+                        ? '🛒'
                         : item.type === 'todo'
                         ? (item.data as any)?.isDone
                           ? '✅'

@@ -1,5 +1,5 @@
 import { supabase } from './supabaseClient';
-import type { CalendarEvent, Todo, Contact } from './types';
+import type { CalendarEvent, Todo, Contact, ShoppingItem } from './types';
 
 export async function getCalendarEvents(familyId: string): Promise<CalendarEvent[]> {
   const { data, error } = await supabase
@@ -38,6 +38,18 @@ export async function getBirthdaysForCalendar(familyId: string): Promise<Contact
     .eq('family_id', familyId)
     .not('birthdate', 'is', null)
     .order('birthdate', { ascending: true });
+
+  if (error) throw error;
+  return data || [];
+}
+
+export async function getShoppingItemsForCalendar(familyId: string): Promise<ShoppingItem[]> {
+  const { data, error } = await supabase
+    .from('shopping_items')
+    .select('*')
+    .eq('family_id', familyId)
+    .not('deal_date', 'is', null)
+    .order('deal_date', { ascending: true });
 
   if (error) throw error;
   return data || [];

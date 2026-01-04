@@ -23,7 +23,9 @@ export async function addShoppingItem(
   name: string,
   quantity: string,
   unit: string,
-  createdById: string
+  createdById: string,
+  store?: string | null,
+  dealDate?: string | null
 ): Promise<void> {
   const { error } = await supabase.from('shopping_items').insert({
     family_id: familyId,
@@ -31,6 +33,8 @@ export async function addShoppingItem(
     quantity,
     unit,
     created_by_id: createdById,
+    store: store || null,
+    deal_date: dealDate || null,
   });
 
   if (error) throw error;

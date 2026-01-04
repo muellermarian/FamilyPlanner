@@ -43,6 +43,21 @@ export default function ShoppingItemComponent({
           <div className="text-sm text-gray-500">
             {item.quantity} {item.unit}
           </div>
+          {(item.store || item.deal_date) && (
+            <div className="text-sm text-blue-600 mt-1 flex items-center gap-2">
+              {item.store && <span>🏪 {item.store}</span>}
+              {item.deal_date && (
+                <span>
+                  📅{' '}
+                  {new Date(item.deal_date).toLocaleDateString('de-DE', {
+                    day: '2-digit',
+                    month: '2-digit',
+                    year: 'numeric',
+                  })}
+                </span>
+              )}
+            </div>
+          )}
         </div>
         <button
           onClick={handleDeleteClick}

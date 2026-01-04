@@ -40,7 +40,20 @@ export default function ShoppingQuickAdd({
     setLoading(true);
     try {
       const data = await getUniquePurchasedItems(familyId);
-      setItems(data.map((item) => ({ ...item, isSelected: false })));
+
+      // Filter out items that are currently on the shopping list with a deal_date
+      const filteredData = data.filter((item) => {
+        const hasDeals = currentItems.some(
+          (current) =>
+            current.name.toLowerCase() === item.name.toLowerCase() &&
+            current.quantity === item.quantity &&
+            current.unit === item.unit &&
+            current.deal_date
+        );
+        return !hasDeals;
+      });
+
+      setItems(filteredData.map((item) => ({ ...item, isSelected: false })));
     } catch (err) {
       console.error('Fehler beim Laden der Artikel:', err);
     } finally {
@@ -181,7 +194,7 @@ export default function ShoppingQuickAdd({
 
           {!loading && filteredItems.length > 0 && (
             <div className="space-y-1">
-              {filteredItems.map((item, index) => {
+              {filteredItems.map((item) => {
                 const originalIndex = items.indexOf(item);
                 return (
                   <label

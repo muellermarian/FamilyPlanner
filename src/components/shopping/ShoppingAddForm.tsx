@@ -1,8 +1,14 @@
 import { useState } from 'react';
-import { QUANTITY_UNITS } from '../../lib/constants';
+import { QUANTITY_UNITS, STORES } from '../../lib/constants';
 
 interface ShoppingAddFormProps {
-  onAdd: (name: string, quantity: string, unit: string) => Promise<void>;
+  onAdd: (
+    name: string,
+    quantity: string,
+    unit: string,
+    store?: string | null,
+    dealDate?: string | null
+  ) => Promise<void>;
   onCancel: () => void;
 }
 
@@ -10,6 +16,8 @@ export default function ShoppingAddForm({ onAdd, onCancel }: ShoppingAddFormProp
   const [name, setName] = useState('');
   const [quantity, setQuantity] = useState('');
   const [unit, setUnit] = useState('Packung');
+  const [store, setStore] = useState('');
+  const [dealDate, setDealDate] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -18,10 +26,12 @@ export default function ShoppingAddForm({ onAdd, onCancel }: ShoppingAddFormProp
 
     setSubmitting(true);
     try {
-      await onAdd(name.trim(), quantity.trim() || '1', unit);
+      await onAdd(name.trim(), quantity.trim() || '1', unit, store || null, dealDate || null);
       setName('');
       setQuantity('');
       setUnit('Packung');
+      setStore('');
+      setDealDate('');
     } catch (err) {
       // Silent fail
     } finally {
@@ -67,6 +77,36 @@ export default function ShoppingAddForm({ onAdd, onCancel }: ShoppingAddFormProp
               </option>
             ))}
           </select>
+        </div>
+      </div>
+      <div className="grid grid-cols-2 gap-3 mb-3">
+        <div>
+          <label className="block text-sm font-medium mb-1">
+            Geschäft <span className="text-gray-400">(optional)</span>
+          </label>
+          <select
+            value={store}
+            onChange={(e) => setStore(e.target.value)}
+            className="w-full border rounded px-3 py-2"
+          >
+            <option value="">-</option>
+            {STORES.map((s) => (
+              <option key={s} value={s}>
+                {s}
+              </option>
+            ))}
+          </select>
+        </div>
+        <div>
+          <label className="block text-sm font-medium mb-1">
+            Angebotsdatum <span className="text-gray-400">(optional)</span>
+          </label>
+          <input
+            type="date"
+            value={dealDate}
+            onChange={(e) => setDealDate(e.target.value)}
+            className="w-full border rounded px-3 py-2"
+          />
         </div>
       </div>
       <div className="flex gap-2">

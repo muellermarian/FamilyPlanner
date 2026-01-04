@@ -1,9 +1,17 @@
-import type { CalendarEvent, Todo, Contact, AgendaItem, CalendarDay } from '../../lib/types';
+import type {
+  CalendarEvent,
+  Todo,
+  Contact,
+  ShoppingItem,
+  AgendaItem,
+  CalendarDay,
+} from '../../lib/types';
 
 export function createAgendaItems(
   calendarEvents: CalendarEvent[],
   todos: Todo[],
   birthdays: Contact[],
+  shoppingItems: ShoppingItem[],
   viewMode: 'upcoming' | 'all' | 'calendar' | 'week'
 ): AgendaItem[] {
   const items: AgendaItem[] = [];
@@ -49,6 +57,24 @@ export function createAgendaItems(
     }
   });
 
+  // Add shopping items with deal dates
+  shoppingItems.forEach((item) => {
+    if (item.deal_date) {
+      const dealDate = parseDate(item.deal_date);
+      if (viewMode === 'calendar' || viewMode === 'all' || dealDate >= today) {
+        const title = item.store ? `🛒 ${item.name} (${item.store})` : `🛒 ${item.name}`;
+        items.push({
+          type: 'shopping',
+          title,
+          id: item.id,
+          date: dealDate,
+          description: `${item.quantity} ${item.unit}`,
+          data: item,
+        });
+      }
+    }
+  });
+
   // Add birthdays for current year
   const currentYear = new Date().getFullYear();
   birthdays.forEach((contact) => {
@@ -75,7 +101,8 @@ export function createCalendarDays(
   currentMonth: Date,
   calendarEvents: CalendarEvent[],
   todos: Todo[],
-  birthdays: Contact[]
+  birthdays: Contact[],
+  shoppingItems: ShoppingItem[]
 ): CalendarDay[] {
   const year = currentMonth.getFullYear();
   const month = currentMonth.getMonth();
@@ -153,6 +180,21 @@ export function createCalendarDays(
             data: contact,
           });
         }
+      }
+    });
+
+    // Add shopping items with deal dates
+    shoppingItems.forEach((item) => {
+      if (item.deal_date === dateStr) {
+        const title = item.store ? `🛒 ${item.name} (${item.store})` : `🛒 ${item.name}`;
+        dayEvents.push({
+          type: 'shopping',
+          title,
+          id: item.id,
+          date: parseDate(item.deal_date),
+          description: `${item.quantity} ${item.unit}`,
+          data: item,
+        });
       }
     });
 

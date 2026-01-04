@@ -65,7 +65,13 @@ export default function ShoppingList({
     fetchHistory();
   }, [familyId]);
 
-  const handleAdd = async (name: string, quantity: string, unit: string) => {
+  const handleAdd = async (
+    name: string,
+    quantity: string,
+    unit: string,
+    store?: string | null,
+    dealDate?: string | null
+  ) => {
     try {
       // Check if item with same name and unit already exists
       const existingItem = items.find(
@@ -90,7 +96,15 @@ export default function ShoppingList({
         setTimeout(() => setToast(null), 4000);
       } else {
         // Add new item
-        await addShoppingItem(familyId, name, quantity, unit, currentProfileId || currentUserId);
+        await addShoppingItem(
+          familyId,
+          name,
+          quantity,
+          unit,
+          currentProfileId || currentUserId,
+          store,
+          dealDate
+        );
         await fetchItems();
         setShowAddForm(false);
       }
@@ -241,7 +255,36 @@ export default function ShoppingList({
 
       <ul className="flex flex-col gap-2">
         {items
-          .sort((a, b) => a.name.localeCompare(b.name))
+          .sort((a, b) => {
+            // Items with deal_date and/or store come first
+            const aHasDeal = a.deal_date || a.store;
+            const bHasDeal = b.deal_date || b.store;
+
+            if (aHasDeal && !bHasDeal) return -1;
+            if (!aHasDeal && bHasDeal) return 1;
+
+            // Both have deals: sort by date, then by store
+            if (aHasDeal && bHasDeal) {
+              // Sort by date first
+              if (a.deal_date && b.deal_date) {
+                const dateCompare = a.deal_date.localeCompare(b.deal_date);
+                if (dateCompare !== 0) return dateCompare;
+              } else if (a.deal_date && !b.deal_date) {
+                return -1;
+              } else if (!a.deal_date && b.deal_date) {
+                return 1;
+              }
+
+              // Then by store
+              if (a.store && b.store) {
+                const storeCompare = a.store.localeCompare(b.store);
+                if (storeCompare !== 0) return storeCompare;
+              }
+            }
+
+            // Finally, sort alphabetically by name
+            return a.name.localeCompare(b.name);
+          })
           .map((item) => (
             <ShoppingItemComponent
               key={item.id}
