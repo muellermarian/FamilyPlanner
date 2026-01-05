@@ -15,6 +15,7 @@ export const QUANTITY_UNITS = [
   'Prise',
   'Dose',
   'Glas',
+  'Portion',
 ] as const;
 
 export type QuantityUnit = (typeof QUANTITY_UNITS)[number];
