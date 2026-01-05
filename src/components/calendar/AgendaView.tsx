@@ -56,8 +56,6 @@ export default function AgendaView({ items, onEditEvent, onSelectItem }: AgendaV
 
             <div className="space-y-2">
               {dayItems.map((item) => {
-                const isTodo = item.type === 'todo';
-                const isTodoDone = isTodo && (item.data as Todo)?.isDone;
                 const icon = getEventIcon(item.type, item.data);
 
                 // Map color classes to border classes

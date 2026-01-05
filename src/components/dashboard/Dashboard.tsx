@@ -14,6 +14,7 @@ import { useEffect, useState } from 'react';
 import { supabase } from '../../lib/supabaseClient';
 import { getTodosForFamily } from '../../lib/todos';
 import { getNotesForFamily } from '../../lib/notes';
+import PushNotificationToggle from '../shared/PushNotificationToggle';
 
 /**
  * Props for the Dashboard component.
@@ -214,6 +215,11 @@ export default function Dashboard({
             <div className="text-sm text-gray-500">{t.subtitle}</div>
           </button>
         ))}
+      </div>
+
+      {/* Push Notification Toggle */}
+      <div className="mt-6">
+        <PushNotificationToggle userId={currentProfileId} familyId={familyId} />
       </div>
     </div>
   );
