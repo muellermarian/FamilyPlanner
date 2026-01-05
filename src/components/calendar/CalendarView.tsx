@@ -11,7 +11,13 @@ import CalendarEventForm from './CalendarEventForm.js';
 import CalendarGrid from './CalendarGrid';
 import AgendaView from './AgendaView';
 import EventDetailModal from './EventDetailModal';
-import { createAgendaItems, createCalendarDays } from './calendarUtils';
+import {
+  createAgendaItems,
+  createCalendarDays,
+  getEventIcon,
+  getEventBorderClasses,
+  getEventColorClasses,
+} from './calendarUtils';
 export default function CalendarView() {
   const { familyId: userFamilyId } = useAuth();
   const familyId = userFamilyId || '';
@@ -155,7 +161,7 @@ export default function CalendarView() {
 
     shoppingItems.forEach((item) => {
       if (item.deal_date === dateStr) {
-        const title = item.store ? `🛒 ${item.name} (${item.store})` : `🛒 ${item.name}`;
+        const title = item.store ? `${item.name} (${item.store})` : item.name;
         dayItems.push({
           type: 'shopping',
           title,
@@ -248,7 +254,7 @@ export default function CalendarView() {
               : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
           }`}
         >
-          Kalender
+          Monat
         </button>
       </div>
 
@@ -287,6 +293,13 @@ export default function CalendarView() {
               const normalizedDate = new Date(date.getFullYear(), date.getMonth(), date.getDate());
               setSelectedDay(normalizedDate);
               setSelectedDayAgenda(buildDayAgenda(normalizedDate));
+              // Scroll to detail view
+              setTimeout(() => {
+                const detailElement = document.querySelector('.mt-6.p-4.bg-gray-50');
+                if (detailElement) {
+                  detailElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+              }, 100);
             }}
           />
         </>
@@ -333,6 +346,13 @@ export default function CalendarView() {
                 onClick={() => {
                   setSelectedDay(date);
                   setSelectedDayAgenda(items);
+                  // Scroll to detail view
+                  setTimeout(() => {
+                    const detailElement = document.querySelector('.mt-6.p-4.bg-gray-50');
+                    if (detailElement) {
+                      detailElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }
+                  }, 100);
                 }}
                 className={`w-full text-left p-3 rounded border hover:border-blue-400 hover:bg-blue-50 transition ${
                   isToday ? 'ring-2 ring-blue-500 bg-blue-50/80' : ''
@@ -366,23 +386,14 @@ export default function CalendarView() {
                       key={`${item.type}-${item.id}`}
                       className={`text-[11px] px-2 py-1 rounded-full border ${
                         {
-                          event: 'bg-blue-100 border-blue-300 text-blue-900',
-                          todo: 'bg-green-100 border-green-300 text-green-900',
-                          birthday: 'bg-pink-100 border-pink-300 text-pink-900',
-                          shopping: 'bg-orange-100 border-orange-300 text-orange-900',
-                        }[item.type]
-                      }`}
+                          event: 'border-blue-300',
+                          todo: 'border-green-300',
+                          birthday: 'border-pink-300',
+                          shopping: 'border-orange-300',
+                        }[item.type] || 'border-gray-300'
+                      } ${getEventColorClasses(item.type)}`}
                     >
-                      {item.type === 'birthday'
-                        ? '🎂'
-                        : item.type === 'shopping'
-                        ? '🛒'
-                        : item.type === 'todo'
-                        ? (item.data as any)?.isDone
-                          ? '✅'
-                          : '⬜'
-                        : '📅'}{' '}
-                      {item.title}
+                      {getEventIcon(item.type, item.data)} {item.title}
                       {item.time ? ` · ${item.time}` : ''}
                     </span>
                   ))}
@@ -430,23 +441,10 @@ export default function CalendarView() {
               {selectedDayAgenda.map((item) => (
                 <li
                   key={`${item.type}-${item.id}`}
-                  className={`p-3 rounded border-l-4 ${
-                    item.type === 'event'
-                      ? 'bg-blue-50 border-l-blue-500'
-                      : item.type === 'todo'
-                      ? 'bg-green-50 border-l-green-500'
-                      : 'bg-pink-50 border-l-pink-500'
-                  }`}
+                  className={`p-3 rounded border-l-4 ${getEventBorderClasses(item.type)}`}
                 >
                   <div className="font-medium text-sm">
-                    {item.type === 'birthday'
-                      ? '🎂'
-                      : item.type === 'todo'
-                      ? (item.data as any)?.isDone
-                        ? '✅'
-                        : '⬜'
-                      : '📅'}{' '}
-                    {item.title}
+                    {getEventIcon(item.type, item.data)} {item.title}
                   </div>
                   {item.description && (
                     <div className="text-xs text-gray-600 mt-1">{item.description}</div>

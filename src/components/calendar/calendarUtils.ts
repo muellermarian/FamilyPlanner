@@ -7,6 +7,53 @@ import type {
   CalendarDay,
 } from '../../lib/types';
 
+// Get the appropriate icon/emoji for an agenda item type
+export function getEventIcon(type: string, data?: any): string {
+  switch (type) {
+    case 'birthday':
+      return '🎂';
+    case 'shopping':
+      return '🛒';
+    case 'todo':
+      return data?.isDone ? '✅' : '⬜';
+    case 'event':
+    default:
+      return '📅';
+  }
+}
+
+// Get background color classes for an agenda item type
+export function getEventColorClasses(type: string): string {
+  switch (type) {
+    case 'event':
+      return 'bg-blue-100 text-blue-900';
+    case 'todo':
+      return 'bg-green-100 text-green-900';
+    case 'birthday':
+      return 'bg-pink-100 text-pink-900';
+    case 'shopping':
+      return 'bg-orange-100 text-orange-900';
+    default:
+      return 'bg-gray-100 text-gray-900';
+  }
+}
+
+// Get border color classes for detail view
+export function getEventBorderClasses(type: string): string {
+  switch (type) {
+    case 'event':
+      return 'bg-blue-50 border-l-blue-500';
+    case 'todo':
+      return 'bg-green-50 border-l-green-500';
+    case 'shopping':
+      return 'bg-orange-50 border-l-orange-500';
+    case 'birthday':
+      return 'bg-pink-50 border-l-pink-500';
+    default:
+      return 'bg-gray-50 border-l-gray-500';
+  }
+}
+
 export function createAgendaItems(
   calendarEvents: CalendarEvent[],
   todos: Todo[],
@@ -62,7 +109,7 @@ export function createAgendaItems(
     if (item.deal_date) {
       const dealDate = parseDate(item.deal_date);
       if (viewMode === 'calendar' || viewMode === 'all' || dealDate >= today) {
-        const title = item.store ? `🛒 ${item.name} (${item.store})` : `🛒 ${item.name}`;
+        const title = item.store ? `${item.name} (${item.store})` : item.name;
         items.push({
           type: 'shopping',
           title,
@@ -186,7 +233,7 @@ export function createCalendarDays(
     // Add shopping items with deal dates
     shoppingItems.forEach((item) => {
       if (item.deal_date === dateStr) {
-        const title = item.store ? `🛒 ${item.name} (${item.store})` : `🛒 ${item.name}`;
+        const title = item.store ? `${item.name} (${item.store})` : item.name;
         dayEvents.push({
           type: 'shopping',
           title,

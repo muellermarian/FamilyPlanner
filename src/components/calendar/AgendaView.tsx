@@ -1,4 +1,5 @@
 import type { CalendarEvent, Todo, Contact, AgendaItem } from '../../lib/types';
+import { getEventIcon, getEventColorClasses } from './calendarUtils';
 
 interface AgendaViewProps {
   items: AgendaItem[];
@@ -57,14 +58,17 @@ export default function AgendaView({ items, onEditEvent, onSelectItem }: AgendaV
               {dayItems.map((item) => {
                 const isTodo = item.type === 'todo';
                 const isTodoDone = isTodo && (item.data as Todo)?.isDone;
-                const icon =
-                  item.type === 'event' ? '📅' : isTodo ? (isTodoDone ? '✅' : '⬜') : '🎂';
-                const bgColor =
-                  item.type === 'event'
-                    ? 'bg-blue-50 border-blue-200'
-                    : item.type === 'todo'
-                    ? 'bg-green-50 border-green-200'
-                    : 'bg-pink-50 border-pink-200';
+                const icon = getEventIcon(item.type, item.data);
+
+                // Map color classes to border classes
+                const borderColorMap: Record<string, string> = {
+                  'bg-blue-100 text-blue-900': 'bg-blue-50 border-blue-200',
+                  'bg-green-100 text-green-900': 'bg-green-50 border-green-200',
+                  'bg-pink-100 text-pink-900': 'bg-pink-50 border-pink-200',
+                  'bg-orange-100 text-orange-900': 'bg-orange-50 border-orange-200',
+                };
+                const colorClass = getEventColorClasses(item.type);
+                const bgColor = borderColorMap[colorClass] || 'bg-gray-50 border-gray-200';
 
                 let ageText = '';
                 if (item.type === 'birthday') {

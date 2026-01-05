@@ -1,4 +1,5 @@
 import type { CalendarDay } from '../../lib/types';
+import { getEventIcon, getEventColorClasses } from './calendarUtils';
 
 interface CalendarGridProps {
   days: CalendarDay[];
@@ -90,23 +91,10 @@ export default function CalendarGrid({
                 {day.events.slice(0, 2).map((event) => (
                   <div
                     key={`${event.type}-${event.id}`}
-                    className={`text-[10px] p-0.5 rounded ${
-                      event.type === 'event'
-                        ? 'bg-blue-100 text-blue-900'
-                        : event.type === 'todo'
-                        ? 'bg-green-100 text-green-900'
-                        : 'bg-pink-100 text-pink-900'
-                    }`}
+                    className={`text-[10px] p-0.5 rounded ${getEventColorClasses(event.type)}`}
                   >
                     <div className="truncate">
-                      {event.type === 'birthday'
-                        ? '🎂'
-                        : event.type === 'todo'
-                        ? (event.data as any)?.isDone
-                          ? '✅'
-                          : '⬜'
-                        : '📅'}{' '}
-                      {event.title}
+                      {getEventIcon(event.type, event.data)} {event.title}
                     </div>
                     {event.description && (
                       <div className="text-[9px] opacity-75 truncate">{event.description}</div>
