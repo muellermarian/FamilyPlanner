@@ -186,7 +186,17 @@ export default function Dashboard({
               <div className="font-medium mb-0">{profileName ?? 'Unknown'}</div>
               <div className="text-xs text-gray-500 mb-2">{userEmail ?? '—'}</div>
 
-              <div className="border-t pt-2 mt-2">
+              <div className="border-t pt-2 mt-2 mb-2">
+                <div className="px-2 py-1">
+                  <PushNotificationToggle
+                    userId={currentProfileId}
+                    familyId={familyId}
+                    compact={true}
+                  />
+                </div>
+              </div>
+
+              <div className="border-t pt-2">
                 <button
                   onClick={() => {
                     setMenuOpen(false);
@@ -215,11 +225,6 @@ export default function Dashboard({
             <div className="text-sm text-gray-500">{t.subtitle}</div>
           </button>
         ))}
-      </div>
-
-      {/* Push Notification Toggle */}
-      <div className="mt-6">
-        <PushNotificationToggle userId={currentProfileId} familyId={familyId} />
       </div>
     </div>
   );

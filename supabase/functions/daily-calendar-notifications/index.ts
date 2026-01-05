@@ -1,9 +1,15 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import webpush from 'npm:web-push@3.6.6';
 
 const VAPID_PRIVATE_KEY = Deno.env.get('VAPID_PRIVATE_KEY')!;
 const VAPID_PUBLIC_KEY = Deno.env.get('VAPID_PUBLIC_KEY')!;
-const VAPID_EMAIL = 'mailto:muellerm187@gmail.com'; // Deine E-Mail
+
+webpush.setVapidDetails(
+  'mailto:your-email@example.com',
+  VAPID_PUBLIC_KEY,
+  VAPID_PRIVATE_KEY
+);
 
 serve(async (req) => {
   try {
@@ -12,14 +18,12 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
     );
 
-    // Hole heute's Datum
     const today = new Date();
     const year = today.getFullYear();
     const month = String(today.getMonth() + 1).padStart(2, '0');
     const day = String(today.getDate()).padStart(2, '0');
     const dateStr = `${year}-${month}-${day}`;
 
-    // Hole alle Familien mit Push-Subscriptions
     const { data: subscriptions } = await supabase
       .from('push_subscriptions')
       .select('*, families!inner(*)');
@@ -28,7 +32,7 @@ serve(async (req) => {
       return new Response('No subscriptions found', { status: 200 });
     }
 
-    // Gruppiere nach Familie
+    // Group subscriptions by family
     const familyMap = new Map<string, any[]>();
     subscriptions.forEach((sub: any) => {
       if (!familyMap.has(sub.family_id)) {
@@ -39,16 +43,16 @@ serve(async (req) => {
 
     const results = [];
 
-    // Für jede Familie: Hole Events und sende Notifications
+    // Process each family
     for (const [familyId, familySubs] of familyMap) {
-      // Hole Calendar Events
+      // Fetch calendar events for today
       const { data: events } = await supabase
         .from('calendar_events')
         .select('*')
         .eq('family_id', familyId)
         .eq('event_date', dateStr);
 
-      // Hole Todos mit due_at heute
+      // Fetch todos due today
       const { data: todos } = await supabase
         .from('todos')
         .select('*')
@@ -56,7 +60,14 @@ serve(async (req) => {
         .like('due_at', `${dateStr}%`)
         .eq('isDone', false);
 
-      // Hole Geburtstage
+      // Fetch shopping items
+      const { data: shoppingItems } = await supabase
+        .from('shopping_items')
+        .select('*')
+        .eq('family_id', familyId)
+        .eq('purchased', false);
+
+      // Fetch contacts with birthdays
       const { data: contacts } = await supabase
         .from('contacts')
         .select('*')
@@ -70,41 +81,34 @@ serve(async (req) => {
           return bday.getMonth() === today.getMonth() && bday.getDate() === today.getDate();
         }) || [];
 
-      const totalItems = (events?.length || 0) + (todos?.length || 0) + birthdaysToday.length;
+      const totalItems =
+        (events?.length || 0) +
+        (todos?.length || 0) +
+        (shoppingItems?.length || 0) +
+        birthdaysToday.length;
 
       if (totalItems === 0) continue;
 
-      // Erstelle Notification-Text
-      let body = `Du hast heute ${totalItems} Termin(e):\n`;
+      // Build notification message
+      let body = `You have ${totalItems} item(s) today:\n`;
       events?.forEach((e: any) => (body += `📅 ${e.title}\n`));
       todos?.forEach((t: any) => (body += `⬜ ${t.task}\n`));
+      shoppingItems?.forEach((s: any) => (body += `🛒 ${s.item_name}\n`));
       birthdaysToday.forEach((b: any) => (body += `🎂 ${b.first_name} ${b.last_name}\n`));
 
-      // Sende an alle Subscriptions dieser Familie
+      // Send notification to all subscriptions for this family
       for (const sub of familySubs) {
         const subscription = JSON.parse(sub.subscription);
 
         try {
           const pushPayload = {
-            title: 'Deine Termine heute',
+            title: 'Your Daily Agenda',
             body: body.trim(),
             icon: '/icons/icon-192x192.png',
-            url: '/calendar',
+            data: { url: '/calendar' },
           };
 
-          // Web Push senden
-          await fetch('https://fcm.googleapis.com/fcm/send', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              Authorization: `key=${VAPID_PRIVATE_KEY}`,
-            },
-            body: JSON.stringify({
-              to: subscription.endpoint,
-              notification: pushPayload,
-            }),
-          });
-
+          await webpush.sendNotification(subscription, JSON.stringify(pushPayload));
           results.push({ success: true, familyId });
         } catch (error) {
           console.error('Push error:', error);

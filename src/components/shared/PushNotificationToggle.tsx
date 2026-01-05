@@ -1,18 +1,21 @@
-import { useState } from 'react';
 import { usePushNotifications } from '../../hooks/usePushNotifications';
 
 interface PushNotificationToggleProps {
   userId: string;
   familyId: string;
+  compact?: boolean;
 }
 
-export default function PushNotificationToggle({ userId, familyId }: PushNotificationToggleProps) {
+export default function PushNotificationToggle({
+  userId,
+  familyId,
+  compact = false,
+}: PushNotificationToggleProps) {
   const { isSupported, isSubscribed, permission, subscribe, unsubscribe, loading, error } =
     usePushNotifications(userId, familyId);
-  const [showInfo, setShowInfo] = useState(false);
 
   if (!isSupported) {
-    return null; // Verstecke Button wenn nicht unterstützt
+    return null;
   }
 
   const handleToggle = async () => {
@@ -23,27 +26,53 @@ export default function PushNotificationToggle({ userId, familyId }: PushNotific
     }
   };
 
+  if (compact) {
+    return (
+      <div className="w-full">
+        <button
+          onClick={handleToggle}
+          disabled={loading || permission === 'denied'}
+          className="w-full text-left flex items-center justify-between px-2 py-1 rounded hover:bg-gray-100 disabled:opacity-50"
+        >
+          <div className="flex items-center gap-2">
+            <span className="text-lg">🔔</span>
+            <span>Tägl. Erinnerung</span>
+          </div>
+          <div className="flex items-center gap-2">
+            {permission === 'granted' && isSubscribed && (
+              <span className="text-xs text-green-600">✓</span>
+            )}
+            <div
+              className={`w-9 h-5 rounded-full transition-colors ${
+                isSubscribed ? 'bg-blue-600' : 'bg-gray-300'
+              }`}
+            >
+              <div
+                className={`w-4 h-4 bg-white rounded-full shadow transition-transform ${
+                  isSubscribed ? 'translate-x-4' : 'translate-x-0.5'
+                } mt-0.5`}
+              ></div>
+            </div>
+          </div>
+        </button>
+        {error && <div className="mt-1 px-2 text-xs text-red-600">{error}</div>}
+      </div>
+    );
+  }
+
   return (
     <div className="bg-white border rounded-lg p-4 shadow-sm">
-      <div className="flex items-center justify-between mb-2">
+      <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
           <span className="text-lg">🔔</span>
-          <h3 className="font-semibold">Tägliche Erinnerungen</h3>
+          <h3 className="font-semibold">Tägl. Erinnerung</h3>
         </div>
-        <button
-          onClick={() => setShowInfo(!showInfo)}
-          className="text-gray-500 hover:text-gray-700 text-sm"
-        >
-          {showInfo ? '▼' : '▶'}
-        </button>
       </div>
 
-      {showInfo && (
-        <p className="text-sm text-gray-600 mb-3">
-          Erhalte jeden Morgen eine Benachrichtigung mit deinen Terminen, Geburtstagen und To-dos
-          für den Tag.
-        </p>
-      )}
+      <p className="text-sm text-gray-600 mb-3">
+        Get a morning notification with your events, birthdays, todos, and shopping items for the
+        day.
+      </p>
 
       {error && (
         <div className="mb-3 p-2 bg-red-50 border border-red-200 rounded text-sm text-red-700">
@@ -54,13 +83,11 @@ export default function PushNotificationToggle({ userId, familyId }: PushNotific
       <div className="flex items-center justify-between">
         <div className="text-sm">
           {permission === 'denied' && (
-            <span className="text-red-600">
-              Benachrichtigungen wurden blockiert. Bitte in den Browser-Einstellungen aktivieren.
-            </span>
+            <span className="text-red-600">Blocked. Enable in browser settings.</span>
           )}
-          {permission === 'default' && <span className="text-gray-600">Noch nicht aktiviert</span>}
+          {permission === 'default' && <span className="text-gray-600">Not activated</span>}
           {permission === 'granted' && isSubscribed && (
-            <span className="text-green-600">✓ Aktiviert</span>
+            <span className="text-green-600">✓ Active</span>
           )}
         </div>
 
@@ -76,10 +103,10 @@ export default function PushNotificationToggle({ userId, familyId }: PushNotific
           {loading
             ? '...'
             : isSubscribed
-            ? 'Deaktivieren'
+            ? 'Deactivate'
             : permission === 'denied'
-            ? 'Blockiert'
-            : 'Aktivieren'}
+            ? 'Blocked'
+            : 'Activate'}
         </button>
       </div>
     </div>
