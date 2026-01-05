@@ -22,9 +22,6 @@ interface RecipeAddFormProps {
 
 export default function RecipeAddForm({ onAdd, onCancel }: RecipeAddFormProps) {
   const [name, setName] = useState('');
-  const [imageUrl, setImageUrl] = useState('');
-  const [imageFile, setImageFile] = useState<File | null>(null);
-  const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [instructions, setInstructions] = useState('');
   const [servings, setServings] = useState<number | null>(null);
   const [ingredients, setIngredients] = useState<Ingredient[]>([
@@ -58,27 +55,6 @@ export default function RecipeAddForm({ onAdd, onCancel }: RecipeAddFormProps) {
     setIngredients(updated);
   };
 
-  const handleImageFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      setImageFile(file);
-      setImageUrl(''); // Clear URL if file is selected
-
-      // Create preview
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setImagePreview(reader.result as string);
-      };
-      reader.readAsDataURL(file);
-    }
-  };
-
-  const clearImage = () => {
-    setImageFile(null);
-    setImageUrl('');
-    setImagePreview(null);
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim()) return;
@@ -93,16 +69,13 @@ export default function RecipeAddForm({ onAdd, onCancel }: RecipeAddFormProps) {
     try {
       await onAdd(
         name.trim(),
-        imageUrl.trim() || null,
-        imageFile,
+        null,
+        null,
         instructions.trim(),
         servings,
         validIngredients
       );
       setName('');
-      setImageUrl('');
-      setImageFile(null);
-      setImagePreview(null);
       setInstructions('');
       setServings(null);
       setIngredients([{ name: '', quantity: '1', unit: 'Stk', add_to_shopping: true }]);
@@ -140,59 +113,6 @@ export default function RecipeAddForm({ onAdd, onCancel }: RecipeAddFormProps) {
                 required
                 autoFocus
               />
-            </div>
-
-            <div className="mb-4">
-              <label className="block text-sm font-medium mb-1">Rezeptbild</label>
-
-              {imagePreview && (
-                <div className="mb-3 relative">
-                  <img
-                    src={imagePreview}
-                    alt="Vorschau"
-                    className="w-full h-48 object-cover rounded"
-                  />
-                  <button
-                    type="button"
-                    onClick={clearImage}
-                    className="absolute top-2 right-2 bg-red-600 text-white px-2 py-1 rounded text-sm"
-                  >
-                    Entfernen
-                  </button>
-                </div>
-              )}
-
-              <div className="space-y-2">
-                <div>
-                  <label className="block text-xs text-gray-600 mb-1">
-                    Foto aufnehmen oder auswählen
-                  </label>
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={handleImageFileChange}
-                    className="w-full border rounded px-3 py-2 text-sm"
-                  />
-                </div>
-
-                <div className="text-center text-xs text-gray-500">oder</div>
-
-                <div>
-                  <label className="block text-xs text-gray-600 mb-1">Bild-URL eingeben</label>
-                  <input
-                    type="url"
-                    value={imageUrl}
-                    onChange={(e) => {
-                      setImageUrl(e.target.value);
-                      setImageFile(null);
-                      setImagePreview(null);
-                    }}
-                    className="w-full border rounded px-3 py-2 text-sm"
-                    placeholder="https://..."
-                    disabled={!!imageFile}
-                  />
-                </div>
-              </div>
             </div>
 
             <div className="mb-4">

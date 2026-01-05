@@ -12,6 +12,7 @@ interface RecipeDetailProps {
   onClose: () => void;
   onUpdate: () => void;
   onEdit: () => void;
+  onAddToShopping?: (message: string) => void;
 }
 
 export default function RecipeDetail({
@@ -23,10 +24,10 @@ export default function RecipeDetail({
   onClose,
   onUpdate,
   onEdit,
+  onAddToShopping,
 }: RecipeDetailProps) {
   const [selectedIngredients, setSelectedIngredients] = useState<Set<string>>(new Set());
   const [adding, setAdding] = useState(false);
-  const [toast, setToast] = useState<string | null>(null);
   const [desiredServings, setDesiredServings] = useState<number>(recipe.servings || 1);
 
   // Initialize selected ingredients based on add_to_shopping flag
@@ -131,11 +132,14 @@ export default function RecipeDetail({
           ? `${addedCount} neue und ${updatedCount} aktualisierte Zutat(en) zur Einkaufsliste hinzugefügt! "${recipe.name}" ist jetzt zum Kochen markiert.`
           : `${addedCount} Zutat(en) zur Einkaufsliste hinzugefügt! "${recipe.name}" ist jetzt zum Kochen markiert.`;
 
-      setToast(message);
-      setTimeout(() => {
-        setToast(null);
-        onUpdate();
-      }, 3000);
+      // Callback für Toast-Message
+      if (onAddToShopping) {
+        onAddToShopping(message);
+      }
+      
+      // Sofort schließen und aktualisieren
+      onClose();
+      onUpdate();
     } catch (err: any) {
       alert(err.message || JSON.stringify(err));
     } finally {
@@ -146,12 +150,13 @@ export default function RecipeDetail({
   const handleMarkAsCooked = async () => {
     try {
       await markRecipeAsCooked(recipe.id, familyId, currentProfileId || currentUserId);
-      setToast(`"${recipe.name}" wurde als gekocht markiert!`);
-      setTimeout(() => {
-        setToast(null);
-        onUpdate();
-        onClose();
-      }, 2000);
+      
+      if (onAddToShopping) {
+        onAddToShopping(`"${recipe.name}" wurde als gekocht markiert!`);
+      }
+      
+      onClose();
+      onUpdate();
     } catch (err: any) {
       alert(err.message || JSON.stringify(err));
     }
@@ -308,12 +313,6 @@ export default function RecipeDetail({
           )}
         </div>
       </div>
-
-      {toast && (
-        <div className="fixed bottom-4 left-1/2 transform -translate-x-1/2 bg-green-600 text-white px-6 py-3 rounded-lg shadow-lg z-[60] max-w-md text-center">
-          {toast}
-        </div>
-      )}
     </>
   );
 }

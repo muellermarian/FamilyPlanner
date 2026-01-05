@@ -7,6 +7,7 @@ import {
   getActiveCookings,
   updateRecipe,
   uploadRecipeImage,
+  markRecipeAsCooked,
 } from '../../lib/recipes';
 import RecipeItem from './RecipeItem';
 import RecipeAddForm from './RecipeAddForm';
@@ -28,6 +29,7 @@ export default function RecipeList({ familyId, currentUserId, currentProfileId }
   const [error, setError] = useState<string | null>(null);
   const [markedRecipeIds, setMarkedRecipeIds] = useState<Set<string>>(new Set());
   const [searchQuery, setSearchQuery] = useState('');
+  const [toast, setToast] = useState<string | null>(null);
 
   const fetchRecipes = async () => {
     setLoading(true);
@@ -136,6 +138,24 @@ export default function RecipeList({ familyId, currentUserId, currentProfileId }
     setSelectedRecipe(recipe);
   };
 
+  const handleMarkCooked = async (recipeId: string) => {
+    try {
+      const recipe = recipes.find((r) => r.id === recipeId);
+      await markRecipeAsCooked(recipeId, familyId, currentProfileId || currentUserId);
+      
+      // Show toast
+      if (recipe) {
+        setToast(`"${recipe.name}" als gekocht markiert \u2713`);
+        setTimeout(() => setToast(null), 3000);
+      }
+      
+      // Refresh recipes in background
+      fetchRecipes();
+    } catch (err: any) {
+      alert(err.message || 'Fehler beim Markieren des Rezepts');
+    }
+  };
+
   const handleCloseDetail = () => {
     setSelectedRecipe(null);
   };
@@ -225,13 +245,14 @@ export default function RecipeList({ familyId, currentUserId, currentProfileId }
         </div>
       )}
 
-      <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-2 gap-4">
         {sortedRecipes.map((recipe) => (
           <RecipeItem
             key={recipe.id}
             recipe={recipe}
             onClick={() => handleRecipeClick(recipe)}
             isMarkedForCooking={markedRecipeIds.has(recipe.id)}
+            onMarkCooked={handleMarkCooked}
           />
         ))}
       </div>
@@ -248,6 +269,10 @@ export default function RecipeList({ familyId, currentUserId, currentProfileId }
           onClose={handleCloseDetail}
           onUpdate={handleUpdate}
           onEdit={handleEdit}
+          onAddToShopping={(message) => {
+            setToast(message);
+            setTimeout(() => setToast(null), 4000);
+          }}
         />
       )}
 
@@ -262,6 +287,12 @@ export default function RecipeList({ familyId, currentUserId, currentProfileId }
             setSelectedRecipe(null);
           }}
         />
+      )}
+
+      {toast && (
+        <div className="fixed bottom-4 left-1/2 transform -translate-x-1/2 bg-green-600 text-white px-6 py-3 rounded-lg shadow-lg z-[9999] animate-fade-in">
+          {toast}
+        </div>
       )}
     </div>
   );
