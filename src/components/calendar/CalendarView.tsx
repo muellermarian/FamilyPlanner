@@ -142,10 +142,7 @@ export default function CalendarView() {
             }}
           />
         ) : (
-          <AgendaView
-            items={agendaItems}
-            onEditEvent={openForEdit}
-          />
+          <AgendaView items={agendaItems} onEditEvent={openForEdit} />
         )}
 
         {toast && <Toast message={toast} />}
