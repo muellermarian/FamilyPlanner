@@ -89,27 +89,12 @@ serve(async (req) => {
       // Only send notification if there's at least something to show
       if (!hasEvents && !hasTodos && !hasBirthdays && !hasShoppingItems) continue;
 
-      // Build notification message
-      const parts: string[] = [];
-      
-      if (hasEvents) {
-        parts.push(`📅 ${events!.length} Termin${events!.length > 1 ? 'e' : ''}`);
-      }
-      if (hasTodos) {
-        parts.push(`✅ ${todos!.length} To-Do${todos!.length > 1 ? 's' : ''}`);
-      }
-      if (hasBirthdays) {
-        parts.push(`🎂 ${birthdaysToday.length} Geburtstag${birthdaysToday.length > 1 ? 'e' : ''}`);
-      }
-      if (hasShoppingItems) {
-        parts.push(`🛒 ${shoppingItems!.length} Einkauf${shoppingItems!.length > 1 ? 'artikel' : ''}`);
-      }
-
-      let body = parts.join(', ') + '\n\n';
+      // Build notification message - just list the items directly
+      let body = '';
       events?.forEach((e: any) => (body += `📅 ${e.title}\n`));
       todos?.forEach((t: any) => (body += `✅ ${t.task}\n`));
-      birthdaysToday.forEach((b: any) => (body += `🎂 ${b.first_name} ${b.last_name}\n`));
-      shoppingItems?.forEach((s: any) => (body += `🛒 ${s.name}\n`));
+      birthdaysToday.forEach((b: any) => (body += `🎈 ${b.first_name} ${b.last_name}\n`));
+      shoppingItems?.forEach((s: any) => (body += `🛒 ${s.name} (Deal)\n`));
 
       // Send notification to all subscriptions for this family
       for (const sub of familySubs) {
@@ -117,7 +102,7 @@ serve(async (req) => {
 
         try {
           const pushPayload = {
-            title: 'Deine Tagesübersicht',
+            title: 'Heute',
             body: body.trim(),
             icon: '/icons/icon-192x192.png',
             data: { url: '/calendar' },

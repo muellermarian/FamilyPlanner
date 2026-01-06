@@ -7,16 +7,7 @@ interface ContactItemProps {
   onDelete: () => void;
 }
 
-export default function ContactItem({
-  contact,
-  contactFamilies,
-  onEdit,
-  onDelete,
-}: ContactItemProps) {
-  const familyName = contact.contact_family_id
-    ? contactFamilies.find((f) => f.id === contact.contact_family_id)?.family_name
-    : null;
-
+export default function ContactItem({ contact, onEdit, onDelete }: ContactItemProps) {
   const calculateAge = (birthdate: string): number => {
     const today = new Date();
     const birthDate = new Date(birthdate);
