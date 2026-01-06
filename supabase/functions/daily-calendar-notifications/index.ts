@@ -105,7 +105,7 @@ serve(async (req) => {
             title: 'Heute',
             body: body.trim(),
             icon: '/icons/icon-192x192.png',
-            data: { url: '/calendar' },
+            data: { url: '/calendar?view=week' },
           };
 
           await webpush.sendNotification(subscription, JSON.stringify(pushPayload));

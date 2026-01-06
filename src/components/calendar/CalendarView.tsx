@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../../hooks/useAuth';
 import { useToast } from '../../hooks/useToast';
 import type { AgendaItem } from '../../lib/types';
@@ -27,12 +27,18 @@ export default function CalendarView() {
   );
   const { showEventForm, editEvent, selectedDate, openForNew, openForEdit, close } = useEventForm();
 
-  const [viewMode, setViewMode] = useState<'upcoming' | 'calendar' | 'week'>('upcoming');
+  const [viewMode, setViewMode] = useState<'upcoming' | 'calendar' | 'week'>(() => {
+    const params = new URLSearchParams(window.location.search);
+    const view = params.get('view');
+    return view === 'week' ? 'week' : 'upcoming';
+  });
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [selectedItem, setSelectedItem] = useState<AgendaItem | null>(null);
   const [selectedDayAgenda, setSelectedDayAgenda] = useState<AgendaItem[] | null>(null);
   const [selectedDay, setSelectedDay] = useState<Date | null>(null);
   const [weekStart, setWeekStart] = useState(() => getWeekStart());
+
+  const dayDetailRef = useRef<HTMLDivElement>(null);
 
   const handleSelectDay = (date: Date) => {
     const normalizedDate = new Date(date.getFullYear(), date.getMonth(), date.getDate());
@@ -40,6 +46,11 @@ export default function CalendarView() {
     setSelectedDayAgenda(
       buildDayAgenda(normalizedDate, calendarEvents, todos, birthdays, shoppingItems)
     );
+
+    // Scroll to day detail
+    setTimeout(() => {
+      dayDetailRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 100);
   };
 
   useEffect(() => {
@@ -91,14 +102,16 @@ export default function CalendarView() {
         <>
           {/* Day Detail oberhalb */}
           {selectedDayAgenda && selectedDay && (
-            <DayDetail
-              date={selectedDay}
-              items={selectedDayAgenda}
-              onClose={() => {
-                setSelectedDayAgenda(null);
-                setSelectedDay(null);
-              }}
-            />
+            <div ref={dayDetailRef}>
+              <DayDetail
+                date={selectedDay}
+                items={selectedDayAgenda}
+                onClose={() => {
+                  setSelectedDayAgenda(null);
+                  setSelectedDay(null);
+                }}
+              />
+            </div>
           )}
 
           <CalendarGrid
