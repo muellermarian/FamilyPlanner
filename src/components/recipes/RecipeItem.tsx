@@ -62,10 +62,11 @@ export default function RecipeItem({
       </div>
 
       <button onClick={onClick} className="relative flex-1 flex flex-col p-4 text-left z-10">
-        <h3 
+        <h3
           className="font-semibold text-sm leading-tight mb-2 line-clamp-4 break-words hyphens-auto text-gray-900"
-          style={{ 
-            textShadow: '1px 1px 0 white, -1px -1px 0 white, 1px -1px 0 white, -1px 1px 0 white, 2px 2px 4px rgba(255, 255, 255, 0.9)'
+          style={{
+            textShadow:
+              '1px 1px 0 white, -1px -1px 0 white, 1px -1px 0 white, -1px 1px 0 white, 2px 2px 4px rgba(255, 255, 255, 0.9)',
           }}
         >
           {recipe.name}
