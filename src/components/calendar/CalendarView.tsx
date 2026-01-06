@@ -1,7 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../../hooks/useAuth';
 import { useToast } from '../../hooks/useToast';
-import type { AgendaItem } from '../../lib/types';
 import CalendarEventForm from './CalendarEventForm.js';
 import CalendarGrid from './CalendarGrid';
 import AgendaView from './AgendaView';
