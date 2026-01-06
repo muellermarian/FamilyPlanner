@@ -80,11 +80,15 @@ export function createAgendaItems(
   todos: Todo[],
   birthdays: Contact[],
   shoppingItems: ShoppingItem[],
-  viewMode: 'upcoming' | 'all' | 'calendar' | 'week'
+  viewMode: 'upcoming' | 'calendar' | 'week'
 ): AgendaItem[] {
   const items: AgendaItem[] = [];
   const today = new Date();
   today.setHours(0, 0, 0, 0);
+  
+  // For 'upcoming' mode, calculate 7 days from today
+  const sevenDaysFromNow = new Date(today);
+  sevenDaysFromNow.setDate(today.getDate() + 7);
 
   // Helper to parse ISO date string to local date
   const parseDate = (dateStr: string) => {
@@ -95,7 +99,9 @@ export function createAgendaItems(
   // Add calendar events
   calendarEvents.forEach((event) => {
     const eventDate = parseDate(event.event_date);
-    if (viewMode === 'calendar' || viewMode === 'all' || eventDate >= today) {
+    if (viewMode === 'calendar' || 
+        (viewMode === 'upcoming' && eventDate >= today && eventDate < sevenDaysFromNow) ||
+        (viewMode === 'week' && eventDate >= today)) {
       items.push({
         type: 'event',
         title: event.title,
@@ -112,7 +118,9 @@ export function createAgendaItems(
   todos.forEach((todo) => {
     if (todo.due_at) {
       const dueDate = parseDate(todo.due_at.split('T')[0]);
-      if (viewMode === 'calendar' || viewMode === 'all' || dueDate >= today) {
+      if (viewMode === 'calendar' || 
+          (viewMode === 'upcoming' && dueDate >= today && dueDate < sevenDaysFromNow) ||
+          (viewMode === 'week' && dueDate >= today)) {
         items.push({
           type: 'todo',
           title: todo.task,
@@ -129,7 +137,9 @@ export function createAgendaItems(
   shoppingItems.forEach((item) => {
     if (item.deal_date) {
       const dealDate = parseDate(item.deal_date);
-      if (viewMode === 'calendar' || viewMode === 'all' || dealDate >= today) {
+      if (viewMode === 'calendar' || 
+          (viewMode === 'upcoming' && dealDate >= today && dealDate < sevenDaysFromNow) ||
+          (viewMode === 'week' && dealDate >= today)) {
         const title = item.store ? `${item.name} (${item.store})` : item.name;
         items.push({
           type: 'shopping',
@@ -149,7 +159,9 @@ export function createAgendaItems(
     if (contact.birthdate) {
       const bdayDate = new Date(contact.birthdate);
       const thisYearBday = new Date(currentYear, bdayDate.getMonth(), bdayDate.getDate());
-      if (viewMode === 'calendar' || viewMode === 'all' || thisYearBday >= today) {
+      if (viewMode === 'calendar' || 
+          (viewMode === 'upcoming' && thisYearBday >= today && thisYearBday < sevenDaysFromNow) ||
+          (viewMode === 'week' && thisYearBday >= today)) {
         items.push({
           type: 'birthday',
           title: `${contact.first_name} ${contact.last_name}`,

@@ -30,7 +30,7 @@ export default function CalendarView() {
   const [showEventForm, setShowEventForm] = useState(false);
   const [editEvent, setEditEvent] = useState<CalendarEvent | null>(null);
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
-  const [viewMode, setViewMode] = useState<'upcoming' | 'all' | 'calendar' | 'week'>('upcoming');
+  const [viewMode, setViewMode] = useState<'upcoming' | 'calendar' | 'week'>('upcoming');
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [selectedItem, setSelectedItem] = useState<AgendaItem | null>(null);
   const [selectedDayAgenda, setSelectedDayAgenda] = useState<AgendaItem[] | null>(null);
@@ -225,17 +225,7 @@ export default function CalendarView() {
               : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
           }`}
         >
-          Anstehend
-        </button>
-        <button
-          onClick={() => setViewMode('all')}
-          className={`flex-1 py-2 px-3 rounded font-medium text-sm ${
-            viewMode === 'all'
-              ? 'bg-blue-500 text-white'
-              : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-          }`}
-        >
-          Alle
+          7 Tage
         </button>
         <button
           onClick={() => setViewMode('week')}
