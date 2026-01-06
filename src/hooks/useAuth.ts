@@ -34,14 +34,11 @@ export function useAuth() {
   // Loads the user's profile (to discover family and profile ids) and the list of profiles/users
   const loadProfileAndUsers = async (userId: string) => {
     setLoadingProfile(true);
-    console.log('🔍 Loading profile for userId:', userId);
-    const { data: profile, error } = await supabase
+    const { data: profile } = await supabase
       .from('profiles')
       .select('id, family_id')
       .eq('user_id', userId)
       .maybeSingle();
-    
-    console.log('📊 Profile query result:', { profile, error });
     
     if (profile) {
       setFamilyId(profile.family_id);
@@ -52,10 +49,7 @@ export function useAuth() {
         .from('profiles')
         .select('id, name')
         .eq('family_id', profile.family_id);
-      console.log('👥 Users for family:', usersData);
       setUsers(usersData ?? []);
-    } else {
-      console.error('❌ No profile found for user:', userId);
     }
     setLoadingProfile(false);
   };
