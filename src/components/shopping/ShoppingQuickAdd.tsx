@@ -129,10 +129,7 @@ export default function ShoppingQuickAdd({
       <div className="space-y-4">
         {/* Header */}
         <div className="flex items-center gap-3 mb-6">
-          <button
-            onClick={onClose}
-            className="text-2xl"
-          >
+          <button onClick={onClose} className="text-2xl">
             ←
           </button>
           <h3 className="text-xl font-bold">Schnellanlage</h3>
