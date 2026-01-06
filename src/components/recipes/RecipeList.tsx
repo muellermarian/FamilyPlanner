@@ -119,54 +119,9 @@ export default function RecipeList({ familyId, currentUserId, currentProfileId }
 
   return (
     <PullToRefresh onRefresh={fetchRecipes}>
-      <div className="max-w-4xl mx-auto mt-10 p-4">
-        <div className="flex justify-between items-center mb-6">
-          <h2 className="text-2xl font-bold">Rezepte</h2>
-          <button
-            onClick={() => setShowAddForm(true)}
-            className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 font-medium"
-          >
-            + Neues Rezept
-          </button>
-        </div>
-
-        <div className="mb-4">
-          <input
-            type="text"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Suche nach Rezeptname oder Zutat..."
-            className="w-full border rounded px-4 py-2"
-          />
-        </div>
-
-        <div className="mb-4 text-sm text-gray-600">
-          {loading ? '🔄 Lade Rezepte…' : `${filteredRecipes.length} Rezept(e)`}
-        </div>
-        {error && <div className="mb-4 text-red-600">Fehler: {error}</div>}
-
-        {filteredRecipes.length === 0 && !loading && (
-          <div className="text-center text-gray-500 py-12">
-            <div className="text-6xl mb-4">🍽️</div>
-            <p>Keine Rezepte vorhanden.</p>
-          </div>
-        )}
-
-        <div className="grid grid-cols-2 gap-4">
-          {filteredRecipes.map((recipe) => (
-            <RecipeItem
-              key={recipe.id}
-              recipe={recipe}
-              onClick={() => handleRecipeClick(recipe)}
-              isMarkedForCooking={markedRecipeIds.has(recipe.id)}
-              onMarkCooked={handleMarkCookedWithToast}
-            />
-          ))}
-        </div>
-
-        {showAddForm && <RecipeAddForm onAdd={handleAdd} onCancel={() => setShowAddForm(false)} />}
-
-        {selectedRecipe && (
+      <div className="max-w-4xl mx-auto p-4">
+        {/* Show Detail View if recipe selected */}
+        {selectedRecipe ? (
           <RecipeDetail
             recipe={selectedRecipe}
             familyId={familyId}
@@ -178,9 +133,7 @@ export default function RecipeList({ familyId, currentUserId, currentProfileId }
             onEdit={handleEdit}
             onAddToShopping={showToast}
           />
-        )}
-
-        {editRecipe && (
+        ) : editRecipe ? (
           <RecipeEditForm
             recipe={editRecipe}
             onUpdate={handleUpdateRecipe}
@@ -191,6 +144,55 @@ export default function RecipeList({ familyId, currentUserId, currentProfileId }
               setSelectedRecipe(null);
             }}
           />
+        ) : showAddForm ? (
+          <RecipeAddForm onAdd={handleAdd} onCancel={() => setShowAddForm(false)} />
+        ) : (
+          <>
+            {/* List View */}
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-2xl font-bold">Rezepte</h2>
+              <button
+                onClick={() => setShowAddForm(true)}
+                className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 font-medium"
+              >
+                + Neues Rezept
+              </button>
+            </div>
+
+            <div className="mb-4">
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Suche nach Rezeptname oder Zutat..."
+                className="w-full border rounded px-4 py-2"
+              />
+            </div>
+
+            <div className="mb-4 text-sm text-gray-600">
+              {loading ? '🔄 Lade Rezepte…' : `${filteredRecipes.length} Rezept(e)`}
+            </div>
+            {error && <div className="mb-4 text-red-600">Fehler: {error}</div>}
+
+            {filteredRecipes.length === 0 && !loading && (
+              <div className="text-center text-gray-500 py-12">
+                <div className="text-6xl mb-4">🍽️</div>
+                <p>Keine Rezepte vorhanden.</p>
+              </div>
+            )}
+
+            <div className="grid grid-cols-2 gap-4">
+              {filteredRecipes.map((recipe) => (
+                <RecipeItem
+                  key={recipe.id}
+                  recipe={recipe}
+                  onClick={() => handleRecipeClick(recipe)}
+                  isMarkedForCooking={markedRecipeIds.has(recipe.id)}
+                  onMarkCooked={handleMarkCookedWithToast}
+                />
+              ))}
+            </div>
+          </>
         )}
 
         {toast && <Toast message={toast} />}
