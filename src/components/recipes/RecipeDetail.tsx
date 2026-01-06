@@ -169,59 +169,59 @@ export default function RecipeDetail({
 
   return (
     <>
-      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-        <div className="bg-white rounded-lg shadow-lg max-w-2xl w-full max-h-[85vh] overflow-hidden flex flex-col">
-          <div className="p-4 border-b flex justify-between items-center">
-            <h3 className="text-xl font-bold">{recipe.name}</h3>
-            <div className="flex gap-2 items-center">
+      <div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center p-2 z-50">
+        <div className="bg-white rounded-lg shadow-lg max-w-2xl w-full max-h-[90vh] overflow-hidden flex flex-col">
+          <div className="p-3 border-b flex justify-between items-center">
+            <h3 className="text-lg font-bold truncate pr-2">{recipe.name}</h3>
+            <div className="flex gap-1 items-center flex-shrink-0">
               <button
                 onClick={onEdit}
-                className="text-blue-600 hover:text-blue-800 px-3 py-1 text-sm font-medium"
+                className="text-blue-600 hover:text-blue-800 px-2 py-1 text-xs font-medium"
                 title="Bearbeiten"
               >
-                ✏️ Bearbeiten
+                ✏️
               </button>
               <button
                 onClick={onClose}
-                className="text-gray-500 hover:text-gray-700 text-2xl leading-none"
+                className="text-gray-500 hover:text-gray-700 text-xl leading-none px-2"
               >
                 ×
               </button>
             </div>
           </div>
 
-          <div className="overflow-y-auto flex-1 p-4">
+          <div className="overflow-y-auto flex-1 p-3">
             {recipe.image_url && (
-              <div className="mb-4 rounded-lg overflow-hidden">
+              <div className="mb-3 rounded-lg overflow-hidden">
                 <img
                   src={recipe.image_url}
                   alt={recipe.name}
-                  className="w-full h-64 object-cover"
+                  className="w-full h-48 object-cover"
                 />
               </div>
             )}
 
             {isMarkedForCooking && (
-              <div className="mb-4 p-3 bg-orange-100 border border-orange-300 rounded flex justify-between items-center">
-                <div>
-                  <div className="font-medium text-orange-800">Zum Kochen markiert</div>
-                  <div className="text-sm text-orange-600">
-                    Zutaten wurden zur Einkaufsliste hinzugefügt
+              <div className="mb-3 p-2 bg-orange-100 border border-orange-300 rounded flex justify-between items-center gap-2">
+                <div className="flex-1 min-w-0">
+                  <div className="font-medium text-sm text-orange-800">Zum Kochen markiert</div>
+                  <div className="text-xs text-orange-600">
+                    Zutaten in Einkaufsliste
                   </div>
                 </div>
                 <button
                   onClick={handleMarkAsCooked}
-                  className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 text-sm font-medium"
+                  className="bg-green-600 text-white px-3 py-1.5 rounded hover:bg-green-700 text-xs font-medium flex-shrink-0"
                 >
                   Gekocht ✓
                 </button>
               </div>
             )}
 
-            <div className="mb-4">
-              <div className="flex justify-between items-center mb-3">
-                <h4 className="font-semibold">Zutaten ({recipe.ingredients?.length || 0})</h4>
-                <button onClick={toggleAll} className="text-sm text-blue-600 hover:text-blue-700">
+            <div className="mb-3">
+              <div className="flex justify-between items-center mb-2">
+                <h4 className="font-semibold text-sm">Zutaten ({recipe.ingredients?.length || 0})</h4>
+                <button onClick={toggleAll} className="text-xs text-blue-600 hover:text-blue-700">
                   {allSelected ? 'Alle abwählen' : 'Alle auswählen'}
                 </button>
               </div>
@@ -229,18 +229,18 @@ export default function RecipeDetail({
               {!recipe.ingredients || recipe.ingredients.length === 0 ? (
                 <p className="text-gray-500 text-sm">Keine Zutaten vorhanden</p>
               ) : (
-                <ul className="space-y-2">
+                <ul className="space-y-1.5">
                   {recipe.ingredients.map((ing) => (
-                    <li key={ing.id} className="flex items-center gap-3 p-2 border rounded">
+                    <li key={ing.id} className="flex items-center gap-2 p-1.5 border rounded text-sm">
                       <input
                         type="checkbox"
                         checked={selectedIngredients.has(ing.id)}
                         onChange={() => toggleIngredient(ing.id)}
-                        className="w-5 h-5"
+                        className="w-4 h-4 flex-shrink-0"
                       />
-                      <div className="flex-1">
+                      <div className="flex-1 min-w-0">
                         <span className="font-medium">{ing.name}</span>
-                        <span className="text-gray-500 text-sm ml-2">
+                        <span className="text-gray-500 text-xs ml-2">
                           {ing.quantity} {ing.unit}
                         </span>
                       </div>
@@ -251,23 +251,23 @@ export default function RecipeDetail({
             </div>
 
             {recipe.instructions && (
-              <div className="mb-4">
-                <h4 className="font-semibold mb-2">Anleitung</h4>
-                <div className="text-gray-700 whitespace-pre-wrap bg-gray-50 p-3 rounded border">
+              <div className="mb-3">
+                <h4 className="font-semibold mb-1.5 text-sm">Anleitung</h4>
+                <div className="text-sm text-gray-700 whitespace-pre-wrap bg-gray-50 p-2 rounded border">
                   {recipe.instructions}
                 </div>
               </div>
             )}
 
             {recipe.servings && !isMarkedForCooking && (
-              <div className="mb-4 p-4 bg-blue-50 border border-blue-200 rounded">
-                <label className="block text-sm font-medium text-blue-900 mb-3">
+              <div className="mb-3 p-3 bg-blue-50 border border-blue-200 rounded">
+                <label className="block text-xs font-medium text-blue-900 mb-2">
                   Für wie viele Personen möchtest du kochen?
                 </label>
-                <div className="flex gap-2 items-center mb-3">
+                <div className="flex gap-2 items-center mb-2">
                   <button
                     onClick={() => setDesiredServings(Math.max(0.5, desiredServings - 0.5))}
-                    className="bg-blue-500 hover:bg-blue-600 text-white font-bold px-4 py-2 rounded text-xl leading-none"
+                    className="bg-blue-500 hover:bg-blue-600 text-white font-bold px-3 py-1.5 rounded text-lg leading-none"
                   >
                     −
                   </button>
@@ -277,30 +277,30 @@ export default function RecipeDetail({
                     step="0.5"
                     value={desiredServings}
                     onChange={(e) => setDesiredServings(parseFloat(e.target.value) || 0.5)}
-                    className="flex-1 text-center border border-blue-300 rounded px-3 py-2 text-lg font-medium"
+                    className="flex-1 text-center border border-blue-300 rounded px-2 py-1.5 text-base font-medium"
                   />
                   <button
                     onClick={() => setDesiredServings(desiredServings + 0.5)}
-                    className="bg-blue-500 hover:bg-blue-600 text-white font-bold px-4 py-2 rounded text-xl leading-none"
+                    className="bg-blue-500 hover:bg-blue-600 text-white font-bold px-3 py-1.5 rounded text-lg leading-none"
                   >
                     +
                   </button>
                 </div>
-                <div className="text-center mb-3">
-                  <div className="inline-block px-4 py-2 bg-blue-100 rounded-full">
-                    <span className="text-sm text-blue-700">
+                <div className="text-center mb-2">
+                  <div className="inline-block px-3 py-1.5 bg-blue-100 rounded-full">
+                    <span className="text-xs text-blue-700">
                       Original: {recipe.servings} Personen
                     </span>
-                    <span className="mx-2 text-blue-400">→</span>
-                    <span className="text-sm font-semibold text-blue-900">
+                    <span className="mx-1.5 text-blue-400">→</span>
+                    <span className="text-xs font-semibold text-blue-900">
                       Faktor: {((desiredServings || 1) / (recipe.servings || 1)).toFixed(2)}x
                     </span>
                   </div>
                 </div>
                 {desiredServings !== recipe.servings && (
-                  <div className="p-3 bg-white rounded border border-blue-100">
-                    <h5 className="font-medium text-sm text-blue-900 mb-2">Angepasste Mengen:</h5>
-                    <div className="space-y-1 max-h-40 overflow-y-auto">
+                  <div className="p-2 bg-white rounded border border-blue-100">
+                    <h5 className="font-medium text-xs text-blue-900 mb-1.5">Angepasste Mengen:</h5>
+                    <div className="space-y-0.5 max-h-32 overflow-y-auto">
                       {recipe.ingredients?.map((ing) => {
                         const scaleFactor = (desiredServings || 1) / (recipe.servings || 1);
                         const scaledQty = (parseFloat(ing.quantity) * scaleFactor).toFixed(2);
@@ -321,11 +321,11 @@ export default function RecipeDetail({
           </div>
 
           {!isMarkedForCooking && (
-            <div className="p-4 border-t">
+            <div className="p-3 border-t">
               <button
                 onClick={handleAddToShopping}
                 disabled={adding || selectedIngredients.size === 0}
-                className="w-full bg-green-600 text-white px-4 py-3 rounded hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed font-medium"
+                className="w-full bg-green-600 text-white px-4 py-2.5 rounded hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed font-medium text-sm"
               >
                 {adding ? 'Wird hinzugefügt...' : 'Kochen - Zutaten zur Einkaufsliste'}
               </button>
