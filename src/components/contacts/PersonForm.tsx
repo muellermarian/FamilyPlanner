@@ -1,10 +1,11 @@
 import { useState } from 'react';
 import type { Contact, ContactFamily } from '../../lib/types';
 
-interface ContactPersonEditFormProps {
-  contact: Contact;
+interface PersonFormProps {
+  contact?: Contact;
   contactFamilies: ContactFamily[];
-  onUpdate: (
+  preselectedFamilyId?: string | null;
+  onSave: (
     firstName: string,
     lastName: string,
     contactFamilyId: string | null,
@@ -21,24 +22,29 @@ interface ContactPersonEditFormProps {
   onCancel: () => void;
 }
 
-export default function ContactPersonEditForm({
+export default function PersonForm({
   contact,
   contactFamilies,
-  onUpdate,
+  preselectedFamilyId,
+  onSave,
   onCancel,
-}: ContactPersonEditFormProps) {
-  const [firstName, setFirstName] = useState(contact.first_name);
-  const [lastName, setLastName] = useState(contact.last_name);
-  const [contactFamilyId, setContactFamilyId] = useState(contact.contact_family_id || '');
-  const [birthdate, setBirthdate] = useState(contact.birthdate || '');
-  const [phone, setPhone] = useState(contact.phone || '');
-  const [phoneLandline, setPhoneLandline] = useState(contact.phone_landline || '');
-  const [email, setEmail] = useState(contact.email || '');
-  const [street, setStreet] = useState(contact.street || '');
-  const [houseNumber, setHouseNumber] = useState(contact.house_number || '');
-  const [zip, setZip] = useState(contact.zip || '');
-  const [city, setCity] = useState(contact.city || '');
-  const [country, setCountry] = useState(contact.country || 'Deutschland');
+}: PersonFormProps) {
+  const isEdit = !!contact;
+
+  const [firstName, setFirstName] = useState(contact?.first_name || '');
+  const [lastName, setLastName] = useState(contact?.last_name || '');
+  const [contactFamilyId, setContactFamilyId] = useState(
+    contact?.contact_family_id || preselectedFamilyId || ''
+  );
+  const [birthdate, setBirthdate] = useState(contact?.birthdate || '');
+  const [phone, setPhone] = useState(contact?.phone || '');
+  const [phoneLandline, setPhoneLandline] = useState(contact?.phone_landline || '');
+  const [email, setEmail] = useState(contact?.email || '');
+  const [street, setStreet] = useState(contact?.street || '');
+  const [houseNumber, setHouseNumber] = useState(contact?.house_number || '');
+  const [zip, setZip] = useState(contact?.zip || '');
+  const [city, setCity] = useState(contact?.city || '');
+  const [country, setCountry] = useState(contact?.country || 'Deutschland');
   const [submitting, setSubmitting] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -47,7 +53,7 @@ export default function ContactPersonEditForm({
 
     setSubmitting(true);
     try {
-      await onUpdate(
+      await onSave(
         firstName.trim(),
         lastName.trim(),
         contactFamilyId || null,
@@ -73,7 +79,9 @@ export default function ContactPersonEditForm({
       <div className="bg-white rounded-lg shadow-lg w-full max-h-[90vh] overflow-y-auto sm:max-w-md">
         <form onSubmit={handleSubmit}>
           <div className="sticky top-0 bg-white p-3 sm:p-4 border-b">
-            <h3 className="text-lg font-bold">Person bearbeiten</h3>
+            <h3 className="text-lg font-bold">
+              {isEdit ? 'Person bearbeiten' : 'Neue Person hinzufügen'}
+            </h3>
           </div>
 
           <div className="p-3 sm:p-4 space-y-3">
@@ -234,9 +242,11 @@ export default function ContactPersonEditForm({
             <button
               type="submit"
               disabled={submitting || !firstName.trim() || !lastName.trim()}
-              className="flex-1 bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 disabled:opacity-50 text-base font-medium"
+              className={`flex-1 text-white px-4 py-2 rounded disabled:opacity-50 text-base font-medium ${
+                isEdit ? 'bg-blue-600 hover:bg-blue-700' : 'bg-green-600 hover:bg-green-700'
+              }`}
             >
-              {submitting ? 'Speichern...' : 'Speichern'}
+              {submitting ? 'Speichern...' : isEdit ? 'Speichern' : 'Hinzufügen'}
             </button>
           </div>
         </form>

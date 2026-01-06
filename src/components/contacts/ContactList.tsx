@@ -1,63 +1,65 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import type { ContactFamily, Contact } from '../../lib/types';
-import {
-  getContactFamilies,
-  getAllContacts,
-  addContactFamily,
-  updateContactFamily,
-  addContact,
-  updateContact,
-  deleteContactFamily,
-  deleteContact,
-} from '../../lib/contacts';
 import { useToast } from '../../hooks/useToast';
+import { useContacts } from './useContacts';
+import { useContactSearch } from './useContactSearch';
 import Toast from '../shared/Toast';
 import ContactFamilyForm from './ContactFamilyForm';
-import ContactPersonForm from './ContactPersonForm';
-import ContactPersonEditForm from './ContactPersonEditForm';
+import PersonForm from './PersonForm';
 import ContactItem from './ContactItem';
+import PersonDetails from './PersonDetails';
+import ActionButtons from './ActionButtons';
 
 interface ContactListProps {
   familyId: string;
 }
 
 export default function ContactList({ familyId }: ContactListProps) {
-  const [contactFamilies, setContactFamilies] = useState<ContactFamily[]>([]);
-  const [allContacts, setAllContacts] = useState<Contact[]>([]);
-  const [expandedFamilyIds, setExpandedFamilyIds] = useState<Set<string>>(new Set());
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [showFamilyForm, setShowFamilyForm] = useState(false);
-  const [showPersonForm, setShowPersonForm] = useState(false);
-  const [editFamily, setEditFamily] = useState<ContactFamily | null>(null);
-  const [editContact, setEditContact] = useState<Contact | null>(null);
-  const [selectedFamilyId, setSelectedFamilyId] = useState<string | null>(null);
-  const [familySearchQuery, setFamilySearchQuery] = useState('');
-  const [personSearchQuery, setPersonSearchQuery] = useState('');
+  const {
+    contactFamilies,
+    allContacts,
+    loading,
+    error,
+    handleAddFamily,
+    handleUpdateFamily,
+    handleDeleteFamily,
+    handleAddPerson,
+    handleUpdatePerson,
+    handleDeletePerson,
+  } = useContacts(familyId);
+
+  const {
+    familySearchQuery,
+    setFamilySearchQuery,
+    personSearchQuery,
+    setPersonSearchQuery,
+    filteredFamilies,
+    filteredPersons,
+  } = useContactSearch(contactFamilies, allContacts);
+
   const { toast, showToast } = useToast();
 
-  const fetchData = async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const [families, contacts] = await Promise.all([
-        getContactFamilies(familyId),
-        getAllContacts(familyId),
-      ]);
-      setContactFamilies(families);
-      setAllContacts(contacts);
-    } catch (err: any) {
-      setError(err.message || 'Fehler beim Laden');
-    } finally {
-      setLoading(false);
-    }
+  const [viewMode, setViewMode] = useState<'persons' | 'families'>('persons');
+  const [expandedFamilyIds, setExpandedFamilyIds] = useState<Set<string>>(new Set());
+  const [expandedPersonIds, setExpandedPersonIds] = useState<Set<string>>(new Set());
+  const [showFamilyForm, setShowFamilyForm] = useState(false);
+  const [editFamily, setEditFamily] = useState<ContactFamily | null>(null);
+  const [editContact, setEditContact] = useState<Contact | null>(null);
+  const [showPersonForm, setShowPersonForm] = useState(false);
+  const [preselectedFamilyId, setPreselectedFamilyId] = useState<string | null>(null);
+
+  const toggleExpanded = (
+    id: string,
+    setter: React.Dispatch<React.SetStateAction<Set<string>>>
+  ) => {
+    setter((prev) => {
+      const newSet = new Set(prev);
+      newSet.has(id) ? newSet.delete(id) : newSet.add(id);
+      return newSet;
+    });
   };
 
-  useEffect(() => {
-    fetchData();
-  }, [familyId]);
-
-  const handleAddFamily = async (
+  const onAddFamily = async (
     familyName: string,
     street: string,
     houseNumber: string,
@@ -66,8 +68,7 @@ export default function ContactList({ familyId }: ContactListProps) {
     country: string
   ) => {
     try {
-      await addContactFamily(familyId, familyName, street, houseNumber, zip, city, country);
-      await fetchData();
+      await handleAddFamily(familyName, street, houseNumber, zip, city, country);
       setShowFamilyForm(false);
       showToast('Familie hinzugefügt ✓');
     } catch (err: any) {
@@ -75,7 +76,7 @@ export default function ContactList({ familyId }: ContactListProps) {
     }
   };
 
-  const handleUpdateFamily = async (
+  const onUpdateFamily = async (
     contactFamilyId: string,
     familyName: string,
     street: string,
@@ -85,7 +86,7 @@ export default function ContactList({ familyId }: ContactListProps) {
     country: string
   ) => {
     try {
-      await updateContactFamily(
+      await handleUpdateFamily(
         contactFamilyId,
         familyName,
         street,
@@ -94,16 +95,31 @@ export default function ContactList({ familyId }: ContactListProps) {
         city,
         country
       );
-      await fetchData();
       setEditFamily(null);
     } catch (err: any) {
       alert(err.message || JSON.stringify(err));
     }
   };
 
-  const handleAddPerson = async (
+  const onDeleteFamily = async (contactFamilyId: string, familyName: string) => {
+    if (
+      !confirm(
+        `Familie "${familyName}" wirklich löschen? Alle zugehörigen Personen werden ebenfalls gelöscht.`
+      )
+    )
+      return;
+
+    try {
+      await handleDeleteFamily(contactFamilyId);
+    } catch (err: any) {
+      alert(err.message);
+    }
+  };
+
+  const onAddPerson = async (
     firstName: string,
     lastName: string,
+    contactFamilyId: string | null,
     birthdate: string | null,
     phone: string,
     phoneLandline: string,
@@ -115,12 +131,11 @@ export default function ContactList({ familyId }: ContactListProps) {
     country: string
   ) => {
     try {
-      await addContact(
-        familyId,
+      await handleAddPerson(
         firstName,
         lastName,
-        selectedFamilyId,
-        birthdate || undefined,
+        contactFamilyId,
+        birthdate,
         phone,
         phoneLandline,
         email,
@@ -130,16 +145,15 @@ export default function ContactList({ familyId }: ContactListProps) {
         city,
         country
       );
-      await fetchData();
       setShowPersonForm(false);
-      setSelectedFamilyId(null);
+      setPreselectedFamilyId(null);
       showToast('Person hinzugefügt ✓');
     } catch (err: any) {
       alert(err.message || JSON.stringify(err));
     }
   };
 
-  const handleUpdatePerson = async (
+  const onUpdatePerson = async (
     firstName: string,
     lastName: string,
     contactFamilyId: string | null,
@@ -156,12 +170,12 @@ export default function ContactList({ familyId }: ContactListProps) {
     if (!editContact) return;
 
     try {
-      await updateContact(
+      await handleUpdatePerson(
         editContact.id,
         firstName,
         lastName,
         contactFamilyId,
-        birthdate || undefined,
+        birthdate,
         phone,
         phoneLandline,
         email,
@@ -171,94 +185,55 @@ export default function ContactList({ familyId }: ContactListProps) {
         city,
         country
       );
-      await fetchData();
       setEditContact(null);
     } catch (err: any) {
       alert(err.message || JSON.stringify(err));
     }
   };
 
-  const handleDeleteFamily = async (contactFamilyId: string, familyName: string) => {
-    if (
-      !confirm(
-        `Familie "${familyName}" wirklich löschen? Alle zugehörigen Personen werden ebenfalls gelöscht.`
-      )
-    )
-      return;
-
-    try {
-      await deleteContactFamily(contactFamilyId);
-      await fetchData();
-    } catch (err: any) {
-      alert(err.message);
-    }
-  };
-
-  const handleDeletePerson = async (contactId: string, name: string) => {
+  const onDeletePerson = async (contactId: string, name: string) => {
     if (!confirm(`"${name}" wirklich löschen?`)) return;
 
     try {
-      await deleteContact(contactId);
-      await fetchData();
+      await handleDeletePerson(contactId);
     } catch (err: any) {
       alert(err.message);
     }
   };
 
-  const toggleFamily = (familyId: string) => {
-    setExpandedFamilyIds((prev) => {
-      const newSet = new Set(prev);
-      if (newSet.has(familyId)) {
-        newSet.delete(familyId);
-      } else {
-        newSet.add(familyId);
-      }
-      return newSet;
-    });
-  };
-
   const openPersonForm = (contactFamilyId?: string) => {
-    setSelectedFamilyId(contactFamilyId || null);
+    setPreselectedFamilyId(contactFamilyId || null);
     setShowPersonForm(true);
   };
-
-  // Filter families by search query
-  const filteredFamilies = contactFamilies.filter((family) => {
-    if (!familySearchQuery.trim()) return true;
-    const query = familySearchQuery.toLowerCase();
-    return family.family_name.toLowerCase().includes(query);
-  });
-
-  // Filter persons by search query
-  const filteredPersons = allContacts.filter((contact) => {
-    if (!personSearchQuery.trim()) return true;
-    const query = personSearchQuery.toLowerCase();
-    const fullName = `${contact.last_name} ${contact.first_name}`.toLowerCase();
-    return (
-      fullName.includes(query) ||
-      contact.last_name.toLowerCase().includes(query) ||
-      contact.first_name.toLowerCase().includes(query)
-    );
-  });
 
   return (
     <div className="max-w-4xl mx-auto mt-10 p-4">
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-2xl font-bold">Kontakte</h2>
-        <div className="flex gap-2">
-          <button
-            onClick={() => setShowFamilyForm(true)}
-            className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 font-medium"
-          >
-            + Familie
-          </button>
-          <button
-            onClick={() => openPersonForm()}
-            className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 font-medium"
-          >
-            + Person
-          </button>
-        </div>
+      </div>
+
+      {/* View Mode Tabs */}
+      <div className="mb-4 flex gap-2">
+        <button
+          onClick={() => setViewMode('persons')}
+          className={`px-4 py-2 rounded font-medium ${
+            viewMode === 'persons'
+              ? 'bg-blue-600 text-white'
+              : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+          }`}
+        >
+          👤 Personen
+        </button>
+        <button
+          onClick={() => setViewMode('families')}
+          className={`px-4 py-2 rounded font-medium ${
+            viewMode === 'families'
+              ? 'bg-blue-600 text-white'
+              : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+          }`}
+        >
+          👨‍👩‍👧 Familien
+        </button>
       </div>
 
       {loading && <div className="text-gray-500">🔄 Lade Kontakte…</div>}
@@ -271,10 +246,20 @@ export default function ContactList({ familyId }: ContactListProps) {
       )}
 
       {/* Contact Families */}
-      {contactFamilies.length > 0 && (
+      {viewMode === 'families' && contactFamilies.length > 0 && (
         <div className="mb-6">
-          <h3 className="text-lg font-semibold mb-3">Familien ({contactFamilies.length})</h3>
-
+          <div className="mb-4 flex items-center justify-between">
+            <span className="text-gray-700 font-medium">
+              {filteredFamilies.length} {filteredFamilies.length === 1 ? 'Familie' : 'Familien'}
+            </span>
+            <button
+              onClick={() => setShowFamilyForm(true)}
+              className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 font-medium flex items-center gap-2"
+            >
+              <span>+</span>
+              <span>Familie</span>
+            </button>
+          </div>
           <div className="mb-4">
             <input
               type="text"
@@ -299,7 +284,7 @@ export default function ContactList({ familyId }: ContactListProps) {
                 <div key={family.id} className="border rounded-lg overflow-hidden">
                   <div
                     className="p-4 bg-gray-50 flex justify-between items-center cursor-pointer hover:bg-gray-100"
-                    onClick={() => toggleFamily(family.id)}
+                    onClick={() => toggleExpanded(family.id, setExpandedFamilyIds)}
                   >
                     <div className="flex items-center gap-3">
                       <span className="text-2xl">👨‍👩‍👧</span>
@@ -314,33 +299,16 @@ export default function ContactList({ familyId }: ContactListProps) {
                         )}
                       </div>
                     </div>
-                    <div className="flex gap-2" onClick={(e) => e.stopPropagation()}>
-                      <button
-                        onClick={() => openPersonForm(family.id)}
-                        className="text-blue-600 hover:text-blue-800 px-3 py-1 text-sm font-medium"
-                        title="Person hinzufügen"
-                      >
-                        +Person
-                      </button>
-                      <button
-                        onClick={() => setEditFamily(family)}
-                        className="text-gray-700 hover:text-gray-900 px-3 py-1 text-sm font-medium"
-                        title="Familie bearbeiten"
-                      >
-                        ✏️
-                      </button>
-                      <button
-                        onClick={() => handleDeleteFamily(family.id, family.family_name)}
-                        className="text-red-500 font-bold ml-3"
-                        title="Familie löschen"
-                      >
-                        X
-                      </button>
-                    </div>
                   </div>
 
                   {isExpanded && (
                     <div className="p-4 bg-white">
+                      <ActionButtons
+                        onEdit={() => setEditFamily(family)}
+                        onDelete={() => onDeleteFamily(family.id, family.family_name)}
+                        onAddPerson={() => openPersonForm(family.id)}
+                      />
+
                       {hasAddress && (
                         <div className="mb-4 p-3 bg-gray-50 rounded border text-sm">
                           <div className="font-medium mb-1">Anschrift:</div>
@@ -371,7 +339,7 @@ export default function ContactList({ familyId }: ContactListProps) {
                               contactFamilies={contactFamilies}
                               onEdit={() => setEditContact(contact)}
                               onDelete={() =>
-                                handleDeletePerson(
+                                onDeletePerson(
                                   contact.id,
                                   `${contact.last_name}, ${contact.first_name}`
                                 )
@@ -390,10 +358,20 @@ export default function ContactList({ familyId }: ContactListProps) {
       )}
 
       {/* Individual Contacts */}
-      {allContacts.length > 0 && (
+      {viewMode === 'persons' && allContacts.length > 0 && (
         <div>
-          <h3 className="text-lg font-semibold mb-3">Personen ({allContacts.length})</h3>
-
+          <div className="mb-4 flex items-center justify-between">
+            <span className="text-gray-700 font-medium">
+              {filteredPersons.length} {filteredPersons.length === 1 ? 'Person' : 'Personen'}
+            </span>
+            <button
+              onClick={() => openPersonForm()}
+              className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 font-medium flex items-center gap-2"
+            >
+              <span>+</span>
+              <span>Person</span>
+            </button>
+          </div>
           <div className="mb-4">
             <input
               type="text"
@@ -408,50 +386,84 @@ export default function ContactList({ familyId }: ContactListProps) {
             <div className="text-gray-500 text-sm mb-4">Keine Personen gefunden</div>
           )}
 
-          <div className="space-y-2">
-            {filteredPersons.map((contact) => (
-              <ContactItem
-                key={contact.id}
-                contact={contact}
-                contactFamilies={contactFamilies}
-                onEdit={() => setEditContact(contact)}
-                onDelete={() =>
-                  handleDeletePerson(contact.id, `${contact.last_name}, ${contact.first_name}`)
-                }
-              />
-            ))}
+          <div className="space-y-3">
+            {filteredPersons.map((contact) => {
+              const isExpanded = expandedPersonIds.has(contact.id);
+              const family = contactFamilies.find((f) => f.id === contact.contact_family_id);
+              const familyName = family?.family_name;
+
+              return (
+                <div key={contact.id} className="border rounded-lg overflow-hidden">
+                  <div
+                    className="p-4 bg-gray-50 flex justify-between items-center cursor-pointer hover:bg-gray-100"
+                    onClick={() => toggleExpanded(contact.id, setExpandedPersonIds)}
+                  >
+                    <div className="flex items-center gap-3">
+                      <span className="text-2xl">👤</span>
+                      <div>
+                        <div className="font-semibold text-lg">
+                          {contact.last_name}, {contact.first_name}
+                        </div>
+                        {familyName && <div className="text-sm text-gray-600">👨‍👩‍👧 {familyName}</div>}
+                      </div>
+                    </div>
+                  </div>
+
+                  {isExpanded && (
+                    <div className="p-4 bg-white">
+                      <ActionButtons
+                        onEdit={() => setEditContact(contact)}
+                        onDelete={() =>
+                          onDeletePerson(contact.id, `${contact.last_name}, ${contact.first_name}`)
+                        }
+                      />
+
+                      {/* Contact Details */}
+                      <PersonDetails
+                        familyName={familyName}
+                        family={family}
+                        email={contact.email}
+                        phone={contact.phone}
+                        birthdate={contact.birthdate}
+                      />
+                    </div>
+                  )}
+                </div>
+              );
+            })}
           </div>
         </div>
       )}
 
       {showFamilyForm && (
-        <ContactFamilyForm onAdd={handleAddFamily} onCancel={() => setShowFamilyForm(false)} />
+        <ContactFamilyForm onAdd={onAddFamily} onCancel={() => setShowFamilyForm(false)} />
       )}
 
       {editFamily && (
         <ContactFamilyForm
           family={editFamily}
-          onUpdate={handleUpdateFamily}
+          onUpdate={onUpdateFamily}
           onCancel={() => setEditFamily(null)}
         />
       )}
 
       {showPersonForm && (
-        <ContactPersonForm
-          contactFamilyId={selectedFamilyId}
-          onAdd={handleAddPerson}
+        <PersonForm
+          contactFamilies={contactFamilies}
+          preselectedFamilyId={preselectedFamilyId}
+          onSave={onAddPerson}
           onCancel={() => {
             setShowPersonForm(false);
-            setSelectedFamilyId(null);
+            setPreselectedFamilyId(null);
           }}
         />
       )}
 
       {editContact && (
-        <ContactPersonEditForm
+        <PersonForm
           contact={editContact}
           contactFamilies={contactFamilies}
-          onUpdate={handleUpdatePerson}
+          onSave={onUpdatePerson}
           onCancel={() => setEditContact(null)}
         />
       )}
