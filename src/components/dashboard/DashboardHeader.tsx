@@ -19,7 +19,7 @@ export default function DashboardHeader({
   onLogout,
 }: DashboardHeaderProps) {
   return (
-    <div className="flex items-center justify-between mb-6 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 rounded-2xl shadow-lg p-6">
+    <div className="flex items-center justify-between mb-6 bg-gradient-to-r from-blue-800 via-blue-400 to-green-400 rounded-2xl shadow-lg p-6">
       <div>
         <div className="text-xs font-medium text-white/80 uppercase tracking-wider mb-1">
           Willkommen, Familie

@@ -82,7 +82,7 @@ export default function Dashboard({
 
   return (
     <PullToRefresh onRefresh={refetch}>
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 p-4 relative">
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 p-4 relative">
         <DashboardHeader
           familyName={familyName}
           profileName={profileName}
