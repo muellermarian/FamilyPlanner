@@ -1,4 +1,5 @@
 import type { Contact, ContactFamily } from '../../lib/types';
+import { calculateAge } from '../../lib/contactUtils';
 
 interface ContactItemProps {
   contact: Contact;
@@ -8,17 +9,6 @@ interface ContactItemProps {
 }
 
 export default function ContactItem({ contact, onEdit, onDelete }: ContactItemProps) {
-  const calculateAge = (birthdate: string): number => {
-    const today = new Date();
-    const birthDate = new Date(birthdate);
-    let age = today.getFullYear() - birthDate.getFullYear();
-    const monthDiff = today.getMonth() - birthDate.getMonth();
-    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
-      age--;
-    }
-    return age;
-  };
-
   const age = contact.birthdate ? calculateAge(contact.birthdate) : null;
 
   return (
@@ -26,11 +16,11 @@ export default function ContactItem({ contact, onEdit, onDelete }: ContactItemPr
       <div>
         <div className="font-medium text-lg">
           {contact.last_name}, {contact.first_name}
-          {age !== null && <span className="text-gray-500 font-normal"> ({age})</span>}
         </div>
         {contact.birthdate && (
           <div className="text-sm text-gray-600">
             🎈 {new Date(contact.birthdate).toLocaleDateString('de-DE')}
+            {age !== null && <span className="text-gray-500"> ({age})</span>}
           </div>
         )}
         {contact.email && <div className="text-sm text-gray-600">✉️ {contact.email}</div>}

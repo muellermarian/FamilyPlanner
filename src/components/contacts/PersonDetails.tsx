@@ -1,4 +1,5 @@
 import type { ContactFamily } from '../../lib/types';
+import { calculateAge } from '../../lib/contactUtils';
 
 interface PersonDetailsProps {
   familyName?: string;
@@ -15,6 +16,8 @@ export default function PersonDetails({
   phone,
   birthdate,
 }: PersonDetailsProps) {
+  const age = birthdate ? calculateAge(birthdate) : null;
+
   return (
     <div className="space-y-2 text-sm">
       {familyName && (
@@ -56,7 +59,10 @@ export default function PersonDetails({
       {birthdate && (
         <div className="flex gap-2">
           <span className="text-lg">🎈</span>
-          <span>{new Date(birthdate).toLocaleDateString('de-DE')}</span>
+          <span>
+            {new Date(birthdate).toLocaleDateString('de-DE')}
+            {age !== null && <span className="text-gray-500"> ({age})</span>}
+          </span>
         </div>
       )}
     </div>
