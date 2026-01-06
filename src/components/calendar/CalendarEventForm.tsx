@@ -79,88 +79,100 @@ export default function CalendarEventForm({
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-      <div className="bg-white rounded-lg shadow-xl p-6 w-full max-w-md">
-        <h2 className="text-xl font-bold mb-4">{event ? 'Termin bearbeiten' : 'Neuer Termin'}</h2>
+    <div className="max-w-2xl mx-auto pb-24">
+      {/* Header with back button */}
+      <div className="sticky top-0 bg-white border-b z-10 px-4 py-3 flex items-center gap-3 shadow-sm mb-4">
+        <button
+          onClick={onCancel}
+          className="text-gray-600 hover:text-gray-800 text-2xl"
+          type="button"
+          aria-label="Zurück"
+        >
+          ←
+        </button>
+        <h3 className="text-lg font-bold flex-1">{event ? 'Termin bearbeiten' : 'Neuer Termin'}</h3>
+      </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium mb-1">
-              Titel <span className="text-red-500">*</span>
-            </label>
-            <input
-              type="text"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              className="w-full border border-gray-300 rounded p-2"
-              required
-            />
-          </div>
+      {/* Form Content */}
+      <form id="calendar-event-form" onSubmit={handleSubmit} className="px-4 space-y-4">
+        <div>
+          <label className="block text-sm font-medium mb-1">
+            Titel <span className="text-red-500">*</span>
+          </label>
+          <input
+            type="text"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            className="w-full border border-gray-300 rounded p-2"
+            required
+          />
+        </div>
 
-          <div>
-            <label className="block text-sm font-medium mb-1">
-              Datum <span className="text-red-500">*</span>
-            </label>
-            <input
-              type="date"
-              value={eventDate}
-              onChange={(e) => setEventDate(e.target.value)}
-              className="w-full border border-gray-300 rounded p-2"
-              required
-            />
-          </div>
+        <div>
+          <label className="block text-sm font-medium mb-1">
+            Datum <span className="text-red-500">*</span>
+          </label>
+          <input
+            type="date"
+            value={eventDate}
+            onChange={(e) => setEventDate(e.target.value)}
+            className="w-full border border-gray-300 rounded p-2"
+            required
+          />
+        </div>
 
-          <div>
-            <label className="block text-sm font-medium mb-1">Uhrzeit</label>
-            <input
-              type="time"
-              value={eventTime}
-              onChange={(e) => setEventTime(e.target.value)}
-              onFocus={(e) => {
-                if (!e.target.value) {
-                  setEventTime(getNextFullHour());
-                }
-              }}
-              step="3600"
-              className="w-full border border-gray-300 rounded p-2"
-            />
-          </div>
+        <div>
+          <label className="block text-sm font-medium mb-1">Uhrzeit</label>
+          <input
+            type="time"
+            value={eventTime}
+            onChange={(e) => setEventTime(e.target.value)}
+            onFocus={(e) => {
+              if (!e.target.value) {
+                setEventTime(getNextFullHour());
+              }
+            }}
+            step="3600"
+            className="w-full border border-gray-300 rounded p-2"
+          />
+        </div>
 
-          <div>
-            <label className="block text-sm font-medium mb-1">Beschreibung</label>
-            <textarea
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              className="w-full border border-gray-300 rounded p-2"
-              rows={3}
-            />
-          </div>
+        <div>
+          <label className="block text-sm font-medium mb-1">Beschreibung</label>
+          <textarea
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            className="w-full border border-gray-300 rounded p-2"
+            rows={3}
+          />
+        </div>
+      </form>
 
-          <div className="flex gap-2 pt-4">
-            <button
-              type="submit"
-              className="flex-1 bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded"
-            >
-              {event ? 'Speichern' : 'Hinzufügen'}
-            </button>
-            <button
-              type="button"
-              onClick={onCancel}
-              className="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold py-2 px-4 rounded"
-            >
-              Abbrechen
-            </button>
-            {event && (
-              <button
-                type="button"
-                onClick={handleDelete}
-                className="bg-red-500 hover:bg-red-600 text-white font-semibold py-2 px-4 rounded"
-              >
-                🗑️
-              </button>
-            )}
-          </div>
-        </form>
+      {/* Fixed Bottom Action Bar */}
+      <div className="fixed bottom-0 left-0 right-0 bg-white border-t shadow-lg p-3 flex gap-2">
+        {event && (
+          <button
+            type="button"
+            onClick={handleDelete}
+            className="bg-red-500 hover:bg-red-600 text-white font-semibold py-2 px-4 rounded text-sm"
+          >
+            Löschen
+          </button>
+        )}
+        <button
+          type="button"
+          onClick={onCancel}
+          className="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold py-2 px-4 rounded text-sm"
+        >
+          Abbrechen
+        </button>
+        <button
+          type="submit"
+          form="calendar-event-form"
+          className="flex-1 bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded text-sm"
+        >
+          {event ? 'Speichern' : 'Hinzufügen'}
+        </button>
       </div>
     </div>
   );

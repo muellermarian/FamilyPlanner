@@ -1,14 +1,21 @@
-import type { AgendaItem, Contact, Todo } from '../../lib/types';
+import type { AgendaItem, Contact, Todo, CalendarEvent } from '../../lib/types';
 import { getEventIcon, getEventBorderClasses, formatTime } from './calendarUtils';
 
 interface DayDetailProps {
   date: Date;
   items: AgendaItem[];
   onClose: () => void;
+  onEditEvent?: (event: CalendarEvent) => void;
   compact?: boolean;
 }
 
-export default function DayDetail({ date, items, onClose, compact = false }: DayDetailProps) {
+export default function DayDetail({
+  date,
+  items,
+  onClose,
+  onEditEvent,
+  compact = false,
+}: DayDetailProps) {
   return (
     <div
       className={`p-4 bg-gray-50 border rounded-lg ${
@@ -53,23 +60,35 @@ export default function DayDetail({ date, items, onClose, compact = false }: Day
                   compact ? 'bg-white' : ''
                 } ${getEventBorderClasses(item.type)}`}
               >
-                <div className="font-medium text-sm">
-                  {getEventIcon(item.type, item.data)} {item.title}
-                </div>
-                {item.type === 'birthday' && ageText && (
-                  <div className="text-xs text-gray-600 mt-1">🎈 {ageText}</div>
-                )}
-                {item.description && (
-                  <div className="text-xs text-gray-600 mt-1">{item.description}</div>
-                )}
-                {item.time && (
-                  <div className="text-xs text-gray-500 mt-1">🕐 {formatTime(item.time)}</div>
-                )}
-                {item.type === 'todo' && (item.data as Todo).assigned && (
-                  <div className="text-xs text-gray-600 mt-1">
-                    👤 {(item.data as Todo).assigned?.name}
+                <div className="flex justify-between items-start gap-2">
+                  <div className="flex-1">
+                    <div className="font-medium text-sm">
+                      {getEventIcon(item.type, item.data)} {item.title}
+                    </div>
+                    {item.type === 'birthday' && ageText && (
+                      <div className="text-xs text-gray-600 mt-1">🎈 {ageText}</div>
+                    )}
+                    {item.description && (
+                      <div className="text-xs text-gray-600 mt-1">{item.description}</div>
+                    )}
+                    {item.time && (
+                      <div className="text-xs text-gray-500 mt-1">🕐 {formatTime(item.time)}</div>
+                    )}
+                    {item.type === 'todo' && (item.data as Todo).assigned && (
+                      <div className="text-xs text-gray-600 mt-1">
+                        👤 {(item.data as Todo).assigned?.name}
+                      </div>
+                    )}
                   </div>
-                )}
+                  {item.type === 'event' && onEditEvent && (
+                    <button
+                      onClick={() => onEditEvent(item.data as CalendarEvent)}
+                      className="text-blue-600 hover:text-blue-800 text-sm font-medium flex-shrink-0"
+                    >
+                      ✏️
+                    </button>
+                  )}
+                </div>
               </li>
             );
           })}

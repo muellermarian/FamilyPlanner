@@ -18,6 +18,7 @@ interface WeekViewProps {
   shoppingItems: ShoppingItem[];
   onPreviousWeek: () => void;
   onNextWeek: () => void;
+  onEditEvent: (event: CalendarEvent) => void;
 }
 
 export default function WeekView({
@@ -28,6 +29,7 @@ export default function WeekView({
   shoppingItems,
   onPreviousWeek,
   onNextWeek,
+  onEditEvent,
 }: WeekViewProps) {
   const [selectedDay, setSelectedDay] = useState<Date | null>(null);
 
@@ -117,6 +119,7 @@ export default function WeekView({
                   date={date}
                   items={items}
                   onClose={() => setSelectedDay(null)}
+                  onEditEvent={onEditEvent}
                   compact={true}
                 />
               </div>
