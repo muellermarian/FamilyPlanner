@@ -205,9 +205,7 @@ export default function RecipeDetail({
               <div className="mb-3 p-2 bg-orange-100 border border-orange-300 rounded flex justify-between items-center gap-2">
                 <div className="flex-1 min-w-0">
                   <div className="font-medium text-sm text-orange-800">Zum Kochen markiert</div>
-                  <div className="text-xs text-orange-600">
-                    Zutaten in Einkaufsliste
-                  </div>
+                  <div className="text-xs text-orange-600">Zutaten in Einkaufsliste</div>
                 </div>
                 <button
                   onClick={handleMarkAsCooked}
@@ -220,7 +218,9 @@ export default function RecipeDetail({
 
             <div className="mb-3">
               <div className="flex justify-between items-center mb-2">
-                <h4 className="font-semibold text-sm">Zutaten ({recipe.ingredients?.length || 0})</h4>
+                <h4 className="font-semibold text-sm">
+                  Zutaten ({recipe.ingredients?.length || 0})
+                </h4>
                 <button onClick={toggleAll} className="text-xs text-blue-600 hover:text-blue-700">
                   {allSelected ? 'Alle abwählen' : 'Alle auswählen'}
                 </button>
@@ -231,7 +231,10 @@ export default function RecipeDetail({
               ) : (
                 <ul className="space-y-1.5">
                   {recipe.ingredients.map((ing) => (
-                    <li key={ing.id} className="flex items-center gap-2 p-1.5 border rounded text-sm">
+                    <li
+                      key={ing.id}
+                      className="flex items-center gap-2 p-1.5 border rounded text-sm"
+                    >
                       <input
                         type="checkbox"
                         checked={selectedIngredients.has(ing.id)}
