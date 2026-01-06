@@ -19,10 +19,14 @@ export default function DashboardHeader({
   onLogout,
 }: DashboardHeaderProps) {
   return (
-    <div className="flex items-center justify-between mb-4">
+    <div className="flex items-center justify-between mb-6 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 rounded-2xl shadow-lg p-6">
       <div>
-        <div className="text-sm text-gray-500">Familie</div>
-        <h1 className="text-2xl font-bold">{familyName ?? '—'}</h1>
+        <div className="text-xs font-medium text-white/80 uppercase tracking-wider mb-1">
+          Willkommen, Familie
+        </div>
+        <h1 className="text-3xl font-bold text-white flex items-center gap-2">
+          👨‍👩‍👧 {familyName ?? '—'}
+        </h1>
       </div>
 
       <SettingsMenu
@@ -58,7 +62,7 @@ function SettingsMenu({
       <button
         onClick={() => setMenuOpen((s) => !s)}
         aria-label="Open settings"
-        className="p-2 rounded hover:bg-gray-100"
+        className="p-2 rounded-lg hover:bg-white/20 transition-colors text-2xl"
         onMouseDown={(e) => e.preventDefault()}
       >
         ⚙️
