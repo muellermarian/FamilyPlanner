@@ -1,15 +1,10 @@
-import { useEffect, useState } from 'react';
-import type { Note } from '../../lib/notes';
-import { getNotesForFamily, addNote, deleteNote, updateNote } from '../../lib/notes';
+import { useState } from 'react';
 import NoteItem from './NoteItem';
+import NoteAddForm from './NoteAddForm';
+import { useNotes } from './useNotes';
+import { useToast } from '../../hooks/useToast';
+import Toast from '../shared/Toast';
 
-/**
- * NoteList: simple list UI for notes within a family.
- *
- * - Styling and UX follow the TodoList patterns: a centered card, + button to add, and
- *   stacked list items with spacing.
- * - UI strings are in German per project convention; code comments remain in English.
- */
 interface NoteListProps {
   familyId: string;
   currentProfileId: string;
@@ -17,65 +12,22 @@ interface NoteListProps {
 }
 
 export default function NoteList({ familyId, currentProfileId, users }: NoteListProps) {
-  const [notes, setNotes] = useState<Note[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const [showAdd, setShowAdd] = useState(false);
-  const [newTitle, setNewTitle] = useState('');
-  const [newContent, setNewContent] = useState('');
+  const { toast, showToast } = useToast();
+  const { notes, loading, error, handleAdd, handleDelete, handleUpdate } = useNotes(
+    familyId,
+    currentProfileId
+  );
 
-  const fetchNotes = async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const data = await getNotesForFamily(familyId);
-      setNotes(data ?? []);
-    } catch (err: any) {
-      setError(err?.message || String(err));
-      setNotes([]);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchNotes();
-  }, [familyId]);
-
-  const handleAdd = async () => {
-    if (!newTitle.trim()) return alert('Please provide a title');
-    try {
-      await addNote(familyId, newTitle.trim(), newContent.trim(), currentProfileId);
-      setNewTitle('');
-      setNewContent('');
-      setShowAdd(false);
-      await fetchNotes();
-    } catch (err: any) {
-      alert(err?.message || String(err));
-    }
-  };
-
-  const handleDelete = async (id: string) => {
-    if (!confirm('Delete this note?')) return;
-    try {
-      await deleteNote(id);
-      await fetchNotes();
-    } catch (err: any) {
-      alert(err?.message || String(err));
-    }
-  };
-
-  const handleUpdate = async (note: Note) => {
-    try {
-      await updateNote(note.id, note.title, note.content);
-      await fetchNotes();
-    } catch (err: any) {
-      alert(err?.message || String(err));
-    }
+  const onAddNote = async (title: string, content: string) => {
+    await handleAdd(title, content);
+    setShowAdd(false);
+    showToast('Notiz erfolgreich hinzugefügt ✓');
   };
 
   return (
     <div className="max-w-md mx-auto mt-10 p-4 border rounded shadow-md">
+      {/* Header */}
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-2xl font-bold">Notizen</h2>
         {!showAdd && (
@@ -89,47 +41,30 @@ export default function NoteList({ familyId, currentProfileId, users }: NoteList
         )}
       </div>
 
-      {showAdd && (
-        <div className="mb-4 flex flex-col gap-2">
-          <input
-            placeholder="Titel"
-            className="border rounded px-2 py-1"
-            value={newTitle}
-            onChange={(e) => setNewTitle(e.target.value)}
-          />
-          <textarea
-            placeholder="Inhalt"
-            className="border rounded px-2 py-1 h-28"
-            value={newContent}
-            onChange={(e) => setNewContent(e.target.value)}
-          />
-          <div className="flex gap-2 justify-end">
-            <button className="px-3 py-1 bg-blue-600 text-white rounded" onClick={handleAdd}>
-              Hinzufügen
-            </button>
-            <button className="px-3 py-1 bg-gray-100 rounded" onClick={() => setShowAdd(false)}>
-              Abbrechen
-            </button>
-          </div>
-        </div>
+      {/* Add Form */}
+      {showAdd && <NoteAddForm onAdd={onAddNote} onCancel={() => setShowAdd(false)} />}
+
+      {/* Status */}
+      {loading && <div className="text-center text-gray-500 py-4">Lade Notizen...</div>}
+      {error && <div className="text-center text-red-500 py-4">Fehler: {error}</div>}
+      {!loading && notes.length === 0 && (
+        <div className="text-center text-gray-500 py-4">Keine Notizen vorhanden.</div>
       )}
 
-      <div className="mb-2 text-sm text-gray-600">
-        {loading ? '🔄 Lade Notizen…' : `${notes.length} Notizen`}
-      </div>
-      {error && <div className="mb-2 text-red-600">Fehler: {error}</div>}
-
+      {/* Notes List */}
       <ul className="flex flex-col gap-3">
-        {notes.map((n) => (
+        {notes.map((note) => (
           <NoteItem
-            key={n.id}
-            note={n}
+            key={note.id}
+            note={note}
             onDelete={handleDelete}
             onUpdate={handleUpdate}
             users={users}
           />
         ))}
       </ul>
+
+      {toast && <Toast message={toast} />}
     </div>
   );
 }
