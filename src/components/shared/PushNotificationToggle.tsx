@@ -29,9 +29,6 @@ export default function PushNotificationToggle({
   if (compact) {
     return (
       <div className="w-full">
-        <div className="text-xs text-gray-500 mb-1 px-2">
-          DEBUG: userId = {userId?.substring(0, 8)}...
-        </div>
         <button
           onClick={handleToggle}
           disabled={loading || permission === 'denied'}
