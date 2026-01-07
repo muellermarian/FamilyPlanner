@@ -10,6 +10,7 @@ import RecipeItem from './RecipeItem';
 import RecipeAddForm from './RecipeAddForm';
 import RecipeDetail from './RecipeDetail';
 import RecipeEditForm from './RecipeEditForm';
+import IngredientsList from './IngredientsList';
 
 interface RecipeListProps {
   familyId: string;
@@ -29,6 +30,7 @@ export default function RecipeList({ familyId, currentUserId, currentProfileId }
   const [showAddForm, setShowAddForm] = useState(false);
   const [selectedRecipe, setSelectedRecipe] = useState<Recipe | null>(null);
   const [editRecipe, setEditRecipe] = useState<Recipe | null>(null);
+  const [showIngredientsList, setShowIngredientsList] = useState(false);
 
   const handleAdd = async (
     name: string,
@@ -121,8 +123,10 @@ export default function RecipeList({ familyId, currentUserId, currentProfileId }
   return (
     <PullToRefresh onRefresh={fetchRecipes}>
       <div className="max-w-4xl mx-auto p-4">
-        {/* Show Detail View if recipe selected */}
-        {selectedRecipe ? (
+        {/* Show Ingredients List */}
+        {showIngredientsList ? (
+          <IngredientsList familyId={familyId} onClose={() => setShowIngredientsList(false)} />
+        ) : selectedRecipe ? (
           <RecipeDetail
             recipe={selectedRecipe}
             familyId={familyId}
@@ -151,14 +155,22 @@ export default function RecipeList({ familyId, currentUserId, currentProfileId }
         ) : (
           <>
             {/* List View */}
-            <div className="flex justify-between items-center mb-6">
-              <h2 className="text-2xl font-bold">Rezepte</h2>
-              <button
-                onClick={() => setShowAddForm(true)}
-                className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 font-medium"
-              >
-                + Neues Rezept
-              </button>
+            <div className="mb-4">
+              <h2 className="text-2xl font-bold mb-3">Rezepte</h2>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setShowIngredientsList(true)}
+                  className="flex-1 bg-blue-600 text-white px-3 py-2 rounded hover:bg-blue-700 font-medium text-sm"
+                >
+                  📋 Zutaten
+                </button>
+                <button
+                  onClick={() => setShowAddForm(true)}
+                  className="flex-1 bg-green-600 text-white px-3 py-2 rounded hover:bg-green-700 font-medium text-sm"
+                >
+                  + Rezept
+                </button>
+              </div>
             </div>
 
             <div className="mb-4">
