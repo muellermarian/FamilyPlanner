@@ -69,7 +69,7 @@ export default function TodoList({
         </div>
 
         {/* Add Form */}
-        {showAddForm && (
+        {showAddForm && !editTodo && (
           <TodoAddForm
             currentProfileId={currentProfileId}
             currentUserId={currentUserId}
@@ -79,8 +79,20 @@ export default function TodoList({
           />
         )}
 
+        {/* Edit Form */}
+        {editTodo && (
+          <TodoEditForm
+            todo={editTodo}
+            users={users}
+            onClose={() => setEditTodo(null)}
+            onUpdate={fetchTodos}
+            currentUserId={currentUserId}
+            currentProfileId={currentProfileId}
+          />
+        )}
+
         {/* Views */}
-        {minimalMode ? (
+        {!editTodo && (minimalMode ? (
           <MinimalTodoView
             todos={todos}
             loading={loading}
@@ -112,19 +124,7 @@ export default function TodoList({
               ))}
             </ul>
           </>
-        )}
-
-        {/* Edit Modal */}
-        {editTodo && (
-          <TodoEditForm
-            todo={editTodo}
-            users={users}
-            onClose={() => setEditTodo(null)}
-            onUpdate={fetchTodos}
-            currentUserId={currentUserId}
-            currentProfileId={currentProfileId}
-          />
-        )}
+        ))}
 
         {toast && <Toast message={toast} />}
       </div>

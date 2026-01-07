@@ -137,18 +137,15 @@ export default function TodoEditForm({
   };
 
   return (
-    <div className="fixed inset-0 bg-black/40 z-50 flex justify-center items-start pt-10 overflow-auto">
-      <div className="flex flex-col gap-2 mb-6 border rounded p-4 bg-gray-50 w-full max-w-md mx-4 sm:mx-auto">
-        <h2 className="text-lg font-bold mb-2">Todo bearbeiten</h2>
+    <div className="flex flex-col gap-3 p-4 bg-white border rounded-lg shadow-sm">
+      <h3 className="text-base font-semibold">Todo bearbeiten</h3>
 
         {/* Title */}
         <div>
           <label className="text-sm font-medium mb-1 block">Titel</label>
-          <input
-            type="text"
-            value={todo.task}
-            className="border p-2 rounded w-full bg-gray-100 cursor-not-allowed"
-          />
+          <div className="border p-2 rounded bg-gray-50 text-gray-700">
+            {todo.task}
+          </div>
         </div>
 
         {/* Description */}
@@ -194,57 +191,60 @@ export default function TodoEditForm({
         />
 
         {/* Comments section */}
-        <div className="mt-4">
-          <h3 className="font-semibold mb-2">Kommentare</h3>
+        <div className="mt-2 pt-3 border-t">
+          <h4 className="font-medium mb-2 text-sm">Kommentare</h4>
 
           {/* Add comment */}
-          <div className="flex gap-2 mb-4">
+          <div className="flex gap-2 mb-3">
             <input
               type="text"
               value={newComment}
               onChange={(e) => setNewComment(e.target.value)}
               placeholder="Neuer Kommentar"
-              className="border p-2 rounded flex-1"
+              className="border p-2 rounded flex-1 text-sm"
             />
             <button
               onClick={addComment}
-              className="bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700"
+              className="bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700 text-sm"
             >
-              Hinzufügen
+              +
             </button>
           </div>
 
           {/* Comments list */}
-          <div className="flex flex-col gap-2 max-h-64 overflow-auto">
+          <div className="flex flex-col gap-2 max-h-48 overflow-auto">
             {loadingComments ? (
-              <div className="text-sm text-gray-500">Lade Kommentare…</div>
+              <div className="text-xs text-gray-500">Lade Kommentare…</div>
             ) : comments.length > 0 ? (
               comments.map((c) => (
-                <div key={c.id} className="border rounded p-2 bg-white">
-                  <div className="text-sm text-gray-600">
+                <div key={c.id} className="border rounded p-2 bg-gray-50 text-sm">
+                  <div className="text-xs text-gray-600 mb-1">
                     {c.creator?.name || 'Unbekannt'} – {new Date(c.created_at).toLocaleString()}
                   </div>
-                  <div>{c.text}</div>
+                  <div className="text-sm">{c.text}</div>
                 </div>
               ))
             ) : (
-              <div className="text-sm text-gray-500">Noch keine Kommentare</div>
+              <div className="text-xs text-gray-500">Noch keine Kommentare</div>
             )}
           </div>
         </div>
+
         {/* Buttons speichern / abbrechen */}
-        <div className="flex gap-2 mt-2">
+        <div className="flex gap-2 mt-3 pt-3 border-t">
           <button
             onClick={save}
-            className="bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700"
+            className="flex-1 bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 text-sm font-medium"
           >
             Speichern
           </button>
-          <button onClick={onClose} className="bg-gray-300 px-3 py-1 rounded hover:bg-gray-400">
+          <button 
+            onClick={onClose} 
+            className="flex-1 bg-gray-200 text-gray-800 px-4 py-2 rounded hover:bg-gray-300 text-sm font-medium"
+          >
             Abbrechen
           </button>
         </div>
-      </div>
     </div>
   );
 }
