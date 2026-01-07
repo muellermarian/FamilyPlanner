@@ -56,7 +56,7 @@ function SettingsMenu({
   profileName,
   userEmail,
   currentUserId,
-  currentProfileId,
+  currentProfileId: _currentProfileId,
   familyId,
   onLogout,
 }: SettingsMenuProps) {
