@@ -165,12 +165,24 @@ export default function TodoEditForm({
         {/* Due date */}
         <div>
           <label className="text-sm font-medium mb-1 block">Fällig am (optional)</label>
-          <input
-            type="date"
-            value={dueAt}
-            onChange={(e) => setDueAt(e.target.value)}
-            className="border p-2 rounded w-full"
-          />
+          <div className="flex gap-2">
+            <input
+              type="date"
+              value={dueAt}
+              onChange={(e) => setDueAt(e.target.value)}
+              className="flex-1 border p-2 rounded"
+            />
+            {dueAt && (
+              <button
+                type="button"
+                onClick={() => setDueAt('')}
+                className="px-3 py-2 border rounded bg-gray-100 hover:bg-gray-200 text-sm"
+                title="Löschen"
+              >
+                ✕
+              </button>
+            )}
+          </div>
         </div>
 
         {/* Assigned to */}

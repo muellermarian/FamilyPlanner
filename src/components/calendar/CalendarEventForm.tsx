@@ -112,29 +112,53 @@ export default function CalendarEventForm({
           <label className="block text-sm font-medium mb-1">
             Datum <span className="text-red-500">*</span>
           </label>
-          <input
-            type="date"
-            value={eventDate}
-            onChange={(e) => setEventDate(e.target.value)}
-            className="w-full border border-gray-300 rounded p-2"
-            required
-          />
+          <div className="flex gap-2">
+            <input
+              type="date"
+              value={eventDate}
+              onChange={(e) => setEventDate(e.target.value)}
+              className="flex-1 border border-gray-300 rounded p-2"
+              required
+            />
+            {eventDate && (
+              <button
+                type="button"
+                onClick={() => setEventDate('')}
+                className="px-3 py-2 border border-gray-300 rounded bg-gray-100 hover:bg-gray-200 text-sm"
+                title="Löschen"
+              >
+                ✕
+              </button>
+            )}
+          </div>
         </div>
 
         <div>
           <label className="block text-sm font-medium mb-1">Uhrzeit</label>
-          <input
-            type="time"
-            value={eventTime}
-            onChange={(e) => setEventTime(e.target.value)}
-            onFocus={(e) => {
-              if (!e.target.value) {
-                setEventTime(getNextFullHour());
-              }
-            }}
-            step="3600"
-            className="w-full border border-gray-300 rounded p-2"
-          />
+          <div className="flex gap-2">
+            <input
+              type="time"
+              value={eventTime}
+              onChange={(e) => setEventTime(e.target.value)}
+              onFocus={(e) => {
+                if (!e.target.value) {
+                  setEventTime(getNextFullHour());
+                }
+              }}
+              step="3600"
+              className="flex-1 border border-gray-300 rounded p-2"
+            />
+            {eventTime && (
+              <button
+                type="button"
+                onClick={() => setEventTime('')}
+                className="px-3 py-2 border border-gray-300 rounded bg-gray-100 hover:bg-gray-200 text-sm"
+                title="Löschen"
+              >
+                ✕
+              </button>
+            )}
+          </div>
         </div>
 
         <div>

@@ -101,12 +101,24 @@ export default function ShoppingAddForm({ onAdd, onCancel }: ShoppingAddFormProp
           <label className="block text-sm font-medium mb-1">
             Datum <span className="text-gray-400">(optional)</span>
           </label>
-          <input
-            type="date"
-            value={dealDate}
-            onChange={(e) => setDealDate(e.target.value)}
-            className="w-full border rounded px-3 py-2"
-          />
+          <div className="flex gap-2">
+            <input
+              type="date"
+              value={dealDate}
+              onChange={(e) => setDealDate(e.target.value)}
+              className="flex-1 border rounded px-3 py-2"
+            />
+            {dealDate && (
+              <button
+                type="button"
+                onClick={() => setDealDate('')}
+                className="px-3 py-2 border rounded bg-gray-100 hover:bg-gray-200 text-sm"
+                title="Löschen"
+              >
+                ✕
+              </button>
+            )}
+          </div>
         </div>
       </div>
       <div className="flex gap-2">

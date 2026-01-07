@@ -130,12 +130,24 @@ export default function PersonForm({
 
           <div>
             <label className="block text-sm font-medium mb-1">Geburtsdatum (optional)</label>
-            <input
-              type="date"
-              value={birthdate}
-              onChange={(e) => setBirthdate(e.target.value)}
-              className="w-full border rounded px-3 py-2 text-base"
-            />
+            <div className="flex gap-2">
+              <input
+                type="date"
+                value={birthdate}
+                onChange={(e) => setBirthdate(e.target.value)}
+                className="flex-1 border rounded px-3 py-2 text-base"
+              />
+              {birthdate && (
+                <button
+                  type="button"
+                  onClick={() => setBirthdate('')}
+                  className="px-3 py-2 border rounded bg-gray-100 hover:bg-gray-200 text-sm"
+                  title="Löschen"
+                >
+                  ✕
+                </button>
+              )}
+            </div>
           </div>
 
           <div>
