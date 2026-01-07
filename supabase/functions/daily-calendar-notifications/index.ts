@@ -91,7 +91,16 @@ serve(async (req) => {
 
       // Build notification message - just list the items directly
       let body = '';
-      events?.forEach((e: any) => (body += `📅 ${e.title}\n`));
+      events?.forEach((e: any) => {
+        let line = '📅';
+        if (e.event_time) {
+          // Format time as HH:MM
+          const timeParts = e.event_time.split(':');
+          line += ` ${timeParts[0]}:${timeParts[1]} Uhr`;
+        }
+        line += ` ${e.title}\n`;
+        body += line;
+      });
       todos?.forEach((t: any) => (body += `✅ ${t.task}\n`));
       birthdaysToday.forEach((b: any) => (body += `🎈 ${b.first_name} ${b.last_name}\n`));
       shoppingItems?.forEach((s: any) => (body += `🛒 ${s.name} (Deal)\n`));
