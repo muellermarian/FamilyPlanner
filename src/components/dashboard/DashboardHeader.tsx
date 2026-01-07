@@ -5,6 +5,7 @@ interface DashboardHeaderProps {
   familyName: string | null;
   profileName: string | null;
   userEmail: string | null | undefined;
+  currentUserId: string;
   currentProfileId: string;
   familyId: string;
   onLogout?: () => void;
@@ -14,6 +15,7 @@ export default function DashboardHeader({
   familyName,
   profileName,
   userEmail,
+  currentUserId,
   currentProfileId,
   familyId,
   onLogout,
@@ -32,6 +34,7 @@ export default function DashboardHeader({
       <SettingsMenu
         profileName={profileName}
         userEmail={userEmail}
+        currentUserId={currentUserId}
         currentProfileId={currentProfileId}
         familyId={familyId}
         onLogout={onLogout}
@@ -43,6 +46,7 @@ export default function DashboardHeader({
 interface SettingsMenuProps {
   profileName: string | null;
   userEmail: string | null | undefined;
+  currentUserId: string;
   currentProfileId: string;
   familyId: string;
   onLogout?: () => void;
@@ -51,6 +55,7 @@ interface SettingsMenuProps {
 function SettingsMenu({
   profileName,
   userEmail,
+  currentUserId,
   currentProfileId,
   familyId,
   onLogout,
@@ -74,11 +79,7 @@ function SettingsMenu({
 
           <div className="border-t pt-2 mt-2 mb-2">
             <div className="px-2 py-1">
-              <PushNotificationToggle
-                userId={currentProfileId}
-                familyId={familyId}
-                compact={true}
-              />
+              <PushNotificationToggle userId={currentUserId} familyId={familyId} compact={true} />
             </div>
           </div>
 

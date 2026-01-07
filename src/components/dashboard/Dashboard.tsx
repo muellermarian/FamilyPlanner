@@ -20,6 +20,7 @@ interface DashboardProps {
 
 export default function Dashboard({
   familyId,
+  currentUserId,
   currentProfileId,
   users,
   onOpenTodos,
@@ -87,6 +88,7 @@ export default function Dashboard({
           familyName={familyName}
           profileName={profileName}
           userEmail={userEmail}
+          currentUserId={currentUserId}
           currentProfileId={currentProfileId}
           familyId={familyId}
           onLogout={onLogout}
