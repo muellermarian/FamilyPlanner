@@ -57,7 +57,9 @@ export default function NoteItem({ note, onDelete, onUpdate, users = [] }: NoteI
 
           <div className="pr-12">
             <div className="font-semibold text-lg">{note.title}</div>
-            <div className="text-sm text-gray-600 mt-1 whitespace-pre-wrap">{truncate(note.content)}</div>
+            <div className="text-sm text-gray-600 mt-1 whitespace-pre-wrap">
+              {truncate(note.content)}
+            </div>
           </div>
 
           <div className="text-xs text-gray-400 mt-3">
