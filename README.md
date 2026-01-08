@@ -4,6 +4,28 @@ FamilyPlanner ist eine private Webanwendung, die meiner Familie im Alltag genutz
 
 ---
 
+## Eindrücke aus der App
+
+<div align="center">
+
+<img src="./public/screenshots/IMG_3785.jpg" alt="Screenshot 1" width="180" />
+<img src="./public/screenshots/IMG_3786.jpg" alt="Screenshot 2" width="180" />
+<img src="./public/screenshots/IMG_3787.jpg" alt="Screenshot 3" width="180" />
+<img src="./public/screenshots/IMG_3788.jpg" alt="Screenshot 4" width="180" />
+<img src="./public/screenshots/IMG_3789.jpg" alt="Screenshot 5" width="180" />
+<img src="./public/screenshots/IMG_3790.jpg" alt="Screenshot 6" width="180" />
+<img src="./public/screenshots/IMG_3791.jpg" alt="Screenshot 7" width="180" />
+<img src="./public/screenshots/IMG_3792.jpg" alt="Screenshot 8" width="180" />
+<img src="./public/screenshots/IMG_3793.jpg" alt="Screenshot 9" width="180" />
+<img src="./public/screenshots/IMG_3794.jpg" alt="Screenshot 10" width="180" />
+<img src="./public/screenshots/IMG_3795.jpg" alt="Screenshot 11" width="180" />
+<img src="./public/screenshots/IMG_3796.jpg" alt="Screenshot 12" width="180" />
+<img src="./public/screenshots/IMG_3797.jpg" alt="Screenshot 13" width="180" />
+<img src="./public/screenshots/IMG_3798.jpg" alt="Screenshot 14" width="180" />
+<img src="./public/screenshots/IMG_3799.jpg" alt="Screenshot 15" width="180" />
+
+</div>
+
 ## Funktionen
 
 - **Aufgaben/Todos:** Aufgabenlisten, Filter, Zuweisung an Personen, Fälligkeitsdaten, Kommentarfunktion
