@@ -1,6 +1,5 @@
 import { render, screen } from '@testing-library/react';
 import TodoList from './TodoList';
-import React from 'react';
 
 describe('TodoList', () => {
   const users = [
@@ -20,10 +19,8 @@ describe('TodoList', () => {
         users={users}
       />
     );
-    expect(screen.getByText(/open/i)).toBeInTheDocument();
-    expect(screen.getByText(/done/i)).toBeInTheDocument();
-    expect(screen.getByText(/all/i)).toBeInTheDocument();
+    expect(screen.getByText(/offene todos/i)).toBeInTheDocument();
+    expect(screen.getByText(/erledigt/i)).toBeInTheDocument();
+    expect(screen.getByText(/alle/i)).toBeInTheDocument();
   });
-
-  // Add more tests for loading, error, and todo rendering as needed
 });

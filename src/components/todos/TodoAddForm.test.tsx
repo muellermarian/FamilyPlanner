@@ -26,13 +26,13 @@ describe('TodoAddForm', () => {
       />
     );
     // Task input
-    expect(screen.getByPlaceholderText(/Neue Aufgabe/i)).toBeInTheDocument();
+    expect(screen.getByPlaceholderText(/^Neue Aufgabe/i)).toBeInTheDocument();
     // Description textarea
-    expect(screen.getByPlaceholderText(/Beschreibung/i)).toBeInTheDocument();
-    // Due date input
-    expect(screen.getByLabelText(/Fällig am/i)).toBeInTheDocument();
+    expect(screen.getByPlaceholderText(/^Beschreibung/i)).toBeInTheDocument();
+    // Due date input (label)
+    expect(screen.getByText(/^Fällig am/i)).toBeInTheDocument();
     // Assigned select (label)
-    expect(screen.getByText(/Zugewiesen an/i)).toBeInTheDocument();
+    expect(screen.getByText(/^Zugewiesen an/i)).toBeInTheDocument();
     // Add button
     expect(screen.getByRole('button', { name: /hinzufügen/i })).toBeInTheDocument();
     // Cancel button
@@ -49,8 +49,10 @@ describe('TodoAddForm', () => {
         onCancel={onCancel}
       />
     );
-    fireEvent.change(screen.getByRole('textbox'), { target: { value: 'Test task' } });
-    fireEvent.click(screen.getByRole('button', { name: /add/i }));
+    fireEvent.change(screen.getByPlaceholderText(/^Neue Aufgabe/i), {
+      target: { value: 'Test task' },
+    });
+    fireEvent.click(screen.getByRole('button', { name: /hinzufügen/i }));
     expect(onAdd).toHaveBeenCalledWith('Test task', expect.anything(), '', null);
   });
 
@@ -64,7 +66,7 @@ describe('TodoAddForm', () => {
         onCancel={onCancel}
       />
     );
-    fireEvent.click(screen.getByRole('button', { name: /cancel/i }));
+    fireEvent.click(screen.getByRole('button', { name: /abbrechen/i }));
     expect(onCancel).toHaveBeenCalled();
   });
 });
