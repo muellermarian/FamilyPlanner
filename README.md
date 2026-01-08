@@ -1,6 +1,6 @@
 # FamilyPlanner
 
-FamilyPlanner ist eine private Webanwendung, die meiner Familie im Alltag genutzt wird. Sie hilft uns, Termine, Aufgaben, Notizen, Kontakte, Essenspläne und Einkäufe gemeinsam zu organisieren - einfach und zuverlässig. Die App läuft als PWA auf unseren Handys und wird weiterentwickelt, wenn im Alltag neue Wünsche oder Ideen entstehen.
+FamilyPlanner ist eine private Webanwendung, die von meiner Familie im Alltag genutzt wird. Sie hilft uns, Termine, Aufgaben, Notizen, Kontakte, Essenspläne und Einkäufe gemeinsam zu organisieren - einfach und zuverlässig. Die App läuft als PWA auf unseren Handys und wird von mir weiterentwickelt, wenn im Alltag neue Wünsche oder Ideen entstehen.
 
 ---
 
