@@ -1,73 +1,51 @@
-# React + TypeScript + Vite
+# FamilyPlanner
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+FamilyPlanner ist eine private Webanwendung, die meiner Familie im Alltag genutzt wird. Sie hilft uns, Termine, Aufgaben, Notizen, Kontakte, Essenspläne und Einkäufe gemeinsam zu organisieren - einfach und zuverlässig. Die App läuft als PWA auf unseren Handys und wird weiterentwickelt, wenn im Alltag neue Wünsche oder Ideen entstehen.
 
-Currently, two official plugins are available:
+---
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## Funktionen
 
-## React Compiler
+- **Aufgaben/Todos:** Aufgabenlisten, Filter, Zuweisung an Personen, Fälligkeitsdaten, Kommentarfunktion
+- **Notizen:** Einfache Notizerfassung und Bearbeitung
+- **Einkaufsliste:** Einkaufsliste mit Checkboxen, Schnellanlage, Verlauf, Erfassen zeitlicher Angebote
+- **Rezepte:** Anlegen eigener Rezepte, Erstellen von Kochplänen und Setzen von Zutaten auf Einkaufslisten, Zutatenlisten, Bearbeiten & Suchen
+- **Kontakte:** Verwaltung von Personen und Gruppieren in Familien, Adressen, Kontaktdetails und Geburtstage
+- **Kalender:** Tages-, Wochen- und Monatsansicht, Anlegen und Bearbeiten von Terminen, Anzeige von Todo-Fristen, Shopping-Angeboten und Geburtstagen
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- **Push-Benachrichtigungen:** Tägliche Erinnerung für heutige Termine, Todo Fristen und Deal Angeboten aus der Einkaufsliste
+- **PWA:** Installierbar auf iOS/Android
 
-## Expanding the ESLint configuration
+---
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+## Tech-Stack
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+- **Frontend:** JavaScript/TypeScript, React, Tailwind CSS, Vite
+- **Backend:** Supabase (PostgreSQL-Datenbank, Auth, Realtime, Edge Functions, Cron Jobs)
+- **Testing:** Vitest (React Testing Library)
+- **Deployment:** Vercel
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+---
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+## Ausprobieren & Testzugang
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+Die App ist öffentlich erreichbar und kann mit generierten Demodaten getestet werden. Wer einen Zugang möchte, kann sich gerne per E-Mail oder LinkedIn melden.
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+**Live-Demo:** [family-planner-drab.vercel.app](https://family-planner-drab.vercel.app)
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+**Hinweis:** Für eine optimale Nutzererfahrung sollte die App als PWA installiert werden.
+
+---
+
+## Motivation
+
+Wir wollten eine Lösung, die wirklich zu unserem Alltag passt – ohne Datenverkauf, ohne unnötige Komplexität. FamilyPlanner ist daher bewusst pragmatisch gehalten: Es gibt keine ausgefeilten Rollenmodelle, keine Integrationen mit Drittanbietern, sondern einfach das, was wir brauchen. Die App wächst mit unseren Bedürfnissen.
+
+---
+
+## Kontakt
+
+Fragen, Feedback oder Interesse an einem Testzugang? Einfach melden:
+
+- **E-Mail:** marianfelixmueller@outlook.de
+- **LinkedIn:** www.linkedin.com/in/marian-felix-müller-93a299347
