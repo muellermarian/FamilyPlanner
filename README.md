@@ -61,7 +61,7 @@ Die App ist öffentlich erreichbar und kann mit generierten Demodaten getestet w
 
 ## Motivation
 
-Wir wollten eine Lösung, die wirklich zu unserem Alltag passt – ohne Datenverkauf, ohne unnötige Komplexität. FamilyPlanner ist daher bewusst pragmatisch gehalten: Es gibt keine ausgefeilten Rollenmodelle, keine Integrationen mit Drittanbietern, sondern einfach das, was wir brauchen. Die App wächst mit unseren Bedürfnissen.
+Wir wollten eine Lösung, die zu unserem Alltag passt - ohne Datenverkauf, ohne nervige Werbung und nur das, was wir wirklich nutzen. Die App wächst mit unseren Bedürfnissen.
 
 ---
 
