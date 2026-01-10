@@ -16,8 +16,6 @@ dist-ssr
 .env
 
 # Editor directories and files
-.vscode/*
-.VSCodeCounter/*
 .vscode/
 .VSCodeCounter/
 .idea
