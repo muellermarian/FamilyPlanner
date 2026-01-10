@@ -1,7 +1,7 @@
 import { createClient } from '@supabase/supabase-js';
 import dotenv from 'dotenv';
-import { fileURLToPath } from 'url';
-import { dirname, join } from 'path';
+import { fileURLToPath } from 'node:url';
+import { dirname, join } from 'node:path';
 
 // Load .env from root directory
 const __filename = fileURLToPath(import.meta.url);
@@ -16,12 +16,6 @@ const testPassword = process.env.TEST_USER_PASSWORD || '';
 
 if (!supabaseUrl || !supabaseServiceKey) {
   console.error('❌ Missing VITE_SUPABASE_URL or SUPABASE_SERVICE_KEY environment variables');
-  process.exit(1);
-}
-
-if (!testPassword) {
-  console.error('❌ Missing TEST_USER_PASSWORD environment variable');
-  console.error('🔑 Set it via: $env:TEST_USER_PASSWORD="YourSecurePassword123!"');
   process.exit(1);
 }
 
@@ -105,69 +99,69 @@ async function seedTestData(existingUserId?: string | null) {
   console.log('🌱 Starting seed process...\n');
 
   try {
-    let userId: string;
-    
-    // 1. Create or reuse test user
-    if (existingUserId) {
-      console.log('👤 Reusing existing test user...');
-      userId = existingUserId;
-      console.log(`✅ User found: ${TEST_USER.email} (${userId})\n`);
-    } else {
-      console.log('👤 Creating test user...');
-      const { data: authData, error: authError } = await supabase.auth.admin.createUser({
-        email: TEST_USER.email,
-        password: TEST_USER.password,
-        email_confirm: true,
-      });
-
-      if (authError) throw authError;
-      userId = authData.user!.id;
-      console.log(`✅ User created: ${TEST_USER.email} (${userId})\n`);
+    // Helper functions
+    async function createOrReuseUser(existingUserId?: string | null) {
+      if (existingUserId) {
+        console.log('👤 Reusing existing test user...');
+        console.log(`✅ User found: ${TEST_USER.email} (${existingUserId})\n`);
+        return existingUserId;
+      } else {
+        console.log('👤 Creating test user...');
+        const { data: authData, error: authError } = await supabase.auth.admin.createUser({
+          email: TEST_USER.email,
+          password: TEST_USER.password,
+          email_confirm: true,
+        });
+        if (authError) throw authError;
+        const userId = authData.user!.id;
+        console.log(`✅ User created: ${TEST_USER.email} (${userId})\n`);
+        return userId;
+      }
     }
 
-    // 2. Create family
-    console.log('👨‍👩‍👧‍👦 Creating test family...');
-    
-    // Check if family already exists
-    let { data: existingFamily } = await supabase
-      .from('families')
-      .select('*')
-      .eq('name', TEST_USER.familyName)
-      .single();
-    
-    let family;
-    if (existingFamily) {
-      console.log('⚠️  Family already exists, using existing family...');
-      family = existingFamily;
-    } else {
-      const { data: newFamily, error: familyError } = await supabase
+    async function createOrReuseFamily() {
+      console.log('👨‍👩‍👧‍👦 Creating test family...');
+      let { data: existingFamily } = await supabase
         .from('families')
-        .insert({ name: TEST_USER.familyName })
+        .select('*')
+        .eq('name', TEST_USER.familyName)
+        .single();
+      if (existingFamily) {
+        console.log('⚠️  Family already exists, using existing family...');
+        return existingFamily;
+      } else {
+        const { data: newFamily, error: familyError } = await supabase
+          .from('families')
+          .insert({ name: TEST_USER.familyName })
+          .select()
+          .single();
+        if (familyError) throw familyError;
+        return newFamily;
+      }
+    }
+
+    async function createProfile(userId: string, familyId: string) {
+      console.log('📝 Creating profile...');
+      const { data: profile, error: profileError } = await supabase
+        .from('profiles')
+        .insert({
+          user_id: userId,
+          family_id: familyId,
+          name: TEST_USER.profileName,
+        })
         .select()
         .single();
-      
-      if (familyError) throw familyError;
-      family = newFamily;
+      if (profileError) throw profileError;
+      console.log(`✅ Profile created: ${TEST_USER.profileName} (${profile.id})\n`);
+      return profile;
     }
-    
+
+    // Main logic
+    const userId = await createOrReuseUser(existingUserId);
+    const family = await createOrReuseFamily();
     const familyId = family.id;
-    console.log(`✅ Family created: ${TEST_USER.familyName} (${familyId})\n`);
-
-    // 3. Create profile
-    console.log('📝 Creating profile...');
-    const { data: profile, error: profileError } = await supabase
-      .from('profiles')
-      .insert({
-        user_id: userId,
-        family_id: familyId,
-        name: TEST_USER.profileName,
-      })
-      .select()
-      .single();
-
-    if (profileError) throw profileError;
+    const profile = await createProfile(userId, familyId);
     const profileId = profile.id;
-    console.log(`✅ Profile created: ${TEST_USER.profileName} (${profileId})\n`);
 
     // 4. Create Todos
     console.log('📝 Creating todos...');
@@ -290,7 +284,7 @@ async function seedTestData(existingUserId?: string | null) {
     if (todosError) throw todosError;
     console.log(`✅ ${todos.length} todos created\n`);
 
-    // 6. Create Calendar Events
+    // 5. Create Calendar Events
     console.log('📅 Creating calendar events...');
     const events = [
       {
@@ -395,7 +389,7 @@ async function seedTestData(existingUserId?: string | null) {
     if (eventsError) throw eventsError;
     console.log(`✅ ${events.length} calendar events created\n`);
 
-    // 7. Create Shopping Items
+    // 6. Create Shopping Items
     console.log('🛒 Creating shopping items...');
     const shoppingItems = [
       {
@@ -512,7 +506,7 @@ async function seedTestData(existingUserId?: string | null) {
     if (shoppingError) throw shoppingError;
     console.log(`✅ ${shoppingItems.length} shopping items created\n`);
 
-    // 8. Create Recipes
+    // 7. Create Recipes
     console.log('🍳 Creating recipes...');
     const recipes = [
       {
@@ -643,9 +637,7 @@ async function seedTestData(existingUserId?: string | null) {
         })
         .select()
         .single();
-
       if (recipeError) throw recipeError;
-
       const ingredients = recipe.ingredients.map((ing, idx) => ({
         recipe_id: newRecipe.id,
         name: ing.name,
@@ -654,15 +646,13 @@ async function seedTestData(existingUserId?: string | null) {
         add_to_shopping: false,
         order_index: idx,
       }));
-
       const { error: ingredientsError } = await supabase.from('recipe_ingredients').insert(ingredients);
       if (ingredientsError) throw ingredientsError;
       recipeCount++;
     }
-
     console.log(`✅ ${recipeCount} recipes with ingredients created\n`);
 
-    // 9. Create Contacts
+    // 8. Create Contacts
     console.log('👥 Creating contacts...');
     const contactFamilies = [
       {
@@ -708,7 +698,6 @@ async function seedTestData(existingUserId?: string | null) {
     ];
 
     let totalContacts = 0;
-
     for (const family of contactFamilies) {
       const { data: newFamily, error: familyError } = await supabase
         .from('contact_families')
@@ -722,9 +711,7 @@ async function seedTestData(existingUserId?: string | null) {
         })
         .select()
         .single();
-
       if (familyError) throw familyError;
-
       const familyContacts = family.contacts.map((c) => ({
         family_id: familyId,
         contact_family_id: newFamily.id,
@@ -734,12 +721,10 @@ async function seedTestData(existingUserId?: string | null) {
         phone: c.phone,
         email: c.email,
       }));
-
       const { error: contactsError } = await supabase.from('contacts').insert(familyContacts);
       if (contactsError) throw contactsError;
       totalContacts += familyContacts.length;
     }
-
     const singleContactsData = singleContacts.map((c) => ({
       family_id: familyId,
       first_name: c.first_name,
@@ -748,14 +733,13 @@ async function seedTestData(existingUserId?: string | null) {
       phone: c.phone,
       email: c.email,
     }));
-
     const { error: singleContactsError } = await supabase.from('contacts').insert(singleContactsData);
     if (singleContactsError) throw singleContactsError;
     totalContacts += singleContactsData.length;
 
     console.log(`✅ ${contactFamilies.length} contact families + ${singleContactsData.length} individual contacts = ${totalContacts} total contacts created\n`);
 
-    // 10. Create Notes
+    // 9. Create Notes
     console.log('🗒️ Creating notes...');
     const notes = [
       {
