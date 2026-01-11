@@ -1,9 +1,9 @@
 // RecipeEditForm: Form for editing an existing recipe
 // Only comments are changed, all user-facing German content is preserved
 import { useState, useEffect } from 'react';
-import { QUANTITY_UNITS } from '../../lib/constants';
 import { deleteRecipe } from '../../lib/recipes';
 import type { Recipe } from '../../lib/types';
+import RecipeFormShared from './RecipeFormShared';
 
 interface Ingredient {
   name: string;
@@ -38,22 +38,16 @@ export default function RecipeEditForm({
   onCancel,
   onDelete,
 }: ReadonlyRecipeEditFormProps) {
-  // State for recipe name
+  // State management for recipe form
   const [name, setName] = useState(recipe.name);
-  // State for instructions
   const [instructions, setInstructions] = useState(recipe.instructions || '');
-  // State for number of servings
   const [servings, setServings] = useState<number | null>(recipe.servings || null);
-  // State for ingredients list
   const [ingredients, setIngredients] = useState<Ingredient[]>([]);
-  // State for submit button
   const [submitting, setSubmitting] = useState(false);
-  // State for delete dialog visibility
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
   // Initialize ingredients from recipe
   useEffect(() => {
-    // Initialize ingredients from recipe
     if (recipe.ingredients && recipe.ingredients.length > 0) {
       setIngredients(
         recipe.ingredients.map((ing) => ({
@@ -68,31 +62,24 @@ export default function RecipeEditForm({
     }
   }, [recipe]);
 
-  // Add a new empty ingredient to the list
+  // Ingredient management helpers
   const addIngredient = () => {
     setIngredients([
       ...ingredients,
       { name: '', quantity: '1', unit: 'Stk', add_to_shopping: true },
     ]);
   };
-
-  // Remove an ingredient by index
   const removeIngredient = (index: number) => {
     setIngredients(ingredients.filter((_, i) => i !== index));
   };
-
-  // Update a field of an ingredient by index
   const updateIngredient = (index: number, field: keyof Ingredient, value: any) => {
     const updated = [...ingredients];
     updated[index] = { ...updated[index], [field]: value };
     setIngredients(updated);
   };
-
-  // Move an ingredient up or down in the list
   const moveIngredient = (index: number, direction: 'up' | 'down') => {
     const newIndex = direction === 'up' ? index - 1 : index + 1;
     if (newIndex < 0 || newIndex >= ingredients.length) return;
-
     const updated = [...ingredients];
     [updated[index], updated[newIndex]] = [updated[newIndex], updated[index]];
     setIngredients(updated);
@@ -102,13 +89,11 @@ export default function RecipeEditForm({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim()) return;
-
     const validIngredients = ingredients.filter((ing) => ing.name.trim());
     if (validIngredients.length === 0) {
       alert('Bitte füge mindestens eine Zutat hinzu');
       return;
     }
-
     setSubmitting(true);
     try {
       await onUpdate(name.trim(), null, null, instructions.trim(), servings, validIngredients);
@@ -133,10 +118,10 @@ export default function RecipeEditForm({
     }
   };
 
+  // Render shared form and actions
   return (
     <div className="max-w-2xl mx-auto pb-24">
       <form onSubmit={handleSubmit}>
-        {/* Header with back button */}
         {/* Top bar with back button and title */}
         <div className="sticky top-0 bg-white border-b z-10 px-4 py-3 flex items-center gap-3 shadow-sm mb-4">
           <button
@@ -149,166 +134,22 @@ export default function RecipeEditForm({
           </button>
           <h3 className="text-lg font-bold flex-1">Rezept bearbeiten</h3>
         </div>
-
-        {/* Content */}
-        {/* Main form content */}
-        <div className="px-4">
-          <div className="mb-3">
-            {/* Recipe name input */}
-            <label htmlFor="recipe-name" className="block text-xs font-medium mb-1">
-              Rezeptname *
-            </label>
-            <input
-              id="recipe-name"
-              type="text"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              className="w-full border rounded px-2 py-1.5 text-sm"
-              placeholder="z.B. Spaghetti Carbonara"
-              required
-              autoFocus
-            />
-          </div>
-
-          <div className="mb-4">
-            {/* Instructions textarea */}
-            <label htmlFor="recipe-instructions" className="block text-sm font-medium mb-1">
-              Anleitung
-            </label>
-            <textarea
-              id="recipe-instructions"
-              value={instructions}
-              onChange={(e) => setInstructions(e.target.value)}
-              className="w-full border rounded px-3 py-2 text-sm"
-              placeholder="Beschreibe die Zubereitungsschritte..."
-              rows={6}
-            />
-          </div>
-
-          <div className="mb-4">
-            {/* Servings input */}
-            <label htmlFor="recipe-servings" className="block text-sm font-medium mb-1">
-              Portionen
-            </label>
-            <input
-              id="recipe-servings"
-              type="number"
-              value={servings ?? ''}
-              onChange={(e) => setServings(e.target.value ? Number.parseInt(e.target.value) : null)}
-              className="w-full border rounded px-2 py-1.5 text-sm"
-              placeholder="z.B. 4"
-              min="1"
-            />
-          </div>
-
-          <div className="mb-3">
-            {/* Ingredients section */}
-            <div className="flex justify-between items-center mb-1.5">
-              <label htmlFor="ingredient-list" className="block text-xs font-medium">
-                Zutaten *
-              </label>
-              <button
-                type="button"
-                onClick={addIngredient}
-                className="text-xs text-green-600 hover:text-green-700 font-medium"
-              >
-                + Zutat hinzufügen
-              </button>
-            </div>
-
-            <div className="space-y-2">
-              {ingredients.map((ing, index) => (
-                // Ingredient row
-                <div
-                  key={ing.name + '-' + ing.unit}
-                  className="flex gap-1.5 items-start border p-2 rounded"
-                  id={ingredients[0] === ing ? 'ingredient-list' : undefined}
-                >
-                  <div className="flex flex-col gap-0.5">
-                    {/* Move ingredient up */}
-                    <button
-                      type="button"
-                      onClick={() => moveIngredient(index, 'up')}
-                      disabled={index === 0}
-                      className="text-gray-600 hover:text-gray-800 disabled:opacity-30 disabled:cursor-not-allowed px-1 py-0.5 text-xs"
-                      title="Nach oben"
-                    >
-                      ▲
-                    </button>
-                    {/* Move ingredient down */}
-                    <button
-                      type="button"
-                      onClick={() => moveIngredient(index, 'down')}
-                      disabled={index === ingredients.length - 1}
-                      className="text-gray-600 hover:text-gray-800 disabled:opacity-30 disabled:cursor-not-allowed px-1 py-0.5 text-xs"
-                      title="Nach unten"
-                    >
-                      ▼
-                    </button>
-                  </div>
-                  <div className="flex-1 space-y-1.5">
-                    {/* Ingredient name input */}
-                    <input
-                      type="text"
-                      value={ing.name}
-                      onChange={(e) => updateIngredient(index, 'name', e.target.value)}
-                      className="w-full border rounded px-2 py-1 text-xs"
-                      placeholder="Zutat"
-                      required
-                    />
-                    <div className="grid grid-cols-2 gap-1.5">
-                      {/* Quantity input */}
-                      <input
-                        type="text"
-                        value={ing.quantity}
-                        onChange={(e) => updateIngredient(index, 'quantity', e.target.value)}
-                        className="border rounded px-2 py-1 text-xs"
-                        placeholder="Menge"
-                      />
-                      {/* Unit select */}
-                      <select
-                        value={ing.unit}
-                        onChange={(e) => updateIngredient(index, 'unit', e.target.value)}
-                        className="border rounded px-2 py-1 text-xs"
-                      >
-                        {QUANTITY_UNITS.map((u) => (
-                          <option key={u} value={u}>
-                            {u}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-                    {/* Add to shopping checkbox */}
-                    <label className="flex items-center gap-1.5 text-xs">
-                      <input
-                        type="checkbox"
-                        checked={ing.add_to_shopping}
-                        onChange={(e) =>
-                          updateIngredient(index, 'add_to_shopping', e.target.checked)
-                        }
-                        className="w-3 h-3"
-                      />
-                      <span>Zum Einkauf</span>
-                    </label>
-                  </div>
-                  {/* Remove ingredient button */}
-                  {ingredients.length > 1 && (
-                    <button
-                      type="button"
-                      onClick={() => removeIngredient(index)}
-                      className="text-red-600 hover:text-red-800 px-1 py-0.5 text-xs font-bold shrink-0"
-                      title="Zutat entfernen"
-                    >
-                      ✕
-                    </button>
-                  )}
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        {/* Fixed bottom action bar */}
+        {/* Shared form content */}
+        <RecipeFormShared
+          name={name}
+          setName={setName}
+          instructions={instructions}
+          setInstructions={setInstructions}
+          servings={servings}
+          setServings={setServings}
+          ingredients={ingredients}
+          setIngredients={setIngredients}
+          addIngredient={addIngredient}
+          removeIngredient={removeIngredient}
+          updateIngredient={updateIngredient}
+          moveIngredient={moveIngredient}
+          submitting={submitting}
+        />
         {/* Bottom bar with cancel, save, and delete buttons */}
         <div className="fixed bottom-0 left-0 right-0 p-4 bg-white border-t shadow-lg flex gap-2">
           <button
@@ -334,7 +175,6 @@ export default function RecipeEditForm({
           </button>
         </div>
       </form>
-
       {/* Delete confirmation dialog */}
       {showDeleteDialog && (
         <dialog
