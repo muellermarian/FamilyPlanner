@@ -3,10 +3,10 @@ import { useSwipeable } from 'react-swipeable';
 import type { Todo } from '../../lib/types';
 import TodoEditForm from './TodoEditForm';
 
-// Props for the TodoItem component:
-// - todo: the todo item to render
-// - onToggle: toggles the todo's completion state
-// - onDelete: deletes the todo by id
+// Props for the item component:
+// - task: the entry to render
+// - onToggle: toggles the entry's completion state
+// - onDelete: deletes the entry by id
 interface TodoItemProps {
   todo: Todo;
   onToggle: (todo: Todo) => void;
@@ -24,7 +24,10 @@ interface TodoItemProps {
   comments?: { text?: string; user_id?: string; created_at?: string }[] | null;
 }
 
-// Renders a single todo entry with swipe-to-delete and inline controls.
+// Make all props readonly to prevent accidental mutation
+type ReadonlyTodoItemProps = Readonly<TodoItemProps>;
+
+// Renders a single task entry with swipe-to-delete and inline controls.
 // Features:
 // - horizontal swipe to reveal a red delete background and trigger delete on full swipe left
 // - checkbox to toggle completion
@@ -40,7 +43,7 @@ export default function TodoItem({
   onRefresh,
   commentCount,
   comments,
-}: TodoItemProps) {
+}: ReadonlyTodoItemProps) {
   // Horizontal translation applied while swiping (in pixels)
   const [swipeOffset, setSwipeOffset] = useState(0);
   // Whether a swipe is currently in progress (used to show/hide the delete background)
@@ -87,7 +90,7 @@ export default function TodoItem({
         <span className="text-white font-bold">Löschen</span>
       </div>
 
-      {/* Main todo card: slides left/right based on swipeOffset */}
+      {/* Main card: slides left/right based on swipeOffset */}
       <div
         className="relative border rounded p-3 flex flex-col bg-white transition-transform duration-200 ease-out gap-2"
         style={{ transform: `translateX(${swipeOffset}px)` }}
@@ -167,7 +170,11 @@ export default function TodoItem({
               </div>
               {comments.map((comment, idx) => (
                 <div
-                  key={idx}
+                  key={
+                    comment.user_id && comment.created_at
+                      ? `${comment.user_id}-${comment.created_at}`
+                      : idx
+                  }
                   className="text-xs bg-gray-50 p-2 rounded border-l-2 border-gray-300"
                 >
                   <div className="flex items-center gap-2 font-medium text-gray-700">

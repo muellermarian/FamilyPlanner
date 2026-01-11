@@ -8,7 +8,9 @@ interface TodoFilterProps {
   setFilter: (f: TodoFilterType) => void;
 }
 
-export default function TodoFilter({ filter, setFilter }: TodoFilterProps) {
+type ReadonlyTodoFilterProps = Readonly<TodoFilterProps>;
+
+export default function TodoFilter({ filter, setFilter }: ReadonlyTodoFilterProps) {
   // Available filter options shown as buttons (open, all, done)
   const filterOptions: TodoFilterType[] = ['open', 'all', 'done'];
 
@@ -22,7 +24,17 @@ export default function TodoFilter({ filter, setFilter }: TodoFilterProps) {
           className={`px-3 py-1 rounded ${filter === f ? 'bg-blue-600 text-white' : 'bg-gray-200'}`}
         >
           {/* Labels */}
-          {f === 'open' ? 'Offene Todos' : f === 'all' ? 'Alle' : 'Erledigt'}
+          {(() => {
+            let label;
+            if (f === 'open') {
+              label = 'Offene Todos';
+            } else if (f === 'all') {
+              label = 'Alle';
+            } else {
+              label = 'Erledigt';
+            }
+            return label;
+          })()}
         </button>
       ))}
     </div>

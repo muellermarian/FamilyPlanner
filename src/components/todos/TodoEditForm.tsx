@@ -19,6 +19,8 @@ interface TodoEditFormProps {
   currentProfileId?: string;
 }
 
+type ReadonlyTodoEditFormProps = Readonly<TodoEditFormProps>;
+
 export default function TodoEditForm({
   todo,
   users,
@@ -26,7 +28,7 @@ export default function TodoEditForm({
   onUpdate,
   currentUserId,
   currentProfileId,
-}: TodoEditFormProps) {
+}: ReadonlyTodoEditFormProps) {
   const [dueAt, setDueAt] = useState(todo.due_at ? todo.due_at.split('T')[0] : '');
   const [assignedTo, setAssignedTo] = useState<string | null>(todo.assigned_to_id ?? null);
   const [description, setDescription] = useState(todo.description ?? '');
@@ -34,7 +36,7 @@ export default function TodoEditForm({
   const [newComment, setNewComment] = useState('');
   const [loadingComments, setLoadingComments] = useState(false);
 
-  // Load comments for this todo
+  // Load comments for this task entry
   const loadComments = async () => {
     setLoadingComments(true);
     try {
@@ -78,7 +80,7 @@ export default function TodoEditForm({
     loadComments();
   }, [todo.id]);
 
-  // Save todo
+  // Save task entry
   const save = async () => {
     const { error } = await supabase
       .from('todos')
@@ -95,7 +97,7 @@ export default function TodoEditForm({
     }
   };
 
-  // Add a comment to this todo
+  // Add a comment to this task entry
   const addComment = async () => {
     if (!newComment.trim()) return;
 
@@ -142,14 +144,21 @@ export default function TodoEditForm({
 
       {/* Title */}
       <div>
-        <label className="text-sm font-medium mb-1 block">Titel</label>
-        <div className="border p-2 rounded bg-gray-50 text-gray-700">{todo.task}</div>
+        <label htmlFor="task-title" className="text-sm font-medium mb-1 block">
+          Titel
+        </label>
+        <div id="task-title" className="border p-2 rounded bg-gray-50 text-gray-700">
+          {todo.task}
+        </div>
       </div>
 
       {/* Description */}
       <div>
-        <label className="text-sm font-medium mb-1 block">Beschreibung</label>
+        <label htmlFor="task-description" className="text-sm font-medium mb-1 block">
+          Beschreibung
+        </label>
         <textarea
+          id="task-description"
           value={description}
           onChange={(e) => setDescription(e.target.value)}
           placeholder="Beschreibung (optional)"
@@ -159,9 +168,12 @@ export default function TodoEditForm({
 
       {/* Due date */}
       <div>
-        <label className="text-sm font-medium mb-1 block">Fällig am (optional)</label>
+        <label htmlFor="task-due" className="text-sm font-medium mb-1 block">
+          Fällig am (optional)
+        </label>
         <div className="flex gap-2">
           <input
+            id="task-due"
             type="date"
             value={dueAt}
             onChange={(e) => setDueAt(e.target.value)}
@@ -211,24 +223,26 @@ export default function TodoEditForm({
 
         {/* Comments list */}
         <div className="flex flex-col gap-2 max-h-48 overflow-auto">
-          {loadingComments ? (
-            <div className="text-xs text-gray-500">Lade Kommentare…</div>
-          ) : comments.length > 0 ? (
-            comments.map((c) => (
-              <div key={c.id} className="border rounded p-2 bg-gray-50 text-sm">
-                <div className="text-xs text-gray-600 mb-1">
-                  {c.creator?.name || 'Unbekannt'} – {new Date(c.created_at).toLocaleString()}
+          {(() => {
+            if (loadingComments) {
+              return <div className="text-xs text-gray-500">Lade Kommentare…</div>;
+            }
+            if (comments.length > 0) {
+              return comments.map((c) => (
+                <div key={c.id} className="border rounded p-2 bg-gray-50 text-sm">
+                  <div className="text-xs text-gray-600 mb-1">
+                    {c.creator?.name || 'Unbekannt'} – {new Date(c.created_at).toLocaleString()}
+                  </div>
+                  <div className="text-sm">{c.text}</div>
                 </div>
-                <div className="text-sm">{c.text}</div>
-              </div>
-            ))
-          ) : (
-            <div className="text-xs text-gray-500">Noch keine Kommentare</div>
-          )}
+              ));
+            }
+            return <div className="text-xs text-gray-500">Noch keine Kommentare</div>;
+          })()}
         </div>
       </div>
 
-      {/* Buttons speichern / abbrechen */}
+      {/* Buttons save / cancel */}
       <div className="flex gap-2 mt-3 pt-3 border-t">
         <button
           onClick={save}

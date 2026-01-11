@@ -38,21 +38,4 @@ describe('TodoItem', () => {
     fireEvent.click(screen.getByRole('checkbox'));
     expect(onToggle).toHaveBeenCalledWith(todo);
   });
-
-  // Adjust selector for delete button as needed
-  // it('calls onDelete when delete button is clicked', () => {
-  //   render(
-  //     <TodoItem
-  //       todo={todo}
-  //       onToggle={onToggle}
-  //       onDelete={onDelete}
-  //       users={users}
-  //       onEdit={onEdit}
-  //     />
-  //   );
-  //   // Find delete button by title or icon (adjust selector if needed)
-  //   // const deleteButton = screen.getByTitle(/delete/i) || screen.getByText(/delete/i);
-  //   // fireEvent.click(deleteButton);
-  //   // expect(onDelete).toHaveBeenCalledWith('1');
-  // });
 });

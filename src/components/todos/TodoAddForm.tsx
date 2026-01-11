@@ -1,6 +1,12 @@
 import { useState, useEffect } from 'react';
 import AssignedSelect from '../shared/AssignedSelect';
 
+// Props for the add form component:
+// - currentProfileId: id of the current profile
+// - currentUserId: id of the current user
+// - users: list of users for assignment
+// - onAdd: function to add a new task entry
+// - onCancel: function to cancel adding
 interface TodoAddFormProps {
   currentProfileId: string;
   currentUserId: string;
@@ -14,22 +20,31 @@ interface TodoAddFormProps {
   onCancel: () => void;
 }
 
+// Make all props readonly to prevent accidental mutation
+type ReadonlyTodoAddFormProps = Readonly<TodoAddFormProps>;
+
 export default function TodoAddForm({
   currentProfileId,
   currentUserId,
   users,
   onAdd,
   onCancel,
-}: TodoAddFormProps) {
+}: ReadonlyTodoAddFormProps) {
+  // State for the new task title
   const [newTask, setNewTask] = useState('');
+  // State for the assigned user
   const [assignedTo, setAssignedTo] = useState<string | null>(currentProfileId || currentUserId);
+  // State for the new description
   const [newDescription, setNewDescription] = useState('');
+  // State for the new due date
   const [newDueDate, setNewDueDate] = useState('');
 
+  // Update assigned user when profile or user changes
   useEffect(() => {
     setAssignedTo(currentProfileId || currentUserId);
   }, [currentProfileId, currentUserId]);
 
+  // Handler for adding a new task entry
   const handleAdd = () => {
     if (!newTask) return;
     onAdd(newTask, assignedTo, newDescription, newDueDate || null);
@@ -39,6 +54,7 @@ export default function TodoAddForm({
     setNewDueDate('');
   };
 
+  // Render the add form UI
   return (
     <div className="flex flex-col gap-2 mb-6 border rounded p-3 bg-gray-50">
       <input
@@ -57,9 +73,12 @@ export default function TodoAddForm({
       />
 
       <div>
-        <label className="text-sm font-medium mb-1 block">Fällig am: (optional)</label>
+        <label htmlFor="due-date" className="text-sm font-medium mb-1 block">
+          Fällig am: (optional)
+        </label>
         <div className="flex gap-2">
           <input
+            id="due-date"
             type="date"
             value={newDueDate}
             onChange={(e) => setNewDueDate(e.target.value)}

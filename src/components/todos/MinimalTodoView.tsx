@@ -7,12 +7,14 @@ interface MinimalTodoViewProps {
   onEdit: (todo: Todo) => void;
 }
 
+type ReadonlyMinimalTodoViewProps = Readonly<MinimalTodoViewProps>;
+
 export default function MinimalTodoView({
   todos,
   loading,
   onToggle,
   onEdit,
-}: MinimalTodoViewProps) {
+}: ReadonlyMinimalTodoViewProps) {
   const openCount = todos.filter((t) => !t.isDone).length;
 
   return (
