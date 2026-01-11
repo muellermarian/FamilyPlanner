@@ -6,12 +6,50 @@ type GroupedIngredient = {
   recipes: string[];
 };
 
+// Helper function to render the action button for each ingredient
+function renderActionButton(
+  ingName: string,
+  copiedName: string,
+  handleCopy: (name: string) => void,
+  handleAdopt: (name: string) => void
+) {
+  if (copiedName === ingName) {
+    return (
+      <button
+        onClick={() => handleCopy(ingName)}
+        className="shrink-0 px-3 py-1.5 rounded text-xs font-medium whitespace-nowrap bg-blue-600 text-white"
+      >
+        ✓
+      </button>
+    );
+  }
+  if (copiedName) {
+    return (
+      <button
+        onClick={() => handleAdopt(ingName)}
+        className="shrink-0 px-3 py-1.5 rounded text-xs font-medium whitespace-nowrap bg-green-600 text-white hover:bg-green-700"
+      >
+        Übernehmen
+      </button>
+    );
+  }
+  return (
+    <button
+      onClick={() => handleCopy(ingName)}
+      className="shrink-0 px-3 py-1.5 rounded text-xs font-medium whitespace-nowrap bg-gray-200 text-gray-700 hover:bg-gray-300"
+    >
+      Markieren
+    </button>
+  );
+}
 interface IngredientsListProps {
   familyId: string;
   onClose: () => void;
 }
 
-export default function IngredientsList({ familyId, onClose }: IngredientsListProps) {
+type ReadonlyIngredientsListProps = Readonly<IngredientsListProps>;
+
+export default function IngredientsList({ familyId, onClose }: ReadonlyIngredientsListProps) {
   const [ingredients, setIngredients] = useState<GroupedIngredient[]>([]);
   const [loading, setLoading] = useState(true);
   const [copiedName, setCopiedName] = useState<string | null>(null);
@@ -39,7 +77,10 @@ export default function IngredientsList({ familyId, onClose }: IngredientsListPr
         });
       });
       const groupedArray: GroupedIngredient[] = Object.entries(grouped)
-        .map(([name, recipes]) => ({ name, recipes: Array.from(recipes).sort() }))
+        .map(([name, recipes]) => ({
+          name,
+          recipes: Array.from(recipes).sort((a, b) => a.localeCompare(b)),
+        }))
         .sort((a, b) => a.name.localeCompare(b.name));
       setIngredients(groupedArray);
     } catch (err) {
@@ -122,59 +163,42 @@ export default function IngredientsList({ familyId, onClose }: IngredientsListPr
       )}
 
       {/* Ingredients List */}
-      {loading ? (
-        <div className="text-center py-8 text-gray-500">Lade Zutaten...</div>
-      ) : ingredients.length === 0 ? (
-        <div className="text-center py-8 text-gray-500">Keine Zutaten gefunden</div>
-      ) : (
-        <div className="space-y-2">
-          {ingredients
-            .filter((ing) => ing.name.toLowerCase().includes(search.toLowerCase()))
-            .map((ing, idx) => (
-              <div
-                key={`${ing.name}-${idx}`}
-                className={`bg-white border rounded p-3 shadow-sm ${
-                  copiedName === ing.name ? 'bg-blue-50 border-blue-300' : ''
-                }`}
-              >
-                <div className="flex items-start justify-between gap-3">
-                  <div className="flex-1 min-w-0">
-                    <div className="font-medium text-sm mb-1">{ing.name}</div>
-                    <div className="text-xs text-gray-600">
-                      {ing.recipes.map((recipe, i) => (
-                        <div key={i} className="text-gray-500">
-                          • {recipe}
-                        </div>
-                      ))}
+      {(() => {
+        if (loading) {
+          return <div className="text-center py-8 text-gray-500">Lade Zutaten...</div>;
+        }
+        if (ingredients.length === 0) {
+          return <div className="text-center py-8 text-gray-500">Keine Zutaten gefunden</div>;
+        }
+        return (
+          <div className="space-y-2">
+            {ingredients
+              .filter((ing) => ing.name.toLowerCase().includes(search.toLowerCase()))
+              .map((ing) => (
+                <div
+                  key={ing.name}
+                  className={`bg-white border rounded p-3 shadow-sm ${
+                    copiedName === ing.name ? 'bg-blue-50 border-blue-300' : ''
+                  }`}
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="flex-1 min-w-0">
+                      <div className="font-medium text-sm mb-1">{ing.name}</div>
+                      <div className="text-xs text-gray-600">
+                        {ing.recipes.map((recipe) => (
+                          <div key={recipe} className="text-gray-500">
+                            • {recipe}
+                          </div>
+                        ))}
+                      </div>
                     </div>
+                    {renderActionButton(ing.name, copiedName ?? '', handleCopy, handleAdopt)}
                   </div>
-                  {copiedName === ing.name ? (
-                    <button
-                      onClick={() => handleCopy(ing.name)}
-                      className="shrink-0 px-3 py-1.5 rounded text-xs font-medium whitespace-nowrap bg-blue-600 text-white"
-                    >
-                      ✓
-                    </button>
-                  ) : copiedName ? (
-                    <button
-                      onClick={() => handleAdopt(ing.name)}
-                      className="shrink-0 px-3 py-1.5 rounded text-xs font-medium whitespace-nowrap bg-green-600 text-white hover:bg-green-700"
-                    >
-                      Übernehmen
-                    </button>
-                  ) : (
-                    <button
-                      onClick={() => handleCopy(ing.name)}
-                      className="shrink-0 px-3 py-1.5 rounded text-xs font-medium whitespace-nowrap bg-gray-200 text-gray-700 hover:bg-gray-300"
-                    >
-                      Markieren
-                    </button>
-                  )}
                 </div>
-              </div>
-            ))}
-        </div>
-      )}
+              ))}
+          </div>
+        );
+      })()}
 
       <div className="mt-4 text-sm text-gray-600">Gesamt: {ingredients.length} Zutaten</div>
     </div>

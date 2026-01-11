@@ -3,12 +3,17 @@ import type { Recipe } from '../../lib/types';
 import { getRecipes, getActiveCookings, deleteRecipe, markRecipeAsCooked } from '../../lib/recipes';
 
 export function useRecipes(familyId: string) {
+  // State for all recipes
   const [recipes, setRecipes] = useState<Recipe[]>([]);
+  // Loading state for async operations
   const [loading, setLoading] = useState(false);
+  // Error state for fetch or mutation errors
   const [error, setError] = useState<string | null>(null);
+  // Set of recipe IDs marked as 'to be cooked'
   const [markedRecipeIds, setMarkedRecipeIds] = useState<Set<string>>(new Set());
 
   const fetchRecipes = async () => {
+    // Fetch all recipes and active cookings for the family
     setLoading(true);
     setError(null);
     try {
@@ -27,10 +32,12 @@ export function useRecipes(familyId: string) {
   };
 
   useEffect(() => {
+    // Refetch recipes when familyId changes
     fetchRecipes();
   }, [familyId]);
 
   const handleDelete = async (id: string) => {
+    // Confirm before deleting a recipe
     if (!confirm('Rezept wirklich löschen?')) return;
 
     try {
@@ -42,6 +49,7 @@ export function useRecipes(familyId: string) {
   };
 
   const handleMarkCooked = async (recipeId: string, currentProfileId: string) => {
+    // Mark a recipe as cooked and refetch recipes
     try {
       await markRecipeAsCooked(recipeId, familyId, currentProfileId);
       await fetchRecipes();
@@ -53,6 +61,7 @@ export function useRecipes(familyId: string) {
   };
 
   return {
+    // Expose state and handlers for recipes
     recipes,
     loading,
     error,

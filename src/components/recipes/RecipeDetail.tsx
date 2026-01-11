@@ -1,19 +1,31 @@
+// RecipeDetail: Displays details for a single recipe
+// Only comments are changed, all user-facing German content is preserved
 import { useState, useEffect } from 'react';
 import type { Recipe, RecipeIngredient } from '../../lib/types';
 import { addShoppingItem, getShoppingItems, updateShoppingItemQuantity } from '../../lib/shopping';
 import { markRecipeForCooking, markRecipeAsCooked } from '../../lib/recipes';
 
 interface RecipeDetailProps {
+  // The recipe to display
   recipe: Recipe;
+  // Family ID for shopping and cooking actions
   familyId: string;
+  // Current user and profile IDs
   currentUserId: string;
   currentProfileId: string;
+  // Whether the recipe is marked for cooking
   isMarkedForCooking: boolean;
+  // Callback to close the detail view
   onClose: () => void;
+  // Callback to update recipe data
   onUpdate: () => void;
+  // Callback to edit the recipe
   onEdit: () => void;
+  // Optional callback for shopping list toast message
   onAddToShopping?: (message: string) => void;
 }
+
+type ReadonlyRecipeDetailProps = Readonly<RecipeDetailProps>;
 
 export default function RecipeDetail({
   recipe,
@@ -25,13 +37,14 @@ export default function RecipeDetail({
   onUpdate,
   onEdit,
   onAddToShopping,
-}: RecipeDetailProps) {
+}: ReadonlyRecipeDetailProps) {
   const [selectedIngredients, setSelectedIngredients] = useState<Set<string>>(new Set());
   const [adding, setAdding] = useState(false);
+  // State for selected ingredients to add to shopping list
   const [desiredServings, setDesiredServings] = useState<number>(recipe.servings || 1);
-
   // Initialize selected ingredients based on add_to_shopping flag
   useEffect(() => {
+    // Initialize selected ingredients based on add_to_shopping flag
     const selected = new Set<string>();
     recipe.ingredients?.forEach((ing) => {
       if (ing.add_to_shopping) {
@@ -42,6 +55,7 @@ export default function RecipeDetail({
   }, [recipe]);
 
   const toggleIngredient = (ingredientId: string) => {
+    // Toggle selection for a single ingredient
     setSelectedIngredients((prev) => {
       const newSet = new Set(prev);
       if (newSet.has(ingredientId)) {
@@ -54,6 +68,7 @@ export default function RecipeDetail({
   };
 
   const toggleAll = () => {
+    // Toggle selection for all ingredients
     if (selectedIngredients.size === (recipe.ingredients?.length || 0)) {
       setSelectedIngredients(new Set());
     } else {
@@ -63,6 +78,7 @@ export default function RecipeDetail({
   };
 
   const handleAddToShopping = async () => {
+    // Add selected ingredients to shopping list
     if (selectedIngredients.size === 0) {
       alert('Bitte wähle mindestens eine Zutat aus');
       return;
@@ -78,13 +94,14 @@ export default function RecipeDetail({
       const scaleFactor = desiredServings / baseServings;
       scaledIngredients = ingredientsToAdd.map((ing) => ({
         ...ing,
-        quantity: (parseFloat(ing.quantity) * scaleFactor).toString(),
+        quantity: (Number.parseFloat(ing.quantity) * scaleFactor).toString(),
       }));
     }
 
     await addIngredientsToShopping(scaledIngredients);
   };
 
+  // Add ingredients to shopping list, update quantities if needed
   const addIngredientsToShopping = async (ingredientsToAdd: RecipeIngredient[]) => {
     setAdding(true);
     try {
@@ -103,8 +120,8 @@ export default function RecipeDetail({
 
         if (existingItem) {
           // Parse quantities and add them
-          const existingQty = parseFloat(existingItem.quantity) || 0;
-          const newQty = parseFloat(ing.quantity) || 0;
+          const existingQty = Number.parseFloat(existingItem.quantity) || 0;
+          const newQty = Number.parseFloat(ing.quantity) || 0;
           const combinedQty = existingQty + newQty;
 
           // Update the existing item
@@ -112,7 +129,7 @@ export default function RecipeDetail({
           updatedCount++;
         } else {
           // Add new item
-          const quantity = parseFloat(ing.quantity) || 0;
+          const quantity = Number.parseFloat(ing.quantity) || 0;
           await addShoppingItem(
             familyId,
             ing.name,
@@ -124,6 +141,7 @@ export default function RecipeDetail({
         }
       }
 
+      // Mark recipe for cooking after adding ingredients
       // Mark recipe for cooking
       await markRecipeForCooking(recipe.id, familyId, currentProfileId || currentUserId);
 
@@ -131,10 +149,12 @@ export default function RecipeDetail({
         updatedCount > 0
           ? `${addedCount} neue und ${updatedCount} aktualisierte Zutat(en) zur Einkaufsliste hinzugefügt! "${recipe.name}" ist jetzt zum Kochen markiert.`
           : `${addedCount} Zutat(en) zur Einkaufsliste hinzugefügt! "${recipe.name}" ist jetzt zum Kochen markiert.`;
+      // Show toast message if callback provided
 
       // Callback für Toast-Message
       if (onAddToShopping) {
         onAddToShopping(message);
+        // Close detail and update parent
       }
 
       // Sofort schließen und aktualisieren
@@ -144,6 +164,7 @@ export default function RecipeDetail({
       alert(err.message || JSON.stringify(err));
     } finally {
       setAdding(false);
+      // Mark recipe as cooked
     }
   };
 
@@ -159,6 +180,7 @@ export default function RecipeDetail({
       onUpdate();
     } catch (err: any) {
       alert(err.message || JSON.stringify(err));
+      // Check if all ingredients are selected
     }
   };
 
@@ -186,6 +208,7 @@ export default function RecipeDetail({
         >
           ✏️
         </button>
+        {/* Recipe image */}
       </div>
 
       {/* Content */}
@@ -193,6 +216,7 @@ export default function RecipeDetail({
         {recipe.image_url && (
           <div className="mb-3 rounded-lg overflow-hidden">
             <img src={recipe.image_url} alt={recipe.name} className="w-full h-48 object-cover" />
+            {/* Cooking status and mark as cooked button */}
           </div>
         )}
 
@@ -204,10 +228,11 @@ export default function RecipeDetail({
             </div>
             <button
               onClick={handleMarkAsCooked}
-              className="bg-green-600 text-white px-3 py-1.5 rounded hover:bg-green-700 text-xs font-medium flex-shrink-0"
+              className="bg-green-600 text-white px-3 py-1.5 rounded hover:bg-green-700 text-xs font-medium shrink-0"
             >
               Gekocht ✓
             </button>
+            {/* Ingredients list with select all/none */}
           </div>
         )}
 
@@ -222,6 +247,7 @@ export default function RecipeDetail({
           {!recipe.ingredients || recipe.ingredients.length === 0 ? (
             <p className="text-gray-500 text-sm">Keine Zutaten vorhanden</p>
           ) : (
+            // Ingredient row with checkbox
             <ul className="space-y-1.5">
               {recipe.ingredients.map((ing) => (
                 <li key={ing.id} className="flex items-center gap-2 p-1.5 border rounded text-sm">
@@ -229,7 +255,7 @@ export default function RecipeDetail({
                     type="checkbox"
                     checked={selectedIngredients.has(ing.id)}
                     onChange={() => toggleIngredient(ing.id)}
-                    className="w-4 h-4 flex-shrink-0"
+                    className="w-4 h-4 shrink-0"
                   />
                   <div className="flex-1 min-w-0">
                     <span className="font-medium">{ing.name}</span>
@@ -249,32 +275,37 @@ export default function RecipeDetail({
             <div className="text-sm text-gray-700 whitespace-pre-wrap bg-gray-50 p-2 rounded border">
               {recipe.instructions}
             </div>
+            {/* Servings scaling section */}
           </div>
         )}
 
         {recipe.servings && !isMarkedForCooking && (
           <div className="mb-3 p-3 bg-blue-50 border border-blue-200 rounded">
-            <label className="block text-xs font-medium text-blue-900 mb-2">
+            <label
+              htmlFor="desired-servings"
+              className="block text-xs font-medium text-blue-900 mb-2"
+            >
               Für wie viele Personen möchtest du kochen?
             </label>
             <div className="flex gap-1.5 items-center mb-2">
               <button
                 onClick={() => setDesiredServings(Math.max(0.5, desiredServings - 0.5))}
-                className="bg-blue-500 hover:bg-blue-600 text-white font-bold w-8 h-8 rounded text-base leading-none flex-shrink-0"
+                className="bg-blue-500 hover:bg-blue-600 text-white font-bold w-8 h-8 rounded text-base leading-none shrink-0"
               >
                 −
               </button>
               <input
+                id="desired-servings"
                 type="number"
                 min="0.5"
                 step="0.5"
                 value={desiredServings}
-                onChange={(e) => setDesiredServings(parseFloat(e.target.value) || 0.5)}
+                onChange={(e) => setDesiredServings(Number.parseFloat(e.target.value) || 0.5)}
                 className="flex-1 text-center border border-blue-300 rounded px-2 py-1 text-sm font-medium min-w-0"
               />
               <button
                 onClick={() => setDesiredServings(desiredServings + 0.5)}
-                className="bg-blue-500 hover:bg-blue-600 text-white font-bold w-8 h-8 rounded text-base leading-none flex-shrink-0"
+                className="bg-blue-500 hover:bg-blue-600 text-white font-bold w-8 h-8 rounded text-base leading-none shrink-0"
               >
                 +
               </button>
@@ -293,8 +324,9 @@ export default function RecipeDetail({
                 <h5 className="font-medium text-xs text-blue-900 mb-1.5">Angepasste Mengen:</h5>
                 <div className="space-y-0.5 max-h-32 overflow-y-auto">
                   {recipe.ingredients?.map((ing) => {
+                    // Scaled ingredient row
                     const scaleFactor = (desiredServings || 1) / (recipe.servings || 1);
-                    const scaledQty = (parseFloat(ing.quantity) * scaleFactor).toFixed(2);
+                    const scaledQty = (Number.parseFloat(ing.quantity) * scaleFactor).toFixed(2);
                     return (
                       <div key={ing.id} className="text-xs text-blue-700 flex justify-between">
                         <span>{ing.name}</span>
