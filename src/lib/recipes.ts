@@ -116,7 +116,7 @@ export async function addRecipe(
   // Create ingredients
   if (ingredients.length > 0) {
     const ingredientRecords = ingredients.map((ing, index) => ({
-      recipe_id: (recipe as any).id,
+      recipe_id: recipe.id,
       name: ing.name,
       quantity: ing.quantity,
       unit: ing.unit,
@@ -250,7 +250,7 @@ export async function markRecipeAsCooked(
   if (findError) throw findError;
   if (!cookings || cookings.length === 0) return;
 
-  const cooking = cookings[0] as any;
+  const cooking = cookings[0];
 
   const { error } = await supabase
     .from('recipe_cookings')

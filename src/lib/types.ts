@@ -1,3 +1,4 @@
+// Types for user profile information
 export interface Profile {
   id: string;
   user_id: string;
@@ -5,12 +6,14 @@ export interface Profile {
   name: string;
 }
 
+// Types for authentication user
 export interface User {
   id: string;
   email: string;
   profile?: Profile | null;
 }
 
+// Types for task items
 export interface Todo {
   id: string;
   task: string;
@@ -22,7 +25,7 @@ export interface Todo {
   done_at?: string | null;
   due_at?: string | null;
 
-  // Optional: relational data
+  // Optional: relational data for task
   assigned?: Profile | null;
   creator?: Profile | null;
   done_by?: Profile | null;
@@ -30,7 +33,8 @@ export interface Todo {
   created_at?: string;
 }
 
-export interface Todo_Comment {
+// Types for comments on todos
+export interface TodoComment {
   id: string;
   text: string;
   todo_id: string;
@@ -38,8 +42,10 @@ export interface Todo_Comment {
   created_at: string;
 }
 
+// Filter type for todos
 export type TodoFilterType = 'open' | 'done' | 'all';
 
+// Types for shopping list items
 export interface ShoppingItem {
   id: string;
   family_id: string;
@@ -52,6 +58,7 @@ export interface ShoppingItem {
   deal_date?: string | null;
 }
 
+// Types for shopping purchases
 export interface ShoppingPurchase {
   id: string;
   family_id: string;
@@ -60,6 +67,7 @@ export interface ShoppingPurchase {
   items: ShoppingPurchaseItem[];
 }
 
+// Types for individual items in a shopping purchase
 export interface ShoppingPurchaseItem {
   id: string;
   purchase_id: string;
@@ -68,6 +76,7 @@ export interface ShoppingPurchaseItem {
   unit: string;
 }
 
+// Types for recipes
 export interface Recipe {
   id: string;
   family_id: string;
@@ -80,6 +89,7 @@ export interface Recipe {
   ingredients?: RecipeIngredient[];
 }
 
+// Types for recipe ingredients
 export interface RecipeIngredient {
   id: string;
   recipe_id: string;
@@ -90,6 +100,7 @@ export interface RecipeIngredient {
   order_index: number;
 }
 
+// Types for recipe cooking events
 export interface RecipeCooking {
   id: string;
   recipe_id: string;
@@ -100,6 +111,7 @@ export interface RecipeCooking {
   cooked_by_id?: string | null;
 }
 
+// Types for contact families
 export interface ContactFamily {
   id: string;
   family_id: string;
@@ -113,6 +125,7 @@ export interface ContactFamily {
   contacts?: Contact[];
 }
 
+// Types for individual contacts
 export interface Contact {
   id: string;
   family_id: string;
@@ -131,6 +144,7 @@ export interface Contact {
   created_at?: string;
 }
 
+// Types for calendar events
 export interface CalendarEvent {
   id: string;
   family_id: string;
@@ -142,6 +156,7 @@ export interface CalendarEvent {
   created_at?: string;
 }
 
+// Types for agenda items in the calendar
 export interface AgendaItem {
   type: 'event' | 'todo' | 'birthday' | 'shopping';
   title: string;
@@ -152,6 +167,7 @@ export interface AgendaItem {
   data: CalendarEvent | Todo | Contact | ShoppingItem;
 }
 
+// Types for a single day in the calendar
 export interface CalendarDay {
   date: Date;
   isCurrentMonth: boolean;

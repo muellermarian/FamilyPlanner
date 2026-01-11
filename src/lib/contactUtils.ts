@@ -1,4 +1,4 @@
-// Calculate age from birthdate string
+// Returns the age in years based on a birthdate string (format: YYYY-MM-DD)
 export function calculateAge(birthdate: string): number {
   const today = new Date();
   const birthDate = new Date(birthdate);

@@ -49,7 +49,7 @@ export const getTodosForFamily = async (
   return normalized as Todo[];
 };
 
-// Add a new todo for a family
+// Add a new task for a family
 export const addTodo = async (
   familyId: string,
   task: string,
@@ -75,7 +75,7 @@ export const addTodo = async (
   return data;
 };
 
-// Toggle todo completion status
+// Toggle task completion status
 export const toggleTodo = async (id: string, isDone: boolean, doneById?: string | null) => {
   const updateData: any = { isDone };
   if (isDone) {
@@ -91,7 +91,7 @@ export const toggleTodo = async (id: string, isDone: boolean, doneById?: string 
 };
 
 export async function deleteTodo(id: string) {
-  const confirmed = window.confirm('Todo wirklich löschen?');
+  const confirmed = globalThis.confirm('Todo wirklich löschen?');
   if (!confirmed) return;
 
   const { error } = await supabase.from('todos').delete().eq('id', id);

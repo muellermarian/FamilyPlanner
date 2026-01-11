@@ -84,7 +84,7 @@ export async function createPurchase(
 
   // Create purchase items with deal_date
   const purchaseItems = items.map((item) => ({
-    purchase_id: (purchase as any).id,
+    purchase_id: purchase.id,
     name: item.name,
     quantity: item.quantity,
     unit: item.unit,

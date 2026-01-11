@@ -79,6 +79,7 @@ export function useContacts(familyId: string) {
 
   // Handler for adding a new person
   // Accepts a single object for person data
+  // Handler for adding a new person (accepts a single object)
   const handleAddPerson = async (data: {
     firstName: string;
     lastName: string;
@@ -93,26 +94,27 @@ export function useContacts(familyId: string) {
     city: string;
     country: string;
   }) => {
-    await addContact(
+    await addContact({
       familyId,
-      data.firstName,
-      data.lastName,
-      data.contactFamilyId,
-      data.birthdate || undefined,
-      data.phone,
-      data.phoneLandline,
-      data.email,
-      data.street,
-      data.houseNumber,
-      data.zip,
-      data.city,
-      data.country
-    );
+      firstName: data.firstName,
+      lastName: data.lastName,
+      contactFamilyId: data.contactFamilyId,
+      birthdate: data.birthdate || undefined,
+      phone: data.phone,
+      phoneLandline: data.phoneLandline,
+      email: data.email,
+      street: data.street,
+      houseNumber: data.houseNumber,
+      zip: data.zip,
+      city: data.city,
+      country: data.country,
+    });
     await fetchData();
   };
 
   // Handler for updating an existing person
   // Accepts a single object for person data
+  // Handler for updating an existing person (accepts a single object)
   const handleUpdatePerson = async (
     contactId: string,
     data: {
@@ -130,21 +132,21 @@ export function useContacts(familyId: string) {
       country: string;
     }
   ) => {
-    await updateContact(
+    await updateContact({
       contactId,
-      data.firstName,
-      data.lastName,
-      data.contactFamilyId,
-      data.birthdate || undefined,
-      data.phone,
-      data.phoneLandline,
-      data.email,
-      data.street,
-      data.houseNumber,
-      data.zip,
-      data.city,
-      data.country
-    );
+      firstName: data.firstName,
+      lastName: data.lastName,
+      contactFamilyId: data.contactFamilyId,
+      birthdate: data.birthdate || undefined,
+      phone: data.phone,
+      phoneLandline: data.phoneLandline,
+      email: data.email,
+      street: data.street,
+      houseNumber: data.houseNumber,
+      zip: data.zip,
+      city: data.city,
+      country: data.country,
+    });
     await fetchData();
   };
 

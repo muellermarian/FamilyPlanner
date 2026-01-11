@@ -1,9 +1,7 @@
 import { supabase } from './supabaseClient';
 import type { ContactFamily, Contact } from './types';
 
-/**
- * Get all contact families with their contacts
- */
+// Get all contact families with their contacts
 export async function getContactFamilies(familyId: string): Promise<ContactFamily[]> {
   const { data: families, error: familiesError } = await supabase
     .from('contact_families')
@@ -33,9 +31,7 @@ export async function getContactFamilies(familyId: string): Promise<ContactFamil
   return result;
 }
 
-/**
- * Get individual contacts (not assigned to a family)
- */
+// Get individual contacts (not assigned to a family)
 export async function getIndividualContacts(familyId: string): Promise<Contact[]> {
   const { data, error } = await supabase
     .from('contacts')
@@ -48,9 +44,7 @@ export async function getIndividualContacts(familyId: string): Promise<Contact[]
   return data || [];
 }
 
-/**
- * Get all contacts (including those in families) sorted by last name, first name
- */
+// Get all contacts (including those in families) sorted by last name, first name
 export async function getAllContacts(familyId: string): Promise<Contact[]> {
   const { data, error } = await supabase
     .from('contacts')
@@ -63,9 +57,7 @@ export async function getAllContacts(familyId: string): Promise<Contact[]> {
   return data || [];
 }
 
-/**
- * Add a new contact family
- */
+// Add a new contact family
 export async function addContactFamily(
   familyId: string,
   familyName: string,
@@ -93,9 +85,7 @@ export async function addContactFamily(
   return data;
 }
 
-/**
- * Update a contact family
- */
+// Update a contact family
 export async function updateContactFamily(
   contactFamilyId: string,
   familyName: string,
@@ -120,33 +110,44 @@ export async function updateContactFamily(
   if (error) throw error;
 }
 
-/**
- * Delete a contact family (and all its contacts)
- */
+// Delete a contact family (and all its contacts)
 export async function deleteContactFamily(contactFamilyId: string): Promise<void> {
   const { error } = await supabase.from('contact_families').delete().eq('id', contactFamilyId);
 
   if (error) throw error;
 }
 
-/**
- * Add a new contact
- */
-export async function addContact(
-  familyId: string,
-  firstName: string,
-  lastName: string,
-  contactFamilyId?: string | null,
-  birthdate?: string,
-  phone?: string,
-  phoneLandline?: string,
-  email?: string,
-  street?: string,
-  houseNumber?: string,
-  zip?: string,
-  city?: string,
-  country?: string
-): Promise<Contact> {
+// Add a new contact
+export async function addContact(params: {
+  familyId: string;
+  firstName: string;
+  lastName: string;
+  contactFamilyId?: string | null;
+  birthdate?: string;
+  phone?: string;
+  phoneLandline?: string;
+  email?: string;
+  street?: string;
+  houseNumber?: string;
+  zip?: string;
+  city?: string;
+  country?: string;
+}): Promise<Contact> {
+  const {
+    familyId,
+    firstName,
+    lastName,
+    contactFamilyId,
+    birthdate,
+    phone,
+    phoneLandline,
+    email,
+    street,
+    houseNumber,
+    zip,
+    city,
+    country,
+  } = params;
   const { data, error } = await supabase
     .from('contacts')
     .insert({
@@ -171,24 +172,37 @@ export async function addContact(
   return data;
 }
 
-/**
- * Update a contact
- */
-export async function updateContact(
-  contactId: string,
-  firstName: string,
-  lastName: string,
-  contactFamilyId?: string | null,
-  birthdate?: string,
-  phone?: string,
-  phoneLandline?: string,
-  email?: string,
-  street?: string,
-  houseNumber?: string,
-  zip?: string,
-  city?: string,
-  country?: string
-): Promise<void> {
+// Update a contact
+export async function updateContact(params: {
+  contactId: string;
+  firstName: string;
+  lastName: string;
+  contactFamilyId?: string | null;
+  birthdate?: string;
+  phone?: string;
+  phoneLandline?: string;
+  email?: string;
+  street?: string;
+  houseNumber?: string;
+  zip?: string;
+  city?: string;
+  country?: string;
+}): Promise<void> {
+  const {
+    contactId,
+    firstName,
+    lastName,
+    contactFamilyId,
+    birthdate,
+    phone,
+    phoneLandline,
+    email,
+    street,
+    houseNumber,
+    zip,
+    city,
+    country,
+  } = params;
   const { error } = await supabase
     .from('contacts')
     .update({
@@ -210,9 +224,7 @@ export async function updateContact(
   if (error) throw error;
 }
 
-/**
- * Delete a contact
- */
+// Delete a contact
 export async function deleteContact(contactId: string): Promise<void> {
   const { error } = await supabase.from('contacts').delete().eq('id', contactId);
 
