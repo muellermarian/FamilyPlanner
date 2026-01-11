@@ -11,11 +11,14 @@ import ContactItem from './ContactItem';
 import PersonDetails from './PersonDetails';
 import ActionButtons from './ActionButtons';
 
+// Props for the ContactList component
 interface ContactListProps {
-  familyId: string;
+  familyId: string; // ID of the selected family
 }
 
-export default function ContactList({ familyId }: ContactListProps) {
+type ReadonlyContactListProps = Readonly<ContactListProps>;
+
+export default function ContactList({ familyId }: ReadonlyContactListProps) {
   const {
     contactFamilies,
     allContacts,
@@ -50,6 +53,7 @@ export default function ContactList({ familyId }: ContactListProps) {
   const [showPersonForm, setShowPersonForm] = useState(false);
   const [preselectedFamilyId, setPreselectedFamilyId] = useState<string | null>(null);
 
+  // Toggle expanded state for families or persons
   const toggleExpanded = (
     id: string,
     setter: React.Dispatch<React.SetStateAction<Set<string>>>
@@ -61,6 +65,7 @@ export default function ContactList({ familyId }: ContactListProps) {
     });
   };
 
+  // Handler for adding a new family
   const onAddFamily = async (
     familyName: string,
     street: string,
@@ -78,6 +83,7 @@ export default function ContactList({ familyId }: ContactListProps) {
     }
   };
 
+  // Handler for updating an existing family
   const onUpdateFamily = async (
     contactFamilyId: string,
     familyName: string,
@@ -103,6 +109,7 @@ export default function ContactList({ familyId }: ContactListProps) {
     }
   };
 
+  // Handler for deleting a family (with confirmation)
   const onDeleteFamily = async (contactFamilyId: string, familyName: string) => {
     if (
       !confirm(
@@ -118,35 +125,26 @@ export default function ContactList({ familyId }: ContactListProps) {
     }
   };
 
-  const onAddPerson = async (
-    firstName: string,
-    lastName: string,
-    contactFamilyId: string | null,
-    birthdate: string | null,
-    phone: string,
-    phoneLandline: string,
-    email: string,
-    street: string,
-    houseNumber: string,
-    zip: string,
-    city: string,
-    country: string
-  ) => {
+  // Helper type for person form data
+  type PersonFormData = {
+    firstName: string;
+    lastName: string;
+    contactFamilyId: string | null;
+    birthdate: string | null;
+    phone: string;
+    phoneLandline: string;
+    email: string;
+    street: string;
+    houseNumber: string;
+    zip: string;
+    city: string;
+    country: string;
+  };
+
+  // Handler for adding a new person (accepts a single object)
+  const onAddPerson = async (data: PersonFormData) => {
     try {
-      await handleAddPerson(
-        firstName,
-        lastName,
-        contactFamilyId,
-        birthdate,
-        phone,
-        phoneLandline,
-        email,
-        street,
-        houseNumber,
-        zip,
-        city,
-        country
-      );
+      await handleAddPerson(data);
       setShowPersonForm(false);
       setPreselectedFamilyId(null);
       showToast('Person hinzugefügt ✓');
@@ -155,44 +153,18 @@ export default function ContactList({ familyId }: ContactListProps) {
     }
   };
 
-  const onUpdatePerson = async (
-    firstName: string,
-    lastName: string,
-    contactFamilyId: string | null,
-    birthdate: string | null,
-    phone: string,
-    phoneLandline: string,
-    email: string,
-    street: string,
-    houseNumber: string,
-    zip: string,
-    city: string,
-    country: string
-  ) => {
+  // Handler for updating an existing person (accepts a single object)
+  const onUpdatePerson = async (data: PersonFormData) => {
     if (!editContact) return;
-
     try {
-      await handleUpdatePerson(
-        editContact.id,
-        firstName,
-        lastName,
-        contactFamilyId,
-        birthdate,
-        phone,
-        phoneLandline,
-        email,
-        street,
-        houseNumber,
-        zip,
-        city,
-        country
-      );
+      await handleUpdatePerson(editContact.id, data);
       setEditContact(null);
     } catch (err: any) {
       alert(err.message || JSON.stringify(err));
     }
   };
 
+  // Handler for deleting a person (with confirmation)
   const onDeletePerson = async (contactId: string, name: string) => {
     if (!confirm(`"${name}" wirklich löschen?`)) return;
 
@@ -203,11 +175,13 @@ export default function ContactList({ familyId }: ContactListProps) {
     }
   };
 
+  // Open the person form, optionally preselecting a family
   const openPersonForm = (contactFamilyId?: string) => {
     setPreselectedFamilyId(contactFamilyId || null);
     setShowPersonForm(true);
   };
 
+  // Render the contact list UI with forms, tabs, and lists
   return (
     <PullToRefresh onRefresh={refetch}>
       <div>
@@ -327,8 +301,9 @@ export default function ContactList({ familyId }: ContactListProps) {
 
                     return (
                       <div key={family.id} className="border rounded-lg overflow-hidden">
-                        <div
-                          className="p-4 bg-gray-50 flex justify-between items-center cursor-pointer hover:bg-gray-100"
+                        <button
+                          type="button"
+                          className="w-full text-left p-4 bg-gray-50 flex justify-between items-center cursor-pointer hover:bg-gray-100"
                           onClick={() => toggleExpanded(family.id, setExpandedFamilyIds)}
                         >
                           <div className="flex items-center gap-3">
@@ -344,7 +319,7 @@ export default function ContactList({ familyId }: ContactListProps) {
                               )}
                             </div>
                           </div>
-                        </div>
+                        </button>
 
                         {isExpanded && (
                           <div className="p-4 bg-white">
@@ -381,7 +356,6 @@ export default function ContactList({ familyId }: ContactListProps) {
                                   <ContactItem
                                     key={contact.id}
                                     contact={contact}
-                                    contactFamilies={contactFamilies}
                                     onEdit={() => setEditContact(contact)}
                                     onDelete={() =>
                                       onDeletePerson(
@@ -439,8 +413,9 @@ export default function ContactList({ familyId }: ContactListProps) {
 
                     return (
                       <div key={contact.id} className="border rounded-lg overflow-hidden">
-                        <div
-                          className="p-4 bg-gray-50 flex justify-between items-center cursor-pointer hover:bg-gray-100"
+                        <button
+                          type="button"
+                          className="w-full text-left p-4 bg-gray-50 flex justify-between items-center cursor-pointer hover:bg-gray-100"
                           onClick={() => toggleExpanded(contact.id, setExpandedPersonIds)}
                         >
                           <div className="flex items-center gap-3">
@@ -454,7 +429,7 @@ export default function ContactList({ familyId }: ContactListProps) {
                               )}
                             </div>
                           </div>
-                        </div>
+                        </button>
 
                         {isExpanded && (
                           <div className="p-4 bg-white">

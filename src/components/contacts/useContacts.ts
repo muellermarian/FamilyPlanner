@@ -1,3 +1,5 @@
+// Custom React hook for managing contacts and families
+// Only comments are changed, no user-facing German content is modified
 import { useState, useEffect } from 'react';
 import type { ContactFamily, Contact } from '../../lib/types';
 import {
@@ -11,12 +13,15 @@ import {
   deleteContact,
 } from '../../lib/contacts';
 
+// useContacts hook provides state and handlers for contacts and families
 export function useContacts(familyId: string) {
+  // State for families, contacts, loading, and error
   const [contactFamilies, setContactFamilies] = useState<ContactFamily[]>([]);
   const [allContacts, setAllContacts] = useState<Contact[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Fetch families and contacts from API
   const fetchData = async () => {
     setLoading(true);
     setError(null);
@@ -34,10 +39,12 @@ export function useContacts(familyId: string) {
     }
   };
 
+  // Refetch data when familyId changes
   useEffect(() => {
     fetchData();
   }, [familyId]);
 
+  // Handler for adding a new family
   const handleAddFamily = async (
     familyName: string,
     street: string,
@@ -50,6 +57,7 @@ export function useContacts(familyId: string) {
     await fetchData();
   };
 
+  // Handler for updating an existing family
   const handleUpdateFamily = async (
     contactFamilyId: string,
     familyName: string,
@@ -63,81 +71,90 @@ export function useContacts(familyId: string) {
     await fetchData();
   };
 
+  // Handler for deleting a family
   const handleDeleteFamily = async (contactFamilyId: string) => {
     await deleteContactFamily(contactFamilyId);
     await fetchData();
   };
 
-  const handleAddPerson = async (
-    firstName: string,
-    lastName: string,
-    contactFamilyId: string | null,
-    birthdate: string | null,
-    phone: string,
-    phoneLandline: string,
-    email: string,
-    street: string,
-    houseNumber: string,
-    zip: string,
-    city: string,
-    country: string
-  ) => {
+  // Handler for adding a new person
+  // Accepts a single object for person data
+  const handleAddPerson = async (data: {
+    firstName: string;
+    lastName: string;
+    contactFamilyId: string | null;
+    birthdate: string | null;
+    phone: string;
+    phoneLandline: string;
+    email: string;
+    street: string;
+    houseNumber: string;
+    zip: string;
+    city: string;
+    country: string;
+  }) => {
     await addContact(
       familyId,
-      firstName,
-      lastName,
-      contactFamilyId,
-      birthdate || undefined,
-      phone,
-      phoneLandline,
-      email,
-      street,
-      houseNumber,
-      zip,
-      city,
-      country
+      data.firstName,
+      data.lastName,
+      data.contactFamilyId,
+      data.birthdate || undefined,
+      data.phone,
+      data.phoneLandline,
+      data.email,
+      data.street,
+      data.houseNumber,
+      data.zip,
+      data.city,
+      data.country
     );
     await fetchData();
   };
 
+  // Handler for updating an existing person
+  // Accepts a single object for person data
   const handleUpdatePerson = async (
     contactId: string,
-    firstName: string,
-    lastName: string,
-    contactFamilyId: string | null,
-    birthdate: string | null,
-    phone: string,
-    phoneLandline: string,
-    email: string,
-    street: string,
-    houseNumber: string,
-    zip: string,
-    city: string,
-    country: string
+    data: {
+      firstName: string;
+      lastName: string;
+      contactFamilyId: string | null;
+      birthdate: string | null;
+      phone: string;
+      phoneLandline: string;
+      email: string;
+      street: string;
+      houseNumber: string;
+      zip: string;
+      city: string;
+      country: string;
+    }
   ) => {
     await updateContact(
       contactId,
-      firstName,
-      lastName,
-      contactFamilyId,
-      birthdate || undefined,
-      phone,
-      phoneLandline,
-      email,
-      street,
-      houseNumber,
-      zip,
-      city,
-      country
+      data.firstName,
+      data.lastName,
+      data.contactFamilyId,
+      data.birthdate || undefined,
+      data.phone,
+      data.phoneLandline,
+      data.email,
+      data.street,
+      data.houseNumber,
+      data.zip,
+      data.city,
+      data.country
     );
     await fetchData();
   };
 
+  // Handler for deleting a person
   const handleDeletePerson = async (contactId: string) => {
     await deleteContact(contactId);
     await fetchData();
   };
 
+  // Return state and handlers for use in components
   return {
     contactFamilies,
     allContacts,
