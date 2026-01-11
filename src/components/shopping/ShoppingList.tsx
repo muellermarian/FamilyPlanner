@@ -1,3 +1,4 @@
+// Props for the ShoppingList component: family/user info and user list
 import { useState, useEffect } from 'react';
 import type { ShoppingPurchase } from '../../lib/types';
 import { addShoppingItem, createPurchase, getPurchaseHistory } from '../../lib/shopping';
@@ -19,37 +20,45 @@ interface ShoppingListProps {
   users: { id: string; name: string }[];
 }
 
+type ReadonlyShoppingListProps = Readonly<ShoppingListProps>;
+
+// ShoppingList component manages the shopping list UI and logic
 export default function ShoppingList({
   familyId,
   currentUserId,
   currentProfileId,
   users,
-}: ShoppingListProps) {
+}: ReadonlyShoppingListProps) {
+  // Custom hooks for shopping items, selection, and toast
   const { items, loading, error, fetchItems, handleDelete, handleDeleteSelected, updateQuantity } =
     useShoppingItems(familyId);
   const { selectedIds, handleToggleSelect, handleToggleAll, clearSelection, removeFromSelection } =
     useShoppingSelection();
   const { toast, showToast } = useToast();
 
+  // State for showing forms and history
   const [showAddForm, setShowAddForm] = useState(false);
   const [showHistory, setShowHistory] = useState(false);
   const [showQuickAdd, setShowQuickAdd] = useState(false);
   const [purchases, setPurchases] = useState<ShoppingPurchase[]>([]);
 
+  // Fetch purchase history from backend
   const fetchHistory = async () => {
     try {
       const data = await getPurchaseHistory(familyId);
       setPurchases(data);
     } catch (err) {
-      // Silent fail for purchase history
+      console.error('Fehler beim Laden der Einkaufshistorie:', err);
     }
   };
 
+  // Fetch items and history when familyId changes
   useEffect(() => {
     fetchItems();
     fetchHistory();
   }, [familyId]);
 
+  // Handler for adding a new shopping item
   const handleAdd = async (
     name: string,
     quantity: string,
@@ -65,8 +74,8 @@ export default function ShoppingList({
 
       if (existingItem) {
         // Parse quantities and add them
-        const existingQty = parseFloat(existingItem.quantity) || 0;
-        const newQty = parseFloat(quantity) || 0;
+        const existingQty = Number.parseFloat(existingItem.quantity) || 0;
+        const newQty = Number.parseFloat(quantity) || 0;
         const combinedQty = existingQty + newQty;
 
         // Update the existing item
@@ -95,6 +104,7 @@ export default function ShoppingList({
     }
   };
 
+  // Handler for marking selected items as purchased
   const handlePurchase = async () => {
     if (selectedIds.size === 0) {
       alert('Bitte wähle mindestens einen Artikel aus');
@@ -114,6 +124,7 @@ export default function ShoppingList({
     }
   };
 
+  // Handler for deleting selected items
   const handleDeleteSelectedItems = async () => {
     const success = await handleDeleteSelected(selectedIds);
     if (success) {
@@ -121,22 +132,28 @@ export default function ShoppingList({
     }
   };
 
+  // Handler for deleting a single item
   const handleDeleteItem = async (id: string) => {
     await handleDelete(id);
     removeFromSelection(id);
   };
 
+  // Determine if all items are selected
   const allSelected = items.length > 0 && selectedIds.size === items.length;
+  // Sort items for display
   const sortedItems = sortShoppingItems(items);
 
+  // Handler for refreshing items and history
   const handleRefresh = async () => {
     await fetchItems();
     await fetchHistory();
   };
 
   return (
+    // Pull-to-refresh wrapper for mobile usability
     <PullToRefresh onRefresh={handleRefresh}>
       <div>
+        {/* Quick add form for fast item entry */}
         {showQuickAdd && (
           <ShoppingQuickAdd
             familyId={familyId}
@@ -147,6 +164,7 @@ export default function ShoppingList({
           />
         )}
 
+        {/* Shopping history view */}
         {showHistory && (
           <ShoppingHistory
             purchases={purchases}
@@ -155,9 +173,11 @@ export default function ShoppingList({
           />
         )}
 
+        {/* Main shopping list UI */}
         {!showQuickAdd && !showHistory && (
           <div className="max-w-md mx-auto mt-10 p-4 border rounded shadow-md">
             <div className="flex justify-between items-center mb-4">
+              {/* List title and action buttons */}
               <h2 className="text-2xl font-bold">Einkaufsliste</h2>
               <div className="flex gap-2">
                 <button
@@ -185,10 +205,12 @@ export default function ShoppingList({
               </div>
             </div>
 
+            {/* Add item form */}
             {showAddForm && (
               <ShoppingAddForm onAdd={handleAdd} onCancel={() => setShowAddForm(false)} />
             )}
 
+            {/* Selection and purchase controls */}
             <div className="mb-4 flex flex-col gap-2">
               <div className="flex gap-2">
                 <button
@@ -215,11 +237,13 @@ export default function ShoppingList({
               )}
             </div>
 
+            {/* Loading and error messages */}
             <div className="mb-2 text-sm text-gray-600">
               {loading ? '🔄 Lade Artikel…' : `${items.length} Artikel`}
             </div>
             {error && <div className="mb-2 text-red-600">Fehler: {error}</div>}
 
+            {/* List of shopping items */}
             <ul className="flex flex-col gap-2">
               {sortedItems.map((item) => (
                 <ShoppingItemComponent
@@ -232,6 +256,7 @@ export default function ShoppingList({
               ))}
             </ul>
 
+            {/* Toast notification for feedback */}
             {toast && <Toast message={toast} />}
           </div>
         )}

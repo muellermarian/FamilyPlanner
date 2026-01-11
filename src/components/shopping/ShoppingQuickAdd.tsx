@@ -22,13 +22,15 @@ interface ShoppingQuickAddProps {
   onItemsAdded: () => void;
 }
 
+type ReadonlyShoppingQuickAddProps = Readonly<ShoppingQuickAddProps>;
+
 export default function ShoppingQuickAdd({
   familyId,
   currentProfileId,
   currentItems,
   onClose,
   onItemsAdded,
-}: ShoppingQuickAddProps) {
+}: ReadonlyShoppingQuickAddProps) {
   const [items, setItems] = useState<QuickAddItem[]>([]);
   const [loading, setLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -95,8 +97,8 @@ export default function ShoppingQuickAdd({
 
         if (existingItem) {
           // Update quantity
-          const existingQty = parseFloat(existingItem.quantity) || 0;
-          const newQty = parseFloat(item.quantity) || 0;
+          const existingQty = Number.parseFloat(existingItem.quantity) || 0;
+          const newQty = Number.parseFloat(item.quantity) || 0;
           const combinedQty = existingQty + newQty;
           await updateShoppingItemQuantity(existingItem.id, combinedQty.toString());
         } else {
@@ -185,14 +187,18 @@ export default function ShoppingQuickAdd({
             <div className="space-y-1">
               {filteredItems.map((item) => {
                 const originalIndex = items.indexOf(item);
+                const checkboxId = `quickadd-checkbox-${originalIndex}`;
                 return (
                   <label
                     key={`${item.name}-${item.quantity}-${item.unit}`}
+                    htmlFor={checkboxId}
+                    aria-label={`${item.name}, ${item.quantity} ${item.unit}`}
                     className={`flex items-center gap-3 p-2 rounded cursor-pointer hover:bg-gray-50 ${
                       item.isSelected ? 'bg-green-50' : ''
                     }`}
                   >
                     <input
+                      id={checkboxId}
                       type="checkbox"
                       checked={item.isSelected}
                       onChange={() => handleToggleItem(originalIndex)}

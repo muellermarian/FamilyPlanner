@@ -1,31 +1,45 @@
 import type { ShoppingItem } from '../../lib/types';
 
+function hasDeal(item: ShoppingItem): boolean {
+  return Boolean(item.deal_date || item.store);
+}
+
+function compareDeal(a: ShoppingItem, b: ShoppingItem): number {
+  const aHasDeal = hasDeal(a);
+  const bHasDeal = hasDeal(b);
+  if (aHasDeal && !bHasDeal) return -1;
+  if (!aHasDeal && bHasDeal) return 1;
+  return 0;
+}
+
+function compareDate(a: ShoppingItem, b: ShoppingItem): number {
+  if (a.deal_date && b.deal_date) {
+    return a.deal_date.localeCompare(b.deal_date);
+  }
+  if (a.deal_date && !b.deal_date) return -1;
+  if (!a.deal_date && b.deal_date) return 1;
+  return 0;
+}
+
+function compareStore(a: ShoppingItem, b: ShoppingItem): number {
+  if (a.store && b.store) {
+    return a.store.localeCompare(b.store);
+  }
+  return 0;
+}
+
 export function sortShoppingItems(items: ShoppingItem[]): ShoppingItem[] {
   return [...items].sort((a, b) => {
     // Items with deal_date and/or store come first
-    const aHasDeal = a.deal_date || a.store;
-    const bHasDeal = b.deal_date || b.store;
-
-    if (aHasDeal && !bHasDeal) return -1;
-    if (!aHasDeal && bHasDeal) return 1;
+    const dealCompare = compareDeal(a, b);
+    if (dealCompare !== 0) return dealCompare;
 
     // Both have deals: sort by date, then by store
-    if (aHasDeal && bHasDeal) {
-      // Sort by date first
-      if (a.deal_date && b.deal_date) {
-        const dateCompare = a.deal_date.localeCompare(b.deal_date);
-        if (dateCompare !== 0) return dateCompare;
-      } else if (a.deal_date && !b.deal_date) {
-        return -1;
-      } else if (!a.deal_date && b.deal_date) {
-        return 1;
-      }
-
-      // Then by store
-      if (a.store && b.store) {
-        const storeCompare = a.store.localeCompare(b.store);
-        if (storeCompare !== 0) return storeCompare;
-      }
+    if (hasDeal(a) && hasDeal(b)) {
+      const dateCompare = compareDate(a, b);
+      if (dateCompare !== 0) return dateCompare;
+      const storeCompare = compareStore(a, b);
+      if (storeCompare !== 0) return storeCompare;
     }
 
     // Finally, sort alphabetically by name

@@ -1,3 +1,4 @@
+// Custom hook for managing shopping items state and actions
 import { useState, useEffect } from 'react';
 import type { ShoppingItem } from '../../lib/types';
 import {
@@ -8,10 +9,12 @@ import {
 } from '../../lib/shopping';
 
 export function useShoppingItems(familyId: string) {
+  // State for shopping items, loading, and error
   const [items, setItems] = useState<ShoppingItem[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Fetch shopping items from backend
   const fetchItems = async () => {
     setLoading(true);
     setError(null);
@@ -26,10 +29,12 @@ export function useShoppingItems(familyId: string) {
     }
   };
 
+  // Fetch items when familyId changes
   useEffect(() => {
     fetchItems();
   }, [familyId]);
 
+  // Delete a single shopping item
   const handleDelete = async (id: string) => {
     try {
       await deleteShoppingItem(id);
@@ -39,6 +44,7 @@ export function useShoppingItems(familyId: string) {
     }
   };
 
+  // Delete selected shopping items after confirmation
   const handleDeleteSelected = async (selectedIds: Set<string>) => {
     if (selectedIds.size === 0) {
       alert('Bitte wähle mindestens einen Artikel aus');
@@ -63,11 +69,13 @@ export function useShoppingItems(familyId: string) {
     }
   };
 
+  // Update the quantity of a shopping item
   const updateQuantity = async (id: string, quantity: string) => {
     await updateShoppingItemQuantity(id, quantity);
     await fetchItems();
   };
 
+  // Return state and handlers for shopping items
   return {
     items,
     loading,

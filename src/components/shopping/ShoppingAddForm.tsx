@@ -12,12 +12,15 @@ interface ShoppingAddFormProps {
   onCancel: () => void;
 }
 
-export default function ShoppingAddForm({ onAdd, onCancel }: ShoppingAddFormProps) {
+type ReadonlyShoppingAddFormProps = Readonly<ShoppingAddFormProps>;
+
+export default function ShoppingAddForm({ onAdd, onCancel }: ReadonlyShoppingAddFormProps) {
   const [name, setName] = useState('');
   const [quantity, setQuantity] = useState('');
   const [unit, setUnit] = useState('Packung');
   const [store, setStore] = useState('');
   const [dealDate, setDealDate] = useState('');
+  // Props for the ShoppingAddForm component: expects handlers for adding and cancelling
   const [submitting, setSubmitting] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -26,6 +29,7 @@ export default function ShoppingAddForm({ onAdd, onCancel }: ShoppingAddFormProp
 
     setSubmitting(true);
     try {
+      // State for item name
       await onAdd(name.trim(), quantity.trim() || '1', unit, store || null, dealDate || null);
       setName('');
       setQuantity('');
@@ -33,7 +37,8 @@ export default function ShoppingAddForm({ onAdd, onCancel }: ShoppingAddFormProp
       setStore('');
       setDealDate('');
     } catch (err) {
-      // Silent fail
+      // Log error to console for debugging
+      console.error('Error adding shopping item:', err);
     } finally {
       setSubmitting(false);
     }
@@ -42,8 +47,11 @@ export default function ShoppingAddForm({ onAdd, onCancel }: ShoppingAddFormProp
   return (
     <form onSubmit={handleSubmit} className="mb-4 p-4 bg-gray-50 border rounded">
       <div className="mb-3">
-        <label className="block text-sm font-medium mb-1">Artikel</label>
+        <label htmlFor="shopping-item-name" className="block text-sm font-medium mb-1">
+          Artikel
+        </label>
         <input
+          id="shopping-item-name"
           type="text"
           value={name}
           onChange={(e) => setName(e.target.value)}
@@ -55,8 +63,11 @@ export default function ShoppingAddForm({ onAdd, onCancel }: ShoppingAddFormProp
       </div>
       <div className="grid grid-cols-2 gap-3 mb-3">
         <div>
-          <label className="block text-sm font-medium mb-1">Menge</label>
+          <label htmlFor="shopping-item-quantity" className="block text-sm font-medium mb-1">
+            Menge
+          </label>
           <input
+            id="shopping-item-quantity"
             type="text"
             value={quantity}
             onChange={(e) => setQuantity(e.target.value)}
@@ -65,8 +76,11 @@ export default function ShoppingAddForm({ onAdd, onCancel }: ShoppingAddFormProp
           />
         </div>
         <div>
-          <label className="block text-sm font-medium mb-1">Einheit</label>
+          <label htmlFor="shopping-item-unit" className="block text-sm font-medium mb-1">
+            Einheit
+          </label>
           <select
+            id="shopping-item-unit"
             value={unit}
             onChange={(e) => setUnit(e.target.value)}
             className="w-full border rounded px-3 py-2"
@@ -81,10 +95,11 @@ export default function ShoppingAddForm({ onAdd, onCancel }: ShoppingAddFormProp
       </div>
       <div className="grid grid-cols-2 gap-3 mb-3">
         <div>
-          <label className="block text-sm font-medium mb-1">
+          <label htmlFor="shopping-item-store" className="block text-sm font-medium mb-1">
             Geschäft <span className="text-gray-400">(optional)</span>
           </label>
           <select
+            id="shopping-item-store"
             value={store}
             onChange={(e) => setStore(e.target.value)}
             className="w-full border rounded px-3 py-2"
@@ -98,11 +113,12 @@ export default function ShoppingAddForm({ onAdd, onCancel }: ShoppingAddFormProp
           </select>
         </div>
         <div>
-          <label className="block text-sm font-medium mb-1">
+          <label htmlFor="shopping-item-date" className="block text-sm font-medium mb-1">
             Datum <span className="text-gray-400">(optional)</span>
           </label>
           <div className="flex gap-2">
             <input
+              id="shopping-item-date"
               type="date"
               value={dealDate}
               onChange={(e) => setDealDate(e.target.value)}
