@@ -2,9 +2,9 @@ import { useState } from 'react';
 import type { Note } from '../../lib/notes';
 
 interface NoteEditFormProps {
-  note: Note;
-  onSave: (title: string, content: string) => void;
-  onCancel: () => void;
+  readonly note: Note;
+  readonly onSave: (title: string, content: string) => void;
+  readonly onCancel: () => void;
 }
 
 export default function NoteEditForm({ note, onSave, onCancel }: NoteEditFormProps) {

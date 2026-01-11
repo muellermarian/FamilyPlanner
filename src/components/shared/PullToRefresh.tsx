@@ -1,12 +1,21 @@
 import { usePullToRefresh } from '../../hooks/usePullToRefresh';
 
+// PullToRefresh component: enables pull-to-refresh gesture for its children.
+// Uses a custom hook to handle the gesture and refresh logic.
+
+// Props:
+// - onRefresh: callback function to trigger when user pulls down far enough
+// - children: content to be wrapped and refreshed
+// - disabled: disables pull-to-refresh if true
 interface PullToRefreshProps {
-  onRefresh: () => void | Promise<void>;
-  children: React.ReactNode;
-  disabled?: boolean;
+  readonly onRefresh: () => void | Promise<void>;
+  readonly children: React.ReactNode;
+  readonly disabled?: boolean;
 }
 
+// Main component function
 export function PullToRefresh({ onRefresh, children, disabled = false }: PullToRefreshProps) {
+  // Custom hook manages pull gesture, refresh state, and progress
   const { pullDistance, isRefreshing, progress } = usePullToRefresh({
     onRefresh,
     disabled,
@@ -14,7 +23,7 @@ export function PullToRefresh({ onRefresh, children, disabled = false }: PullToR
 
   return (
     <div className="relative">
-      {/* Pull to Refresh Indicator */}
+      {/* Pull-to-refresh indicator shown above content while pulling or refreshing */}
       <div
         className="absolute top-0 left-0 right-0 flex items-center justify-center pointer-events-none transition-all duration-200"
         style={{
@@ -23,6 +32,7 @@ export function PullToRefresh({ onRefresh, children, disabled = false }: PullToR
         }}
       >
         <div className="flex flex-col items-center gap-1">
+          {/* Spinner icon rotates while pulling or refreshing */}
           <div
             className={`text-2xl transition-transform duration-300 ${
               isRefreshing ? 'animate-spin' : ''
@@ -33,6 +43,7 @@ export function PullToRefresh({ onRefresh, children, disabled = false }: PullToR
           >
             🔄
           </div>
+          {/* Show status text depending on refresh state */}
           {isRefreshing && (
             <span className="text-xs text-gray-600 dark:text-gray-400">Aktualisieren...</span>
           )}
@@ -44,7 +55,7 @@ export function PullToRefresh({ onRefresh, children, disabled = false }: PullToR
         </div>
       </div>
 
-      {/* Content with offset when pulling */}
+      {/* Main content, offset vertically while pulling */}
       <div
         className="transition-transform duration-200"
         style={{
