@@ -107,7 +107,14 @@ serve(async (req) => {
 
       // Send notification to all subscriptions for this family
       for (const sub of familySubs) {
-        const subscription = JSON.parse(sub.subscription);
+        // Baue das Subscription-Objekt direkt aus endpoint, p256dh, auth
+        const subscription = {
+          endpoint: sub.endpoint,
+          keys: {
+            p256dh: sub.p256dh,
+            auth: sub.auth,
+          },
+        };
 
         try {
           const pushPayload = {
