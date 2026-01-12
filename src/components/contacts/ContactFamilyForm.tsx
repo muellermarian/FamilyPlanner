@@ -93,12 +93,14 @@ export default function ContactFamilyForm({
           <button type="button" onClick={onCancel} className="text-2xl">
             ←
           </button>
-          <h3 className="text-xl font-bold">{family ? 'Edit family' : 'Add new family'}</h3>
+          <h3 className="text-xl font-bold">
+            {family ? 'Familie bearbeiten' : 'Neue Familie anlegen'}
+          </h3>
         </div>
         {/* Family name input */}
         <div>
           <label htmlFor="familyName" className="block text-sm font-medium mb-1">
-            Family name *
+            Familienname *
           </label>
           <input
             id="familyName"
@@ -106,19 +108,19 @@ export default function ContactFamilyForm({
             value={familyName}
             onChange={(e) => setFamilyName(e.target.value)}
             className="w-full border rounded px-3 py-2"
-            placeholder="e.g. Family Müller"
+            placeholder="z.B. Familie Müller"
             required
           />
         </div>
 
         {/* Address section */}
         <div className="border-t pt-4">
-          <h4 className="font-medium mb-3">Address</h4>
+          <h4 className="font-medium mb-3">Adresse</h4>
 
           <div className="grid grid-cols-3 gap-2 mb-3">
             <div className="col-span-2">
               <label htmlFor="street" className="block text-sm text-gray-600 mb-1">
-                Street
+                Straße
               </label>
               <input
                 id="street"
@@ -126,12 +128,12 @@ export default function ContactFamilyForm({
                 value={street}
                 onChange={(e) => setStreet(e.target.value)}
                 className="w-full border rounded px-3 py-2"
-                placeholder="Sample Street"
+                placeholder="Beispielstraße"
               />
             </div>
             <div>
               <label htmlFor="houseNumber" className="block text-sm text-gray-600 mb-1">
-                No.
+                Nr.
               </label>
               <input
                 id="houseNumber"
@@ -147,7 +149,7 @@ export default function ContactFamilyForm({
           <div className="grid grid-cols-3 gap-2 mb-3">
             <div>
               <label htmlFor="zip" className="block text-sm text-gray-600 mb-1">
-                ZIP
+                PLZ
               </label>
               <input
                 id="zip"
@@ -160,7 +162,7 @@ export default function ContactFamilyForm({
             </div>
             <div className="col-span-2">
               <label htmlFor="city" className="block text-sm text-gray-600 mb-1">
-                City
+                Ort
               </label>
               <input
                 id="city"
@@ -168,14 +170,14 @@ export default function ContactFamilyForm({
                 value={city}
                 onChange={(e) => setCity(e.target.value)}
                 className="w-full border rounded px-3 py-2"
-                placeholder="Sample City"
+                placeholder="Beispielstadt"
               />
             </div>
           </div>
 
           <div>
             <label htmlFor="country" className="block text-sm text-gray-600 mb-1">
-              Country
+              Land
             </label>
             <input
               id="country"
@@ -183,7 +185,7 @@ export default function ContactFamilyForm({
               value={country}
               onChange={(e) => setCountry(e.target.value)}
               className="w-full border rounded px-3 py-2"
-              placeholder="Germany"
+              placeholder="Deutschland"
             />
           </div>
         </div>
@@ -195,18 +197,17 @@ export default function ContactFamilyForm({
             onClick={onCancel}
             className="flex-1 px-4 py-2 border rounded hover:bg-gray-100"
           >
-            Cancel
+            Abbrechen
           </button>
           <button
             type="submit"
             disabled={submitting || !familyName.trim()}
             className="flex-1 bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 disabled:opacity-50"
           >
-            {/* Extracted nested ternary for SonarQube compliance */}
             {(() => {
-              if (submitting) return 'Saving...';
-              if (family) return 'Save';
-              return 'Add family';
+              if (submitting) return 'Speichern...';
+              if (family) return 'Speichern';
+              return 'Familie anlegen';
             })()}
           </button>
         </div>

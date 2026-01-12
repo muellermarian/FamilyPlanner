@@ -35,50 +35,46 @@ function DayCell({
     <button
       type="button"
       onClick={() => onSelectDay(day.date)}
-      className={`min-h-20 border rounded p-1 cursor-pointer hover:bg-blue-50 w-full text-left outline-none focus:ring-2 focus:ring-blue-500 relative ${
-        day.isCurrentMonth ? 'bg-white' : 'bg-gray-50'
+      className={`min-h-20 border rounded p-1 cursor-pointer hover:bg-blue-50 w-full outline-none focus:ring-2 focus:ring-blue-500 bg-white relative ${
+        day.isCurrentMonth ? '' : 'bg-gray-50'
       } ${isToday ? 'ring-2 ring-blue-500' : ''}`}
       aria-current={isToday ? 'date' : undefined}
       tabIndex={0}
     >
-      {/* Day number always top left, plus always top right */}
-      <div className="flex justify-between items-start mb-1 min-h-5.5">
-        <span
-          className={`text-xs font-semibold ${
-            day.isCurrentMonth ? 'text-gray-900' : 'text-gray-400'
-          } ${
-            isToday
-              ? 'bg-blue-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-[10px]'
-              : ''
-          }`}
-          style={{ minWidth: 20 }}
+      {/* Day number centered top, plus button top right */}
+      <span
+        className={`absolute left-1/2 -translate-x-1/2 top-1 text-xs font-semibold z-10 ${
+          day.isCurrentMonth ? 'text-gray-900' : 'text-gray-400'
+        } ${
+          isToday
+            ? 'bg-blue-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-[10px]'
+            : ''
+        }`}
+        style={{ minWidth: 20 }}
+      >
+        {day.date.getDate()}
+      </span>
+      {day.isCurrentMonth && (
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            const normalizedDate = new Date(
+              day.date.getFullYear(),
+              day.date.getMonth(),
+              day.date.getDate()
+            );
+            onAddEvent(normalizedDate);
+          }}
+          className="absolute right-0.5 top-1 text-blue-600 hover:text-blue-800 text-xs font-bold z-10"
+          tabIndex={-1}
+          aria-label="Termin hinzufügen"
         >
-          {day.date.getDate()}
-        </span>
-        {day.isCurrentMonth && (
-          <button
-            type="button"
-            onClick={(e) => {
-              e.stopPropagation();
-              const normalizedDate = new Date(
-                day.date.getFullYear(),
-                day.date.getMonth(),
-                day.date.getDate()
-              );
-              onAddEvent(normalizedDate);
-            }}
-            className="text-blue-600 hover:text-blue-800 text-xs font-bold ml-2"
-            tabIndex={-1}
-            style={{ minWidth: 20 }}
-            aria-label="Termin hinzufügen"
-          >
-            +
-          </button>
-        )}
-      </div>
-
-      {/* Event previews for the day */}
-      <div className="space-y-0.5">
+          +
+        </button>
+      )}
+      {/* Event list below header */}
+      <div className="pt-5 flex flex-col space-y-0.5">
         {day.events.slice(0, 2).map((event: AgendaItem) => (
           <div
             key={`${event.type}-${event.id}`}
