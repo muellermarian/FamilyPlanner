@@ -87,6 +87,48 @@ export default function DayDetail({
                         👤 {(item.data as Todo).assigned?.name}
                       </div>
                     )}
+                    {/* Show priority for todos in detail view */}
+                    {item.type === 'todo' && !compact && (
+                      <div className="text-xs mt-1">
+                        <span className="font-semibold">Prio:</span>{' '}
+                        {(() => {
+                          const prio = (item.data as Todo).priority;
+                          if (prio === 'high')
+                            return <span className="text-red-600 font-bold">Hoch</span>;
+                          if (prio === 'medium')
+                            return <span className="text-yellow-700 font-semibold">Mittel</span>;
+                          if (prio === 'low')
+                            return <span className="text-green-700 font-semibold">Niedrig</span>;
+                          return <span className="text-gray-500">Keine</span>;
+                        })()}
+                      </div>
+                    )}
+                    {/* Show comments for todos in detail view */}
+                    {item.type === 'todo' &&
+                      !compact &&
+                      Array.isArray((item.data as any).comments) &&
+                      (item.data as any).comments.length > 0 && (
+                        <div className="text-xs mt-1">
+                          <span className="font-semibold">Kommentare:</span>
+                          <ul className="list-disc ml-4 mt-1">
+                            {(
+                              (item.data as any).comments as {
+                                text: string;
+                                user_id?: string;
+                                created_at?: string;
+                              }[]
+                            ).map((c, i) => {
+                              const key =
+                                c.user_id && c.created_at ? `${c.user_id}-${c.created_at}` : i;
+                              return (
+                                <li key={key} className="text-gray-700">
+                                  {c.text}
+                                </li>
+                              );
+                            })}
+                          </ul>
+                        </div>
+                      )}
                   </div>
                   {/* Edit button for events */}
                   {item.type === 'event' && onEditEvent && (

@@ -86,7 +86,7 @@ export default function AgendaView({ items, onEditEvent }: ReadonlyAgendaViewPro
                   items={dayItems}
                   onClose={() => setSelectedDateKey(null)}
                   onEditEvent={onEditEvent}
-                  compact={true}
+                  compact={false}
                 />
               </div>
             )}

@@ -41,12 +41,27 @@ export default function WeekView({
   const [selectedDay, setSelectedDay] = useState<Date | null>(null);
 
   // Build an array of days for the week, each with its agenda items
+  const commentsByTodoId: Record<string, { text: string }[]> = {};
+  if (Array.isArray(todos)) {
+    todos.forEach((todo: any) => {
+      if (Array.isArray(todo.comments)) {
+        commentsByTodoId[todo.id] = todo.comments.map((c: any) => ({ text: c.text }));
+      }
+    });
+  }
   const weekDays = Array.from({ length: 7 }, (_, i) => {
     const dayDate = new Date(weekStart);
     dayDate.setDate(weekStart.getDate() + i);
     return {
       date: dayDate,
-      items: buildDayAgenda(dayDate, calendarEvents, todos, birthdays, shoppingItems),
+      items: buildDayAgenda(
+        dayDate,
+        calendarEvents,
+        todos,
+        birthdays,
+        shoppingItems,
+        commentsByTodoId
+      ),
     };
   });
 
@@ -141,7 +156,7 @@ export default function WeekView({
                   items={items}
                   onClose={() => setSelectedDay(null)}
                   onEditEvent={onEditEvent}
-                  compact={true}
+                  compact={false}
                 />
               </div>
             )}

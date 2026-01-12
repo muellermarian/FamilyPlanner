@@ -308,7 +308,8 @@ export function buildDayAgenda(
   calendarEvents: CalendarEvent[],
   todos: Todo[],
   birthdays: Contact[],
-  shoppingItems: ShoppingItem[]
+  shoppingItems: ShoppingItem[],
+  commentsByTodoId?: Record<string, { text: string }[]>
 ): AgendaItem[] {
   const normalizedDate = new Date(date.getFullYear(), date.getMonth(), date.getDate());
   const year = normalizedDate.getFullYear();
@@ -333,14 +334,19 @@ export function buildDayAgenda(
   });
 
   todos.forEach((todo) => {
-      if (todo.due_at?.startsWith(dateStr)) {
+    if (todo.due_at?.startsWith(dateStr)) {
+      // Comments
+      let todoWithComments = todo;
+      if (commentsByTodoId?.[todo.id]) {
+        todoWithComments = { ...todo, comments: commentsByTodoId[todo.id] } as Todo & { comments: { text: string }[] };
+      }
       dayItems.push({
         type: 'todo',
         title: todo.task,
         id: todo.id,
         date: normalizedDate,
         description: todo.description,
-        data: todo,
+        data: todoWithComments,
       });
     }
   });

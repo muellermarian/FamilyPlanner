@@ -32,8 +32,18 @@ export default function CalendarView() {
   const [weekStart, setWeekStart] = useState(() => getWeekStart());
   const dayDetailRef = useRef<HTMLDivElement>(null);
 
+  // Comment mapping for todos
+  const commentsByTodoId: Record<string, { text: string }[]> = {};
+  if (Array.isArray(todos)) {
+    todos.forEach((todo: any) => {
+      if (Array.isArray(todo.comments)) {
+        commentsByTodoId[todo.id] = todo.comments.map((c: any) => ({ text: c.text }));
+      }
+    });
+  }
+
   const selectedDayAgenda = selectedDay
-    ? buildDayAgenda(selectedDay, calendarEvents, todos, birthdays, shoppingItems)
+    ? buildDayAgenda(selectedDay, calendarEvents, todos, birthdays, shoppingItems, commentsByTodoId)
     : null;
 
   const handleSelectDay = (date: Date) => {
