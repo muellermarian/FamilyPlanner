@@ -13,32 +13,32 @@ export default function ActionButtons({
   onAddPerson,
 }: ReadonlyActionButtonsProps) {
   return (
-    <div className="flex gap-2 mb-4 pb-3 border-b">
-      {/* Button to add a person, shown only if onAddPerson is provided */}
+    <div className="flex flex-row gap-2 w-full">
       {onAddPerson && (
         <button
           onClick={onAddPerson}
-          className="bg-blue-500 hover:bg-blue-600 text-white p-2 rounded text-sm font-medium"
-          title="Add person"
+          className="flex-1 bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 text-sm font-medium flex items-center justify-center gap-2"
+          title="Person hinzufügen"
         >
-          👤+
+          <span>👤+</span>
+          <span>Person hinzufügen</span>
         </button>
       )}
-      {/* Button to edit the item */}
       <button
         onClick={onEdit}
-        className="bg-gray-100 hover:bg-gray-200 text-gray-700 p-2 rounded text-sm font-medium"
-        title="Edit"
+        className="flex-1 bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 text-sm font-medium flex items-center justify-center gap-2"
+        title="Bearbeiten"
       >
-        📝
+        <span>📝</span>
+        <span>Bearbeiten</span>
       </button>
-      {/* Button to delete the item */}
       <button
         onClick={onDelete}
-        className="bg-red-100 hover:bg-red-200 text-red-600 p-2 rounded text-sm font-medium"
-        title="Delete"
+        className="flex-1 bg-red-100 text-red-700 px-4 py-2 rounded hover:bg-red-200 text-sm font-medium flex items-center justify-center gap-2 border border-red-200"
+        title="Löschen"
       >
-        🗑️
+        <span>🗑️</span>
+        <span>Löschen</span>
       </button>
     </div>
   );

@@ -11,14 +11,11 @@ import ContactItem from './ContactItem';
 import PersonDetails from './PersonDetails';
 import ActionButtons from './ActionButtons';
 
-// Props for the ContactList component
 interface ContactListProps {
-  familyId: string; // ID of the selected family
+  readonly familyId: string; // ID of the selected family
 }
 
-type ReadonlyContactListProps = Readonly<ContactListProps>;
-
-export default function ContactList({ familyId }: ReadonlyContactListProps) {
+export default function ContactList({ familyId }: Readonly<ContactListProps>) {
   const {
     contactFamilies,
     allContacts,
@@ -52,6 +49,23 @@ export default function ContactList({ familyId }: ReadonlyContactListProps) {
   const [editContact, setEditContact] = useState<Contact | null>(null);
   const [showPersonForm, setShowPersonForm] = useState(false);
   const [preselectedFamilyId, setPreselectedFamilyId] = useState<string | null>(null);
+
+  // Expand/collapse all persons in a family
+  const handleToggleFamily = (persons: Contact[]) => {
+    setExpandedPersonIds((prev: Set<string>) => {
+      const allExpanded = persons.every((p) => prev.has(p.id));
+      const newSet = new Set(prev);
+      persons.forEach((p) => {
+        if (allExpanded) {
+          newSet.delete(p.id);
+        } else {
+          newSet.add(p.id);
+        }
+      });
+      return newSet;
+    });
+  };
+  // All code below this line was duplicate and is now removed.
 
   // Toggle expanded state for families or persons
   const toggleExpanded = (
@@ -306,7 +320,7 @@ export default function ContactList({ familyId }: ReadonlyContactListProps) {
                 )}
 
                 <div className="space-y-3">
-                  {filteredFamilies.map((family) => {
+                  {filteredFamilies.map((family: ContactFamily) => {
                     const isExpanded = expandedFamilyIds.has(family.id);
                     const hasAddress =
                       family.street ||
@@ -368,7 +382,7 @@ export default function ContactList({ familyId }: ReadonlyContactListProps) {
                               </div>
                             ) : (
                               <div className="space-y-2">
-                                {family.contacts.map((contact) => (
+                                {family.contacts.map((contact: Contact) => (
                                   <ContactItem
                                     key={contact.id}
                                     contact={contact}
@@ -421,57 +435,187 @@ export default function ContactList({ familyId }: ReadonlyContactListProps) {
                   <div className="text-gray-500 text-sm mb-4">Keine Personen gefunden</div>
                 )}
 
-                <div className="space-y-3">
-                  {filteredPersons.map((contact) => {
-                    const isExpanded = expandedPersonIds.has(contact.id);
-                    const family = contactFamilies.find((f) => f.id === contact.contact_family_id);
-                    const familyName = family?.family_name;
-
-                    return (
-                      <div key={contact.id} className="border rounded-lg overflow-hidden">
-                        <button
-                          type="button"
-                          className="w-full text-left p-4 bg-gray-50 flex justify-between items-center cursor-pointer hover:bg-gray-100"
-                          onClick={() => toggleExpanded(contact.id, setExpandedPersonIds)}
-                        >
-                          <div className="flex items-center gap-3">
-                            <span className="text-2xl">👤</span>
-                            <div>
-                              <div className="font-semibold text-lg">
-                                {contact.last_name}, {contact.first_name}
-                              </div>
-                              {familyName && (
-                                <div className="text-sm text-gray-600">👨‍👩‍👧 {familyName}</div>
-                              )}
+                {/* Group persons by family */}
+                <div className="space-y-6">
+                  {/* Persons grouped by family */}
+                  {contactFamilies
+                    .filter((family: ContactFamily) =>
+                      filteredPersons.some((p: Contact) => p.contact_family_id === family.id)
+                    )
+                    .map((family: ContactFamily) => {
+                      const persons = filteredPersons.filter(
+                        (p: Contact) => p.contact_family_id === family.id
+                      );
+                      if (persons.length === 0) return null;
+                      return (
+                        <div key={family.id} className="border rounded-lg overflow-hidden">
+                          {/* Family header (clickable for expand/collapse) */}
+                          <button
+                            type="button"
+                            className="w-full text-left bg-gray-100 px-4 py-3 border-b cursor-pointer hover:bg-gray-200"
+                            aria-expanded={persons.every((p: Contact) =>
+                              expandedPersonIds.has(p.id)
+                            )}
+                            onClick={() => handleToggleFamily(persons)}
+                          >
+                            <div className="font-semibold text-lg flex items-center gap-2">
+                              <span className="text-2xl">👨‍👩‍👧</span>
+                              <span>{family.family_name}</span>
                             </div>
+                            <div className="text-sm text-gray-600">
+                              {family.street} {family.house_number}, {family.zip} {family.city}{' '}
+                              {family.country && `(${family.country})`}
+                            </div>
+                          </button>
+                          {/* Persons in this family */}
+                          <div>
+                            {persons.map((contact: Contact) => {
+                              const isExpanded = expandedPersonIds.has(contact.id);
+                              // Only show address if it differs from family address
+                              const showAddress =
+                                contact.street !== family.street ||
+                                contact.house_number !== family.house_number ||
+                                contact.zip !== family.zip ||
+                                contact.city !== family.city ||
+                                contact.country !== family.country;
+                              return (
+                                <div key={contact.id}>
+                                  <button
+                                    type="button"
+                                    className="w-full text-left p-4 flex justify-between items-center cursor-pointer hover:bg-gray-50"
+                                    onClick={() => toggleExpanded(contact.id, setExpandedPersonIds)}
+                                  >
+                                    <div className="flex items-center gap-3">
+                                      <span className="text-2xl">👤</span>
+                                      <div>
+                                        <div className="font-semibold text-lg">
+                                          {contact.last_name}, {contact.first_name}
+                                        </div>
+                                        {showAddress &&
+                                          (contact.street ||
+                                            contact.house_number ||
+                                            contact.zip ||
+                                            contact.city) &&
+                                          !isExpanded && (
+                                            <div className="text-sm text-gray-600">
+                                              🏠 {contact.street} {contact.house_number},{' '}
+                                              {contact.zip} {contact.city}
+                                            </div>
+                                          )}
+                                      </div>
+                                    </div>
+                                  </button>
+                                  {isExpanded && (
+                                    <div className="p-6 bg-gray-50 rounded-b-lg border-t flex flex-col gap-6">
+                                      <div className="flex flex-col gap-2">
+                                        <PersonDetails
+                                          familyName={undefined}
+                                          family={undefined}
+                                          email={contact.email}
+                                          phone={contact.phone}
+                                          birthdate={contact.birthdate}
+                                        />
+                                      </div>
+                                      {/* Nur die optionale Adresse anzeigen, falls sie abweicht */}
+                                      {showAddress &&
+                                        (contact.street ||
+                                          contact.house_number ||
+                                          contact.zip ||
+                                          contact.city) && (
+                                          <div className="p-4 bg-white rounded shadow-sm border text-sm flex flex-col gap-1">
+                                            <div className="font-semibold text-gray-700 mb-1">
+                                              Abweichende Adresse
+                                            </div>
+                                            <div className="text-gray-800">
+                                              {contact.street} {contact.house_number}
+                                            </div>
+                                            <div className="text-gray-800">
+                                              {contact.zip} {contact.city}
+                                            </div>
+                                            {contact.country && (
+                                              <div className="text-gray-800">{contact.country}</div>
+                                            )}
+                                          </div>
+                                        )}
+                                      <div className="flex justify-center mt-4">
+                                        <div className="w-full sm:w-auto flex flex-col items-center">
+                                          <ActionButtons
+                                            onEdit={() => setEditContact(contact)}
+                                            onDelete={() =>
+                                              onDeletePerson(
+                                                contact.id,
+                                                `${contact.last_name}, ${contact.first_name}`
+                                              )
+                                            }
+                                          />
+                                        </div>
+                                      </div>
+                                    </div>
+                                  )}
+                                </div>
+                              );
+                            })}
                           </div>
-                        </button>
+                        </div>
+                      );
+                    })}
 
-                        {isExpanded && (
-                          <div className="p-4 bg-white">
-                            <ActionButtons
-                              onEdit={() => setEditContact(contact)}
-                              onDelete={() =>
-                                onDeletePerson(
-                                  contact.id,
-                                  `${contact.last_name}, ${contact.first_name}`
-                                )
-                              }
-                            />
-
-                            {/* Contact Details */}
-                            <PersonDetails
-                              familyName={familyName}
-                              family={family}
-                              email={contact.email}
-                              phone={contact.phone}
-                              birthdate={contact.birthdate}
-                            />
-                          </div>
-                        )}
+                  {/* Persons without a family */}
+                  {filteredPersons.some((p: Contact) => !p.contact_family_id) && (
+                    <div className="border rounded-lg overflow-hidden">
+                      <div>
+                        {filteredPersons
+                          .filter((p: Contact) => !p.contact_family_id)
+                          .map((contact: Contact) => {
+                            const isExpanded = expandedPersonIds.has(contact.id);
+                            return (
+                              <div key={contact.id}>
+                                <button
+                                  type="button"
+                                  className="w-full text-left p-4 flex justify-between items-center cursor-pointer hover:bg-gray-50"
+                                  onClick={() => toggleExpanded(contact.id, setExpandedPersonIds)}
+                                >
+                                  <div className="flex items-center gap-3">
+                                    <span className="text-2xl">👤</span>
+                                    <div>
+                                      <div className="font-semibold text-lg">
+                                        {contact.last_name}, {contact.first_name}
+                                      </div>
+                                    </div>
+                                  </div>
+                                </button>
+                                {isExpanded && (
+                                  <div className="p-6 bg-gray-50 rounded-b-lg border-t flex flex-col gap-6">
+                                    <div className="flex flex-col gap-2">
+                                      <PersonDetails
+                                        familyName={undefined}
+                                        family={undefined}
+                                        email={contact.email}
+                                        phone={contact.phone}
+                                        birthdate={contact.birthdate}
+                                      />
+                                    </div>
+                                    <div className="flex justify-center mt-4">
+                                      <div className="w-full sm:w-auto flex flex-col items-center">
+                                        <ActionButtons
+                                          onEdit={() => setEditContact(contact)}
+                                          onDelete={() =>
+                                            onDeletePerson(
+                                              contact.id,
+                                              `${contact.last_name}, ${contact.first_name}`
+                                            )
+                                          }
+                                        />
+                                      </div>
+                                    </div>
+                                  </div>
+                                )}
+                              </div>
+                            );
+                          })}
                       </div>
-                    );
-                  })}
+                    </div>
+                  )}
                 </div>
               </div>
             )}
