@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../../lib/supabaseClient';
-import type { Todo, Todo_Comment } from '../../lib/types';
+import type { Todo, TodoComment } from '../../lib/types';
 import AssignedSelect from '../shared/AssignedSelect';
 
-interface CommentWithUser extends Todo_Comment {
+interface CommentWithUser extends TodoComment {
   creator?: { id: string; name: string } | null;
 }
 
