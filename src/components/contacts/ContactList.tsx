@@ -357,6 +357,7 @@ export default function ContactList({ familyId }: Readonly<ContactListProps>) {
                               onEdit={() => setEditFamily(family)}
                               onDelete={() => onDeleteFamily(family.id, family.family_name)}
                               onAddPerson={() => openPersonForm(family.id)}
+                              compact
                             />
 
                             {hasAddress && (
