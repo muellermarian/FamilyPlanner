@@ -9,20 +9,6 @@ interface MinimalTodoViewProps {
 
 type ReadonlyMinimalTodoViewProps = Readonly<MinimalTodoViewProps>;
 
-type TodoPriority = '' | 'low' | 'medium' | 'high';
-const prioColor = (priority?: TodoPriority) => {
-  switch (priority) {
-    case 'high':
-      return 'bg-red-500 text-white';
-    case 'medium':
-      return 'bg-yellow-400 text-gray-900';
-    case 'low':
-      return 'bg-green-500 text-white';
-    default:
-      return 'bg-gray-200 text-gray-400';
-  }
-};
-
 export default function MinimalTodoView({
   todos,
   loading,

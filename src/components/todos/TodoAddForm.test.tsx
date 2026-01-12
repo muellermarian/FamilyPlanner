@@ -53,7 +53,7 @@ describe('TodoAddForm', () => {
       target: { value: 'Test task' },
     });
     fireEvent.click(screen.getByRole('button', { name: /hinzufügen/i }));
-    expect(onAdd).toHaveBeenCalledWith('Test task', expect.anything(), '', null);
+    expect(onAdd).toHaveBeenCalledWith('Test task', expect.anything(), '', null, '');
   });
 
   it('calls onCancel when Cancel is clicked', () => {
